@@ -1,0 +1,20 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace ARTHS_Data.Entities
+{
+    public partial class FeedbackProduct
+    {
+        public Guid Id { get; set; }
+        public Guid? CustomerId { get; set; }
+        public Guid ProductId { get; set; }
+        public string? Title { get; set; }
+        public int Rate { get; set; }
+        public string Content { get; set; } = null!;
+        public DateTime? UpdateAt { get; set; }
+        public DateTime CreateAt { get; set; }
+
+        public virtual Account? Customer { get; set; }
+        public virtual Product Product { get; set; } = null!;
+    }
+}

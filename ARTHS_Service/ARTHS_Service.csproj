@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ARTHS_Data\ARTHS_Data.csproj" />
+    <ProjectReference Include="..\ARTHS_Utility\ARTHS_Utility.csproj" />
+  </ItemGroup>
+
+</Project>
