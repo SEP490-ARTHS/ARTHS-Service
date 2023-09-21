@@ -70,7 +70,7 @@ namespace ARTHS_Service.Implementations
         private string GenerateJwtToken(AuthModel auth)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_appSettings.SecretKey);
+            var key = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]

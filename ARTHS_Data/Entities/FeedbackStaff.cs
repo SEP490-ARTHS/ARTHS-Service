@@ -12,7 +12,7 @@ namespace ARTHS_Data.Entities
         public string Content { get; set; } = null!;
         public DateTime SendDate { get; set; }
 
-        public virtual Account? Customer { get; set; }
-        public virtual Account Staff { get; set; } = null!;
+        public virtual CustomerAccount? Customer { get; set; }
+        public virtual StaffAccount Staff { get; set; } = null!;
     }
 }

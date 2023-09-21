@@ -5,8 +5,7 @@ namespace ARTHS_Data.Models.Views
     public class AccountViewModel
     {
         public Guid Id { get; set; }
-        //public Guid RoleId { get; set; }
-        public string Email { get; set; } = null!;
+        public string FullName { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
         public string PasswordHash { get; set; } = null!;
         public string Status { get; set; } = null!;
@@ -17,9 +16,5 @@ namespace ARTHS_Data.Models.Views
         public virtual CustomerViewModel? CustomerAccount { get; set; }
         public virtual OwnerAccount? OwnerAccount { get; set; }
         public virtual StaffAccount? StaffAccount { get; set; }
-        //public virtual ICollection<FeedbackProduct> FeedbackProducts { get; set; }
-        //public virtual ICollection<FeedbackStaff> FeedbackStaffCustomers { get; set; }
-        //public virtual ICollection<FeedbackStaff> FeedbackStaffStaffs { get; set; }
-        //public virtual ICollection<Notification> Notifications { get; set; }
     }
 }

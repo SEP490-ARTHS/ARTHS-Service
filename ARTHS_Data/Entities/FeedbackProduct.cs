@@ -14,7 +14,7 @@ namespace ARTHS_Data.Entities
         public DateTime? UpdateAt { get; set; }
         public DateTime CreateAt { get; set; }
 
-        public virtual Account? Customer { get; set; }
+        public virtual CustomerAccount? Customer { get; set; }
         public virtual Product Product { get; set; } = null!;
     }
 }

@@ -36,7 +36,7 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Role.Customer, Role.Staff)]
+        [Authorize(Role.Staff, Role.Customer)]
         public async Task<IActionResult> GetCurrentUser()
         {
             var user = (AuthModel)HttpContext.Items["User"]!;

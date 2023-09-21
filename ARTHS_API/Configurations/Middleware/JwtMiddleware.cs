@@ -31,7 +31,7 @@ namespace ARTHS_API.Configurations.Middleware
             try
             {
                 var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes(_appSettings.SecretKey);
+                var key = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
                 tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,

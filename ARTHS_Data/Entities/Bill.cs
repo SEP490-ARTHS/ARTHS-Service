@@ -7,7 +7,6 @@ namespace ARTHS_Data.Entities
     {
         public Guid Id { get; set; }
         public Guid RepairOrderId { get; set; }
-        public int TotalAmount { get; set; }
         public string PaymentMethod { get; set; } = null!;
         public DateTime BillDate { get; set; }
 
