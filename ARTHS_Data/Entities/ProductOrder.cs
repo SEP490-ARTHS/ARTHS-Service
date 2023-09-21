@@ -18,6 +18,8 @@ namespace ARTHS_Data.Entities
         public string PaymentMethod { get; set; } = null!;
         public string Status { get; set; } = null!;
         public int TotalAmount { get; set; }
+        public string? CancellationReason { get; set; }
+        public DateTime? CancellationDate { get; set; }
         public DateTime OrderDate { get; set; }
 
         public virtual CustomerAccount Customer { get; set; } = null!;

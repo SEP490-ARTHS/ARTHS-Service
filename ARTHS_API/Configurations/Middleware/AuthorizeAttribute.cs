@@ -26,7 +26,6 @@ namespace ARTHS_API.Configurations.Middleware
             {
                 var role = auth.Role;
                 var isValid = false;
-
                 if (Roles.Contains(role.ToLower()))
                 {
                     isValid = true;

@@ -12,7 +12,7 @@ namespace ARTHS_Data.Entities
 
         public Guid Id { get; set; }
         public Guid StaffId { get; set; }
-        public string CustomerName { get; set; } = null!;
+        public string? CustomerName { get; set; }
         public string CustomerPhone { get; set; } = null!;
         public string Status { get; set; } = null!;
         public int TotalAmount { get; set; }

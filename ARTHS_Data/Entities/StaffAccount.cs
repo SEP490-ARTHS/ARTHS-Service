@@ -7,16 +7,16 @@ namespace ARTHS_Data.Entities
     {
         public StaffAccount()
         {
+            FeedbackStaffs = new HashSet<FeedbackStaff>();
             ProductOrders = new HashSet<ProductOrder>();
             RepairOrders = new HashSet<RepairOrder>();
         }
 
         public Guid Id { get; set; }
         public Guid AccountId { get; set; }
-        public string FirstName { get; set; } = null!;
-        public string LastName { get; set; } = null!;
 
         public virtual Account Account { get; set; } = null!;
+        public virtual ICollection<FeedbackStaff> FeedbackStaffs { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
         public virtual ICollection<RepairOrder> RepairOrders { get; set; }
     }
