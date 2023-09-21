@@ -12,7 +12,7 @@ namespace ARTHS_Data.Entities
 
         public Guid Id { get; set; }
         public Guid CustomerId { get; set; }
-        public Guid StaffId { get; set; }
+        public Guid? StaffId { get; set; }
         public string PhoneNumber { get; set; } = null!;
         public string Address { get; set; } = null!;
         public string PaymentMethod { get; set; } = null!;
@@ -21,7 +21,7 @@ namespace ARTHS_Data.Entities
         public DateTime OrderDate { get; set; }
 
         public virtual CustomerAccount Customer { get; set; } = null!;
-        public virtual StaffAccount Staff { get; set; } = null!;
+        public virtual StaffAccount? Staff { get; set; }
         public virtual ICollection<ProductOrderDetail> ProductOrderDetails { get; set; }
     }
 }

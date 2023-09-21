@@ -15,8 +15,8 @@ namespace ARTHS_Data.Entities
 
         public Guid Id { get; set; }
         public Guid RoleId { get; set; }
-        public string Email { get; set; } = null!;
-        public string PhoneNumber { get; set; } = null!;
+        public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
         public string PasswordHash { get; set; } = null!;
         public string Status { get; set; } = null!;
         public DateTime CreateAt { get; set; }

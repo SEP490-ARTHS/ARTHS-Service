@@ -54,10 +54,10 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Account");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Account__85FB4E38F558217E")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Account__85FB4E38DA37628B")
                     .IsUnique();
 
-                entity.HasIndex(e => e.Email, "UQ__Account__A9D105345A2462EF")
+                entity.HasIndex(e => e.Email, "UQ__Account__A9D1053422F0F2E9")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -100,7 +100,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Bill");
 
-                entity.HasIndex(e => e.RepairOrderId, "UQ__Bill__016C098FFEAFA858")
+                entity.HasIndex(e => e.RepairOrderId, "UQ__Bill__016C098FB3165400")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -122,7 +122,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Cart");
 
-                entity.HasIndex(e => e.CustomerId, "UQ__Cart__A4AE64D9B3A943DC")
+                entity.HasIndex(e => e.CustomerId, "UQ__Cart__A4AE64D961EDE086")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -170,7 +170,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("CustomerAccount");
 
-                entity.HasIndex(e => e.AccountId, "UQ__Customer__349DA5A7E259569A")
+                entity.HasIndex(e => e.AccountId, "UQ__Customer__349DA5A76B64A6AD")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -278,7 +278,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("OwnerAccount");
 
-                entity.HasIndex(e => e.AccountId, "UQ__OwnerAcc__349DA5A78CD3E1B9")
+                entity.HasIndex(e => e.AccountId, "UQ__OwnerAcc__349DA5A75D857FBE")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -333,7 +333,7 @@ namespace ARTHS_Data.Entities
                         r => r.HasOne<Product>().WithMany().HasForeignKey("ProductId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__ProductCa__Produ__5441852A"),
                         j =>
                         {
-                            j.HasKey("ProductId", "CategoryId").HasName("PK__ProductC__159C556DF474A545");
+                            j.HasKey("ProductId", "CategoryId").HasName("PK__ProductC__159C556D3846AE06");
 
                             j.ToTable("ProductCategory");
                         });
@@ -346,7 +346,7 @@ namespace ARTHS_Data.Entities
                         r => r.HasOne<Product>().WithMany().HasForeignKey("ProductId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__ProductVe__Produ__5812160E"),
                         j =>
                         {
-                            j.HasKey("ProductId", "VehicleId").HasName("PK__ProductV__807A738431806E5B");
+                            j.HasKey("ProductId", "VehicleId").HasName("PK__ProductV__807A7384EF866A60");
 
                             j.ToTable("ProductVehicleType");
                         });
@@ -396,7 +396,6 @@ namespace ARTHS_Data.Entities
                 entity.HasOne(d => d.Staff)
                     .WithMany(p => p.ProductOrders)
                     .HasForeignKey(d => d.StaffId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__ProductOr__Staff__6A30C649");
             });
 
@@ -502,7 +501,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("StaffAccount");
 
-                entity.HasIndex(e => e.AccountId, "UQ__StaffAcc__349DA5A719D7CA94")
+                entity.HasIndex(e => e.AccountId, "UQ__StaffAcc__349DA5A763388AAE")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
