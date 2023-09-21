@@ -1,4 +1,4 @@
-# 🏍 ARTHS-Service
+# 🏍 ARTHS-Service-API
 
 ## 🎓 Capstone Project
 **English:** Building an application to manage motorbikes accessories and repair business of Thanh Huy store in Ho Chi Minh City.
