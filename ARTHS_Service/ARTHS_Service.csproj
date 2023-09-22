@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FirebaseStorage.net" Version="1.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\ARTHS_Data\ARTHS_Data.csproj" />
     <ProjectReference Include="..\ARTHS_Utility\ARTHS_Utility.csproj" />
   </ItemGroup>
