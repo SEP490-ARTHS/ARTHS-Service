@@ -44,8 +44,8 @@ namespace ARTHS_Data.Entities
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                //optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
             }
         }
 
@@ -55,10 +55,12 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Account");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Account__85FB4E380A417AB5")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Account__85FB4E38489A1AC9")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.Avatar).IsUnicode(false);
 
                 entity.Property(e => e.CreateAt)
                     .HasColumnType("datetime")
@@ -96,7 +98,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Bill");
 
-                entity.HasIndex(e => e.RepairOrderId, "UQ__Bill__016C098F34C9406F")
+                entity.HasIndex(e => e.RepairOrderId, "UQ__Bill__016C098F56BF6652")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -118,7 +120,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Cart");
 
-                entity.HasIndex(e => e.CustomerId, "UQ__Cart__A4AE64D94A54E4B8")
+                entity.HasIndex(e => e.CustomerId, "UQ__Cart__A4AE64D92F6D9A28")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -133,7 +135,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<CartItem>(entity =>
             {
                 entity.HasKey(e => new { e.CartId, e.ProductId })
-                    .HasName("PK__CartItem__9AFC1BDBA1C9CDB8");
+                    .HasName("PK__CartItem__9AFC1BDB985925A5");
 
                 entity.ToTable("CartItem");
 
@@ -167,7 +169,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("CustomerAccount");
 
-                entity.HasIndex(e => e.AccountId, "UQ__Customer__349DA5A7CF7E5130")
+                entity.HasIndex(e => e.AccountId, "UQ__Customer__349DA5A72393E2C1")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -273,7 +275,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("OwnerAccount");
 
-                entity.HasIndex(e => e.AccountId, "UQ__OwnerAcc__349DA5A7DD4F2E94")
+                entity.HasIndex(e => e.AccountId, "UQ__OwnerAcc__349DA5A7AF2FC196")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -324,7 +326,7 @@ namespace ARTHS_Data.Entities
                         r => r.HasOne<Product>().WithMany().HasForeignKey("ProductId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__ProductCa__Produ__5629CD9C"),
                         j =>
                         {
-                            j.HasKey("ProductId", "CategoryId").HasName("PK__ProductC__159C556D631A1E32");
+                            j.HasKey("ProductId", "CategoryId").HasName("PK__ProductC__159C556DEB058CBF");
 
                             j.ToTable("ProductCategory");
                         });
@@ -337,7 +339,7 @@ namespace ARTHS_Data.Entities
                         r => r.HasOne<Product>().WithMany().HasForeignKey("ProductId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__ProductVe__Produ__59FA5E80"),
                         j =>
                         {
-                            j.HasKey("ProductId", "VehicleId").HasName("PK__ProductV__807A738414A27C65");
+                            j.HasKey("ProductId", "VehicleId").HasName("PK__ProductV__807A7384E60EE662");
 
                             j.ToTable("ProductVehicleType");
                         });
@@ -395,7 +397,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<ProductOrderDetail>(entity =>
             {
                 entity.HasKey(e => new { e.ProductOrderId, e.ProductId })
-                    .HasName("PK__ProductO__E4A5EA899BF0E2C1");
+                    .HasName("PK__ProductO__E4A5EA89A92456B7");
 
                 entity.ToTable("ProductOrderDetail");
 
@@ -510,7 +512,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("StaffAccount");
 
-                entity.HasIndex(e => e.AccountId, "UQ__StaffAcc__349DA5A74A276CA1")
+                entity.HasIndex(e => e.AccountId, "UQ__StaffAcc__349DA5A793045906")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();

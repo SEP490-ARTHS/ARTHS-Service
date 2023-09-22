@@ -17,6 +17,7 @@ namespace ARTHS_Data.Entities
         public string Address { get; set; } = null!;
 
         public virtual Account Account { get; set; } = null!;
+        public virtual Cart? Cart { get; set; }
         public virtual ICollection<FeedbackProduct> FeedbackProducts { get; set; }
         public virtual ICollection<FeedbackStaff> FeedbackStaffs { get; set; }
         public virtual ICollection<ProductOrder> ProductOrders { get; set; }
