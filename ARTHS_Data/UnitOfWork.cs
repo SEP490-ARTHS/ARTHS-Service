@@ -10,6 +10,10 @@ namespace ARTHS_Data
         private readonly ARTHS_DBContext _context;
 
         private IAccountRepository _account = null!;
+        private ICustomerRepository _customer = null!;
+        private IAccountRoleRepository _accountRole = null!;
+        private ICartRepository _cart = null!;
+        private ICartItemRepository _cartItem = null!;
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -19,6 +23,26 @@ namespace ARTHS_Data
         public IAccountRepository Account
         {
             get { return _account ??= new AccountRepository(_context); }
+        }
+
+        public ICustomerRepository Customer
+        {
+            get { return _customer ??= new CustomerRepository(_context); }
+        }
+
+        public IAccountRoleRepository AccountRole
+        {
+            get { return _accountRole ??= new AccountRoleRepository(_context); }
+        }
+
+        public ICartRepository Cart
+        {
+            get { return _cart ??= new CartRepository(_context); }
+        }
+
+        public ICartItemRepository CartItem
+        {
+            get { return _cartItem ??= new CartItemRepository(_context); }
         }
 
         public async Task<int> SaveChanges()

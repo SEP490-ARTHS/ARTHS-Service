@@ -18,7 +18,7 @@ namespace ARTHS_API.Configurations.Middleware
             _appSettings = appSettings.Value;
         }
 
-        public async Task Invoke(HttpContext context, IAccountService authService)
+        public async Task Invoke(HttpContext context, IAuthService authService)
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             if (token != null)
@@ -26,7 +26,7 @@ namespace ARTHS_API.Configurations.Middleware
             await _next(context);
         }
 
-        private async Task AttachUserToContext(HttpContext context, IAccountService authService, string token)
+        private async Task AttachUserToContext(HttpContext context, IAuthService authService, string token)
         {
             try
             {

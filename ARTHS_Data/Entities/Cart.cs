@@ -13,7 +13,7 @@ namespace ARTHS_Data.Entities
         public Guid Id { get; set; }
         public Guid CustomerId { get; set; }
 
-        public virtual Account Customer { get; set; } = null!;
+        public virtual CustomerAccount Customer { get; set; } = null!;
         public virtual ICollection<CartItem> CartItems { get; set; }
     }
 }

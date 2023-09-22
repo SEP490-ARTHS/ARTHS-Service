@@ -11,8 +11,9 @@ namespace ARTHS_API.Configurations
     {
         public static void AddDependenceInjection(this IServiceCollection services)
         {
-            //services.AddScoped<ICustomerService, CustomerService>();
+            services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<ICustomerService, CustomerService>();
 
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
@@ -22,11 +23,18 @@ namespace ARTHS_API.Configurations
         {
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ARTHS Service Interface", Description = "APIs for Application to manage motorbikes accessories and repair business of Thanh Huy store in Ho Chi Minh City", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo {
+                    Title = "ARTHS Service Interface",
+                    Description = @"APIs for Application to manage motorbikes accessories and repair business of Thanh Huy store in Ho Chi Minh City.
+                        <br/>
+                        <br/>
+                        <strong>WebApp:</strong> <a href='https://webapp.thanhhuystore.com' target='_blank'>https://webapp.thanhhuystore.com</a>",
+                    Version = "v1"
+                });
                 c.DescribeAllParametersInCamelCase();
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.",
+                    Description = "Use the JWT Authorization header with the Bearer scheme. Enter 'Bearer' followed by a space, then your token.",
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
@@ -53,6 +61,7 @@ namespace ARTHS_API.Configurations
                 //var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 //var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 //c.IncludeXmlComments(xmlPath);
+                c.EnableAnnotations();
             });
         }
         public static void UseJwt(this IApplicationBuilder app)
