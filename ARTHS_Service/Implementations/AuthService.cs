@@ -31,7 +31,9 @@ namespace ARTHS_Service.Implementations
         public async Task<AuthViewModel> AuthenticatedUser(AuthRequest auth)
         {
             var user = await _accountRepository.GetMany(account => account.PhoneNumber.Equals(auth.PhoneNumber))
-                                                .Include(account => account.Role).FirstOrDefaultAsync();
+                                                .Include(account => account.Role)
+                                                .FirstOrDefaultAsync();
+
             if (user != null && PasswordHasher.VerifyPassword(auth.Password, user.PasswordHash))
             {
                 var token = GenerateJwtToken(new AuthModel
@@ -51,7 +53,9 @@ namespace ARTHS_Service.Implementations
 
         public async Task<AuthModel?> GetAuthAccount(Guid id)
         {
-            var auth = await _accountRepository.GetMany(account => account.Id.Equals(id)).Include(account => account.Role).FirstOrDefaultAsync();
+            var auth = await _accountRepository.GetMany(account => account.Id.Equals(id))
+                                                .Include(account => account.Role)
+                                                .FirstOrDefaultAsync();
             if (auth != null)
             {
                 return new AuthModel
@@ -66,9 +70,12 @@ namespace ARTHS_Service.Implementations
         public async Task<AccountViewModel?> GetAccount(Guid id)
         {
             return await _accountRepository.GetMany(account => account.Id.Equals(id))
-                .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+                .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync();
         }
 
+
+        //PRIVATE METHOD
         private string GenerateJwtToken(AuthModel auth)
         {
             var tokenHandler = new JwtSecurityTokenHandler();

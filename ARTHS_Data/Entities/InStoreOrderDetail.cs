@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace ARTHS_Data.Entities
 {
-    public partial class RepairOrderDetail
+    public partial class InStoreOrderDetail
     {
         public Guid Id { get; set; }
-        public Guid RepairOrderId { get; set; }
+        public Guid InStoreOrderId { get; set; }
         public Guid? RepairServiceId { get; set; }
-        public Guid? ProductId { get; set; }
+        public Guid? MotobikeProductId { get; set; }
         public int? ProductQuantity { get; set; }
         public int? ProductPrice { get; set; }
         public int? ServicePrice { get; set; }
@@ -16,8 +16,8 @@ namespace ARTHS_Data.Entities
         public int RepairCount { get; set; }
         public DateTime CreateAt { get; set; }
 
-        public virtual Product? Product { get; set; }
-        public virtual RepairOrder RepairOrder { get; set; } = null!;
+        public virtual InStoreOrder InStoreOrder { get; set; } = null!;
+        public virtual MotobikeProduct? MotobikeProduct { get; set; }
         public virtual RepairService? RepairService { get; set; }
     }
 }

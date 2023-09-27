@@ -3,17 +3,16 @@ using System.Collections.Generic;
 
 namespace ARTHS_Data.Entities
 {
-    public partial class Product
+    public partial class MotobikeProduct
     {
-        public Product()
+        public MotobikeProduct()
         {
             CartItems = new HashSet<CartItem>();
             FeedbackProducts = new HashSet<FeedbackProduct>();
-            ProductImages = new HashSet<ProductImage>();
-            ProductOrderDetails = new HashSet<ProductOrderDetail>();
-            ProductPrices = new HashSet<ProductPrice>();
-            RepairOrderDetails = new HashSet<RepairOrderDetail>();
-            Categories = new HashSet<Category>();
+            InStoreOrderDetails = new HashSet<InStoreOrderDetail>();
+            MotobikeProductImages = new HashSet<MotobikeProductImage>();
+            MotobikeProductPrices = new HashSet<MotobikeProductPrice>();
+            OnlineOrderDetails = new HashSet<OnlineOrderDetail>();
             Vehicles = new HashSet<Vehicle>();
         }
 
@@ -21,6 +20,7 @@ namespace ARTHS_Data.Entities
         public Guid? RepairServiceId { get; set; }
         public Guid? DiscountId { get; set; }
         public Guid? WarrantyId { get; set; }
+        public Guid? CategoryId { get; set; }
         public string Name { get; set; } = null!;
         public int PriceCurrent { get; set; }
         public int Quantity { get; set; }
@@ -29,17 +29,17 @@ namespace ARTHS_Data.Entities
         public DateTime? UpdateAt { get; set; }
         public DateTime CreateAt { get; set; }
 
+        public virtual Category? Category { get; set; }
         public virtual Discount? Discount { get; set; }
         public virtual RepairService? RepairService { get; set; }
         public virtual Warranty? Warranty { get; set; }
         public virtual ICollection<CartItem> CartItems { get; set; }
         public virtual ICollection<FeedbackProduct> FeedbackProducts { get; set; }
-        public virtual ICollection<ProductImage> ProductImages { get; set; }
-        public virtual ICollection<ProductOrderDetail> ProductOrderDetails { get; set; }
-        public virtual ICollection<ProductPrice> ProductPrices { get; set; }
-        public virtual ICollection<RepairOrderDetail> RepairOrderDetails { get; set; }
+        public virtual ICollection<InStoreOrderDetail> InStoreOrderDetails { get; set; }
+        public virtual ICollection<MotobikeProductImage> MotobikeProductImages { get; set; }
+        public virtual ICollection<MotobikeProductPrice> MotobikeProductPrices { get; set; }
+        public virtual ICollection<OnlineOrderDetail> OnlineOrderDetails { get; set; }
 
-        public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<Vehicle> Vehicles { get; set; }
     }
 }

@@ -18,6 +18,10 @@ CREATE TABLE AccountRole(
 );
 GO
 
+INSERT INTO AccountRole (Id, RoleName)
+VALUES (NEWID(), 'Customer');
+GO
+
 --Table account
 DROP TABLE IF EXISTS Account;
 GO

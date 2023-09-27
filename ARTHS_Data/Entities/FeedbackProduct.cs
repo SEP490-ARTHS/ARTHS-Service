@@ -7,7 +7,7 @@ namespace ARTHS_Data.Entities
     {
         public Guid Id { get; set; }
         public Guid? CustomerId { get; set; }
-        public Guid ProductId { get; set; }
+        public Guid MotobikeProductId { get; set; }
         public string? Title { get; set; }
         public int Rate { get; set; }
         public string Content { get; set; } = null!;
@@ -15,6 +15,6 @@ namespace ARTHS_Data.Entities
         public DateTime CreateAt { get; set; }
 
         public virtual CustomerAccount? Customer { get; set; }
-        public virtual Product Product { get; set; } = null!;
+        public virtual MotobikeProduct MotobikeProduct { get; set; } = null!;
     }
 }

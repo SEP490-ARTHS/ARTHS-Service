@@ -7,12 +7,12 @@ namespace ARTHS_Data.Entities
     {
         public Vehicle()
         {
-            Products = new HashSet<Product>();
+            MotobikeProducts = new HashSet<MotobikeProduct>();
         }
 
         public Guid Id { get; set; }
         public string VehicleName { get; set; } = null!;
 
-        public virtual ICollection<Product> Products { get; set; }
+        public virtual ICollection<MotobikeProduct> MotobikeProducts { get; set; }
     }
 }

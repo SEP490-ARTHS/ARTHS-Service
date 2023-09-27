@@ -7,8 +7,8 @@ namespace ARTHS_Data.Entities
     {
         public RepairService()
         {
-            Products = new HashSet<Product>();
-            RepairOrderDetails = new HashSet<RepairOrderDetail>();
+            InStoreOrderDetails = new HashSet<InStoreOrderDetail>();
+            MotobikeProducts = new HashSet<MotobikeProduct>();
         }
 
         public Guid Id { get; set; }
@@ -17,10 +17,9 @@ namespace ARTHS_Data.Entities
         public string ImageUrl { get; set; } = null!;
         public string Description { get; set; } = null!;
         public string Status { get; set; } = null!;
-        public DateTime? UpdateAt { get; set; }
         public DateTime CreateAt { get; set; }
 
-        public virtual ICollection<Product> Products { get; set; }
-        public virtual ICollection<RepairOrderDetail> RepairOrderDetails { get; set; }
+        public virtual ICollection<InStoreOrderDetail> InStoreOrderDetails { get; set; }
+        public virtual ICollection<MotobikeProduct> MotobikeProducts { get; set; }
     }
 }

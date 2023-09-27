@@ -22,7 +22,7 @@ builder.Services.AddControllersWithViews()
         options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
         options.SerializerSettings.Converters.Add(new StringEnumConverter());
         options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-        options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore; // Dòng này sẽ ẩn các trường có giá trị null
+        //options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore; // Dòng này sẽ ẩn các trường có giá trị null
     }
 );
 builder.Services.AddSwaggerGenNewtonsoftSupport();

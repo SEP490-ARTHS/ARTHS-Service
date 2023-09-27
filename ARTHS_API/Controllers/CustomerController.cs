@@ -39,7 +39,7 @@ namespace ARTHS_API.Controllers
             {
                 var customer = await _customerService.CreateCustomer(model);
                 //chuẩn REST
-                return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, customer);
+                return CreatedAtAction(nameof(GetCustomer), new { id = customer.AccountId }, customer);
             }catch (Exception ex)
             {
                 return BadRequest(ex.InnerException != null ? ex.InnerException.Message : ex.Message);

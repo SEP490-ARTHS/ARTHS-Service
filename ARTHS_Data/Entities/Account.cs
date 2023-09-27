@@ -12,10 +12,8 @@ namespace ARTHS_Data.Entities
 
         public Guid Id { get; set; }
         public Guid RoleId { get; set; }
-        public string FullName { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
         public string PasswordHash { get; set; } = null!;
-        public string? Avatar { get; set; }
         public string Status { get; set; } = null!;
         public DateTime CreateAt { get; set; }
 
@@ -23,6 +21,7 @@ namespace ARTHS_Data.Entities
         public virtual CustomerAccount? CustomerAccount { get; set; }
         public virtual OwnerAccount? OwnerAccount { get; set; }
         public virtual StaffAccount? StaffAccount { get; set; }
+        public virtual TellerAccount? TellerAccount { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
     }
 }

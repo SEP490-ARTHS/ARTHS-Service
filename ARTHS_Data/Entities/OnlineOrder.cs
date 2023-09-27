@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace ARTHS_Data.Entities
 {
-    public partial class ProductOrder
+    public partial class OnlineOrder
     {
-        public ProductOrder()
+        public OnlineOrder()
         {
-            ProductOrderDetails = new HashSet<ProductOrderDetail>();
+            OnlineOrderDetails = new HashSet<OnlineOrderDetail>();
         }
 
         public Guid Id { get; set; }
@@ -24,6 +24,6 @@ namespace ARTHS_Data.Entities
 
         public virtual CustomerAccount Customer { get; set; } = null!;
         public virtual StaffAccount? Staff { get; set; }
-        public virtual ICollection<ProductOrderDetail> ProductOrderDetails { get; set; }
+        public virtual ICollection<OnlineOrderDetail> OnlineOrderDetails { get; set; }
     }
 }

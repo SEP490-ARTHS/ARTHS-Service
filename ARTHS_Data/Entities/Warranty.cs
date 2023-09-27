@@ -7,13 +7,13 @@ namespace ARTHS_Data.Entities
     {
         public Warranty()
         {
-            Products = new HashSet<Product>();
+            MotobikeProducts = new HashSet<MotobikeProduct>();
         }
 
         public Guid Id { get; set; }
         public int Duration { get; set; }
-        public string Term { get; set; } = null!;
+        public string Description { get; set; } = null!;
 
-        public virtual ICollection<Product> Products { get; set; }
+        public virtual ICollection<MotobikeProduct> MotobikeProducts { get; set; }
     }
 }
