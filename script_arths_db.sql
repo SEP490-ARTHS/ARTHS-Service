@@ -324,16 +324,16 @@ DROP TABLE IF EXISTS Bill;
 GO
 CREATE TABLE Bill(
 	Id uniqueidentifier primary key NOT NULL,
-	RepairOrderId uniqueidentifier unique foreign key references RepairOrder(Id) NOT NULL,
+	InStoreOrderId uniqueidentifier unique foreign key references InStoreOrder(Id) NOT NULL,
 	PaymentMethod nvarchar(50) NOT NULL,
 	BillDate datetime NOT NULL default getdate()
 );
 GO
 
 --Table booking
-DROP TABLE IF EXISTS Booking;
+DROP TABLE IF EXISTS RepairBooking;
 GO
-CREATE TABLE Booking(
+CREATE TABLE RepairBooking(
 	Id uniqueidentifier primary key NOT NULL,
 	CustomerId uniqueidentifier foreign key references CustomerAccount(AccountId) NOT NULL,
 	DateBook datetime NOT NULL,
