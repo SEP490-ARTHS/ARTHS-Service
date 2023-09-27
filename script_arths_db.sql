@@ -24,10 +24,8 @@ GO
 CREATE TABLE Account(
 	Id uniqueidentifier primary key NOT NULL,
 	RoleId uniqueidentifier foreign key references AccountRole(Id) NOT NULL,
-	FullName nvarchar(255) NOT NULL,
 	PhoneNumber varchar(30) unique NOT NULL,
 	PasswordHash varchar(255) NOT NULL,
-	Avatar varchar(max),
 	Status nvarchar(100) NOT NULL,
 	CreateAt datetime NOT NULL default getdate()
 );
@@ -37,8 +35,11 @@ GO
 DROP TABLE IF EXISTS OwnerAccount;
 GO
 CREATE TABLE OwnerAccount(
-	Id uniqueidentifier primary key NOT NULL,
-	AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	FullName nvarchar(255) NOT NULL,
+	Gender nvarchar(10) NOT NULL, --"Nam", "Nữ", "Khác",
+	Avatar varchar(max),
+	primary key(AccountId)
 );
 GO
 
@@ -46,8 +47,23 @@ GO
 DROP TABLE IF EXISTS StaffAccount;
 GO
 CREATE TABLE StaffAccount(
-	Id uniqueidentifier primary key NOT NULL,
-	AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	FullName nvarchar(255) NOT NULL,
+	Gender nvarchar(10) NOT NULL, --"Nam", "Nữ", "Khác",
+	Avatar varchar(max),
+	primary key(AccountId)
+);
+GO
+
+--Table teller
+DROP TABLE IF EXISTS TellerAccount;
+GO
+CREATE TABLE TellerAccount(
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	FullName nvarchar(255) NOT NULL,
+	Gender nvarchar(10) NOT NULL, --"Nam", "Nữ", "Khác",
+	Avatar varchar(max),
+	primary key(AccountId)
 );
 GO
 
@@ -55,9 +71,12 @@ GO
 DROP TABLE IF EXISTS CustomerAccount;
 GO
 CREATE TABLE CustomerAccount(
-	Id uniqueidentifier primary key NOT NULL,
-	AccountId uniqueidentifier unique foreign key references Account(Id) NOT NULL,
-	Address nvarchar(255) NOT NULL
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	FullName nvarchar(255) NOT NULL,
+	Gender nvarchar(10) NOT NULL, --"Nam", "Nữ", "Khác",
+	Avatar varchar(max),
+	Address nvarchar(255) NOT NULL,
+	primary key(AccountId)
 );
 GO
 
@@ -66,8 +85,8 @@ DROP TABLE IF EXISTS FeedbackStaff;
 GO
 CREATE TABLE FeedbackStaff(
 	Id uniqueidentifier primary key NOT NULL,
-	CustomerId uniqueidentifier foreign key references CustomerAccount(Id),
-	StaffId uniqueidentifier foreign key references StaffAccount(Id) NOT NULL,
+	CustomerId uniqueidentifier foreign key references CustomerAccount(AccountId),
+	StaffId uniqueidentifier foreign key references StaffAccount(AccountId) NOT NULL,
 	Title nvarchar(255),
 	Content nvarchar(max) NOT NULL,
 	SendDate datetime NOT NULL default getdate()
@@ -110,7 +129,7 @@ GO
 CREATE TABLE Warranty(
 	Id uniqueidentifier primary key NOT NULL,
 	Duration int NOT NULL,		--số tháng bảo hành
-	Term nvarchar(max) NOT NULL
+	Description nvarchar(max) NOT NULL
 );
 GO
 
@@ -139,20 +158,20 @@ CREATE TABLE RepairService(
 	ImageUrl varchar(max) NOT NULL,
 	Description nvarchar(max) NOT NULL,
 	Status nvarchar(100) NOT NULL,
-	UpdateAt datetime,
 	CreateAt datetime NOT NULL default getdate()
 );
 GO
 
 
 --Table product
-DROP TABLE IF EXISTS Product;
+DROP TABLE IF EXISTS MotobikeProduct;
 GO
-CREATE TABLE Product(
+CREATE TABLE MotobikeProduct(
 	Id uniqueidentifier primary key NOT NULL,
 	RepairServiceId uniqueidentifier foreign key references RepairService(Id),
 	DiscountId uniqueidentifier foreign key references Discount(Id),
 	WarrantyId uniqueidentifier foreign key references Warranty(Id),
+	CategoryId uniqueidentifier foreign key references Category(Id),
 	Name nvarchar(255) NOT NULL,
 	PriceCurrent int NOT NULL,
 	Quantity int NOT NULL,
@@ -164,44 +183,35 @@ CREATE TABLE Product(
 GO
 
 --Table product price
-DROP TABLE IF EXISTS ProductPrice;
+DROP TABLE IF EXISTS MotobikeProductPrice;
 GO
-CREATE TABLE ProductPrice(
+CREATE TABLE MotobikeProductPrice(
 	Id uniqueidentifier primary key NOT NULL,
-	ProductId uniqueidentifier foreign key references Product(Id) NOT NULL,
+	MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id) NOT NULL,
 	DateApply datetime NOT NULL,
 	PriceCurrent int NOT NULL
 );
 GO
 
 --Table product image
-DROP TABLE IF EXISTS ProductImage;
+DROP TABLE IF EXISTS MotobikeProductImage;
 GO
-CREATE TABLE ProductImage(
+CREATE TABLE MotobikeProductImage(
 	Id uniqueidentifier primary key NOT NULL,
-	ProductId uniqueidentifier foreign key references Product(Id) NOT NULL,
+	MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id) NOT NULL,
 	Thumbnail bit NOT NULL default 0,
 	ImageUrl varchar(max) NOT NULL
 );
 GO
 
---Table product category
-DROP TABLE IF EXISTS ProductCategory;
-GO
-CREATE TABLE ProductCategory (
-    ProductId uniqueidentifier foreign key references Product(Id) NOT NULL,
-    CategoryId uniqueidentifier foreign key references Category(Id) NOT NULL,
-	Primary key (ProductId, CategoryId)
-);
-GO
 
 --Table product vehicle type
 DROP TABLE IF EXISTS ProductVehicleType;
 GO
 CREATE TABLE ProductVehicleType (
-    ProductId uniqueidentifier foreign key references Product(Id) NOT NULL,
+    MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id) NOT NULL,
     VehicleId uniqueidentifier foreign key references Vehicle(Id) NOT NULL,
-	Primary key (ProductId, VehicleId)
+	Primary key (MotobikeProductId, VehicleId)
 );
 GO
 
@@ -211,8 +221,8 @@ DROP TABLE IF EXISTS FeedbackProduct;
 GO
 CREATE TABLE FeedbackProduct(
 	Id uniqueidentifier primary key NOT NULL,
-	CustomerId uniqueidentifier foreign key references CustomerAccount(Id),
-	ProductId uniqueidentifier foreign key references Product(Id) NOT NULL,
+	CustomerId uniqueidentifier foreign key references CustomerAccount(AccountId),
+	MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id) NOT NULL,
 	Title nvarchar(255),
 	Rate int NOT NULL,
 	Content nvarchar(max) NOT NULL,
@@ -226,7 +236,7 @@ DROP TABLE IF EXISTS Cart;
 GO
 CREATE TABLE Cart (
     Id uniqueidentifier primary key NOT NULL,
-	CustomerId uniqueidentifier unique foreign key references CustomerAccount(Id) NOT NULL
+	CustomerId uniqueidentifier unique foreign key references CustomerAccount(AccountId) NOT NULL
 );
 GO
 
@@ -235,21 +245,21 @@ DROP TABLE IF EXISTS CartItem;
 GO
 CREATE TABLE CartItem (
 	CartId uniqueidentifier foreign key references Cart(Id) NOT NULL,
-	ProductId uniqueidentifier foreign key references Product(Id) NOT NULL,
+	MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id) NOT NULL,
 	Quantity int NOT NULL,
 	CreateAt datetime NOT NULL default getdate(),
-	Primary key (CartId, ProductId)
+	Primary key (CartId, MotobikeProductId)
 );
 GO
 
 
 --Table product order
-DROP TABLE IF EXISTS ProductOrder;
+DROP TABLE IF EXISTS OnlineOrder;
 GO
-CREATE TABLE ProductOrder(
+CREATE TABLE OnlineOrder(
 	Id uniqueidentifier primary key NOT NULL,
-	CustomerId uniqueidentifier foreign key references CustomerAccount(Id) NOT NULL,
-	StaffId uniqueidentifier foreign key references StaffAccount(Id),
+	CustomerId uniqueidentifier foreign key references CustomerAccount(AccountId) NOT NULL,
+	StaffId uniqueidentifier foreign key references StaffAccount(AccountId),
 	PhoneNumber varchar(30) NOT NULL,
 	Address nvarchar(255) NOT NULL,
 	PaymentMethod nvarchar(50) NOT NULL,
@@ -262,42 +272,44 @@ CREATE TABLE ProductOrder(
 GO
 
 --Table product order detail
-DROP TABLE IF EXISTS ProductOrderDetail;
+DROP TABLE IF EXISTS OnlineOrderDetail;
 GO
-CREATE TABLE ProductOrderDetail(
-	ProductOrderId uniqueidentifier foreign key references ProductOrder(Id) NOT NULL,
-	ProductId uniqueidentifier foreign key references Product(Id) NOT NULL,
+CREATE TABLE OnlineOrderDetail(
+	OnlineOrderId uniqueidentifier foreign key references OnlineOrder(Id) NOT NULL,
+	MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id) NOT NULL,
 	Price int NOT NULL,
 	Quantity int NOT NULL,
 	SubTotalAmount int NOT NULL,
 	CreateAt datetime NOT NULL default getdate(),
-	Primary key (ProductOrderId, ProductId)
+	Primary key (OnlineOrderId, MotobikeProductId)
 );
 GO
 
 
 --Table repair service order
-DROP TABLE IF EXISTS RepairOrder;
+DROP TABLE IF EXISTS InStoreOrder;
 GO
-CREATE TABLE RepairOrder(
+CREATE TABLE InStoreOrder(
 	Id uniqueidentifier primary key NOT NULL,
-	StaffId uniqueidentifier foreign key references StaffAccount(Id) NOT NULL,
+	TellerId uniqueidentifier foreign key references TellerAccount(AccountId) NOT NULL,
+	StaffId uniqueidentifier foreign key references StaffAccount(AccountId) NOT NULL,
 	CustomerName nvarchar(100),
 	CustomerPhone varchar(30) NOT NULL,
 	Status nvarchar(100) NOT NULL,
 	TotalAmount int NOT NULL,
+	OrderType nvarchar(100) NOT NULL, --Purchase or Repair
 	OrderDate datetime NOT NULL default getdate()
 );
 GO
 
 --Table repair order item
-DROP TABLE IF EXISTS RepairOrderDetail;
+DROP TABLE IF EXISTS InStoreOrderDetail;
 GO
-CREATE TABLE RepairOrderDetail(
+CREATE TABLE InStoreOrderDetail(
 	Id uniqueidentifier primary key NOT NULL,
-	RepairOrderId uniqueidentifier foreign key references RepairOrder(Id) NOT NULL,
+	InStoreOrderId uniqueidentifier foreign key references InStoreOrder(Id) NOT NULL,
 	RepairServiceId uniqueidentifier foreign key references RepairService(Id),
-	ProductId uniqueidentifier foreign key references Product(Id),
+	MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id),
 	ProductQuantity int,
 	ProductPrice int,
 	ServicePrice int,
@@ -318,9 +330,18 @@ CREATE TABLE Bill(
 );
 GO
 
-
-
-
-
-
+--Table booking
+DROP TABLE IF EXISTS Booking;
+GO
+CREATE TABLE Booking(
+	Id uniqueidentifier primary key NOT NULL,
+	CustomerId uniqueidentifier foreign key references CustomerAccount(AccountId) NOT NULL,
+	DateBook datetime NOT NULL,
+	Description nvarchar(50) NOT NULL,
+	CancellationReason nvarchar(max),
+	CancellationDate datetime,
+	Status nvarchar(100) NOT NULL,
+	CreateAt datetime NOT NULL default getdate()
+);
+GO
 
