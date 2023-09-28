@@ -9,8 +9,8 @@ using ARTHS_Utility.Enums;
 using ARTHS_Utility.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Principal;
 
 namespace ARTHS_Service.Implementations
 {
@@ -20,12 +20,14 @@ namespace ARTHS_Service.Implementations
         private readonly IAccountRepository _accountRepository;
         private readonly IAccountRoleRepository _accountRoleRepository;
         private readonly ICartRepository _cartRepository;
-        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        private readonly ICloudStorageService _cloudStorageService;
+        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService) : base(unitOfWork, mapper)
         {
             _customerRepository = unitOfWork.Customer;
             _accountRepository = unitOfWork.Account;
             _accountRoleRepository = unitOfWork.AccountRole;
             _cartRepository = unitOfWork.Cart;
+            _cloudStorageService = cloudStorageService;
         }
 
 
@@ -108,6 +110,31 @@ namespace ARTHS_Service.Implementations
             {
                 throw new Exception("Không tìm thấy customer");
             }
+            var result = await _unitOfWork.SaveChanges();
+            return result > 0 ? await GetCustomer(customer.AccountId) : null!;
+        }
+
+
+        public async Task<CustomerViewModel> UploadAvatar(Guid id, IFormFile image)
+        {
+            var customer = await _customerRepository.GetMany(customer => customer.AccountId.Equals(id)).FirstOrDefaultAsync();
+            if(customer == null)
+            {
+                throw new Exception("Không tìm thấy customer");
+            }
+
+            //xóa hình cũ trong firebase
+            if (!string.IsNullOrEmpty(customer.Avatar))
+            {
+                await _cloudStorageService.Delete(id);
+            }
+
+            //upload hình mới
+            var url = await _cloudStorageService.Upload(id, image.ContentType, image.OpenReadStream());
+
+            customer.Avatar = url;
+
+            _customerRepository.Update(customer);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetCustomer(customer.AccountId) : null!;
         }

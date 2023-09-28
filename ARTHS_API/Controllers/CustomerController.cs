@@ -1,7 +1,10 @@
-﻿using ARTHS_Data.Models.Requests.Post;
+﻿using ARTHS_API.Configurations.Middleware;
+using ARTHS_Data.Models.Internal;
+using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -42,7 +45,8 @@ namespace ARTHS_API.Controllers
                 var customer = await _customerService.CreateCustomer(model);
                 //chuẩn REST
                 return CreatedAtAction(nameof(GetCustomer), new { id = customer.AccountId }, customer);
-            }catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return BadRequest(ex.InnerException != null ? ex.InnerException.Message : ex.Message);
             }
@@ -53,7 +57,7 @@ namespace ARTHS_API.Controllers
         [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Update cusomer.")]
-        public async Task<ActionResult<CustomerViewModel>> UpdateCustomer([FromRoute]Guid id, [FromBody] UpdateCustomerModel model)
+        public async Task<ActionResult<CustomerViewModel>> UpdateCustomer([FromRoute] Guid id, [FromBody] UpdateCustomerModel model)
         {
             try
             {
@@ -63,6 +67,30 @@ namespace ARTHS_API.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+            }
+        }
+
+        [HttpPut]
+        [Route("avatar")]
+        [Authorize(Role.Customer)]
+        [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Upload avatar for customer.")]
+        public async Task<ActionResult<CustomerViewModel>> UploadAvatar([Required] IFormFile image)
+        {
+            try
+            {
+                var auth = (AuthModel?)HttpContext.Items["User"];
+                if (auth != null)
+                {
+                    var customer = await _customerService.UploadAvatar(auth.Id, image);
+                    return CreatedAtAction(nameof(GetCustomer), new { id = customer.AccountId }, customer);
+                }
+                return BadRequest();
+            }
+            catch (Exception e)
+            {
+                return StatusCode(StatusCodes.Status400BadRequest, e.InnerException != null ? e.InnerException.Message : e.Message);
             }
         }
     }
