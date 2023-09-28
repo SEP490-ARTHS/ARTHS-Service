@@ -25,6 +25,7 @@ namespace ARTHS_Service.Implementations
         public AuthService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> appSettings) : base(unitOfWork, mapper)
         {
             _appSettings = appSettings.Value;
+
             _accountRepository = unitOfWork.Account;
         }
 
@@ -39,7 +40,8 @@ namespace ARTHS_Service.Implementations
                 var token = GenerateJwtToken(new AuthModel
                 {
                     Id = user.Id,
-                    Role = user.Role.RoleName
+                    Role = user.Role.RoleName,
+                    Status = user.Status
                 });
 
                 return new AuthViewModel
@@ -51,6 +53,7 @@ namespace ARTHS_Service.Implementations
             return null!;
         }
 
+
         public async Task<AuthModel?> GetAuthAccount(Guid id)
         {
             var auth = await _accountRepository.GetMany(account => account.Id.Equals(id))
@@ -61,18 +64,19 @@ namespace ARTHS_Service.Implementations
                 return new AuthModel
                 {
                     Id = auth.Id,
-                    Role = auth.Role.RoleName
+                    Role = auth.Role.RoleName,
+                    Status = auth.Status
                 };
             }
             return null!;
         }
 
-        public async Task<AccountViewModel?> GetAccount(Guid id)
-        {
-            return await _accountRepository.GetMany(account => account.Id.Equals(id))
-                .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync();
-        }
+        //public async Task<AccountViewModel?> GetAccount(Guid id)
+        //{
+        //    return await _accountRepository.GetMany(account => account.Id.Equals(id))
+        //        .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
+        //        .FirstOrDefaultAsync();
+        //}
 
 
         //PRIVATE METHOD
@@ -87,6 +91,8 @@ namespace ARTHS_Service.Implementations
                     new Claim("id", auth.Id.ToString()),
 
                     new Claim("role", auth.Role.ToString()),
+
+                    new Claim("status", auth.Status.ToString()),
                 }),
                 Expires = DateTime.Now.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

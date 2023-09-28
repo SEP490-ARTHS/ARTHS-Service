@@ -17,9 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Requests\Get\" />
     <Folder Include="Models\Requests\Filters\" />
-    <Folder Include="Models\Requests\Put\" />
+    <Folder Include="Models\Requests\Filters\" />
+    <Folder Include="Models\Requests\Get\" />
   </ItemGroup>
 
 </Project>

@@ -6,5 +6,6 @@
         public const string Owner = "Owner";
         public const string Staff = "Staff";
         public const string Customer = "Customer";
+        public const string Teller = "Teller";
     }
 }

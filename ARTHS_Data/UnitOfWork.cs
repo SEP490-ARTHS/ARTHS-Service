@@ -11,9 +11,13 @@ namespace ARTHS_Data
 
         private IAccountRepository _account = null!;
         private ICustomerRepository _customer = null!;
+        private IOwnerRepository _owner = null!;
+        private ITellerRepository _teller = null!;
+        private IStaffRepository _staff = null!;
         private IAccountRoleRepository _accountRole = null!;
         private ICartRepository _cart = null!;
         private ICartItemRepository _cartItem = null!;
+        
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -43,6 +47,21 @@ namespace ARTHS_Data
         public ICartItemRepository CartItem
         {
             get { return _cartItem ??= new CartItemRepository(_context); }
+        }
+
+        public IOwnerRepository Owner
+        {
+            get { return _owner ??= new OwnerRepository(_context); }
+        }
+
+        public ITellerRepository Teller
+        {
+            get { return _teller ??= new TellerRepository(_context); }
+        }
+
+        public IStaffRepository Staff
+        {
+            get { return _staff ??= new StaffRepository(_context); }
         }
 
         public async Task<int> SaveChanges()
