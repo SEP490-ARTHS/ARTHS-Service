@@ -14,6 +14,9 @@ namespace ARTHS_API.Configurations
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ICustomerService, CustomerService>();
+            services.AddScoped<IStaffService, StaffService>();
+            services.AddScoped<ITellerService, TellerService>();
+            services.AddScoped<IOwnerService, OwnerService>();
 
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();

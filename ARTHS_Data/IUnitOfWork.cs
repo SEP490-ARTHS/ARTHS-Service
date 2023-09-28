@@ -7,6 +7,9 @@ namespace ARTHS_Data
     {
         public IAccountRepository Account { get; }
         public ICustomerRepository Customer { get; }
+        public IOwnerRepository Owner { get; }
+        public ITellerRepository Teller { get; }
+        public IStaffRepository Staff { get; }
         public IAccountRoleRepository AccountRole { get; }
         public ICartRepository Cart { get; }
         public ICartItemRepository CartItem { get; }

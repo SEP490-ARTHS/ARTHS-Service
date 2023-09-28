@@ -8,6 +8,5 @@ namespace ARTHS_Service.Interfaces
     {
         Task<AuthViewModel> AuthenticatedUser(AuthRequest auth);
         Task<AuthModel?> GetAuthAccount(Guid id);
-        Task<AccountViewModel?> GetAccount(Guid id);
     }
 }
