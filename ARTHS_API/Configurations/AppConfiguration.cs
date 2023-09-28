@@ -17,6 +17,7 @@ namespace ARTHS_API.Configurations
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<ITellerService, TellerService>();
             services.AddScoped<IOwnerService, OwnerService>();
+            services.AddScoped<ICloudStorageService, CloudStorageService>();
 
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
