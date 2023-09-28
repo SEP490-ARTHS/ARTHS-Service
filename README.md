@@ -11,7 +11,7 @@
 
 ### 🔐 Admin
 - 🔑 Login/Logout
-- 🧑‍💼 Manage account of system
+- 🧑‍💼 Manage account
 
 ### 🛍️ Owner
 - 🔑 Login/Logout
