@@ -10,7 +10,7 @@ namespace ARTHS_Data.Entities
             InStoreOrderDetails = new HashSet<InStoreOrderDetail>();
         }
 
-        public Guid Id { get; set; }
+        public string Id { get; set; } = null!;
         public Guid TellerId { get; set; }
         public Guid StaffId { get; set; }
         public string? CustomerName { get; set; }

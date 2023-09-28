@@ -6,7 +6,7 @@ namespace ARTHS_Data.Entities
     public partial class InStoreOrderDetail
     {
         public Guid Id { get; set; }
-        public Guid InStoreOrderId { get; set; }
+        public string InStoreOrderId { get; set; } = null!;
         public Guid? RepairServiceId { get; set; }
         public Guid? MotobikeProductId { get; set; }
         public int? ProductQuantity { get; set; }

@@ -46,8 +46,8 @@ namespace ARTHS_Data.Entities
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                //optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
             }
         }
 
@@ -57,7 +57,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Account");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Account__85FB4E38F4CA3E25")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Account__85FB4E38484875CC")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -96,7 +96,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Bill");
 
-                entity.HasIndex(e => e.InStoreOrderId, "UQ__Bill__AFEA978FDD66E35B")
+                entity.HasIndex(e => e.InStoreOrderId, "UQ__Bill__AFEA978F0FA40AD6")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -104,6 +104,10 @@ namespace ARTHS_Data.Entities
                 entity.Property(e => e.BillDate)
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.InStoreOrderId)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.PaymentMethod).HasMaxLength(50);
 
@@ -118,7 +122,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Cart");
 
-                entity.HasIndex(e => e.CustomerId, "UQ__Cart__A4AE64D96E24D0AA")
+                entity.HasIndex(e => e.CustomerId, "UQ__Cart__A4AE64D9F9C93100")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -133,7 +137,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<CartItem>(entity =>
             {
                 entity.HasKey(e => new { e.CartId, e.MotobikeProductId })
-                    .HasName("PK__CartItem__4B299AA3C2DEDF38");
+                    .HasName("PK__CartItem__4B299AA3F43705C2");
 
                 entity.ToTable("CartItem");
 
@@ -166,7 +170,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<CustomerAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__Customer__349DA5A68A319D61");
+                    .HasName("PK__Customer__349DA5A6E6A28A49");
 
                 entity.ToTable("CustomerAccount");
 
@@ -258,7 +262,9 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("InStoreOrder");
 
-                entity.Property(e => e.Id).ValueGeneratedNever();
+                entity.Property(e => e.Id)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.CustomerName).HasMaxLength(100);
 
@@ -296,6 +302,10 @@ namespace ARTHS_Data.Entities
                 entity.Property(e => e.CreateAt)
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.InStoreOrderId)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.RepairCount).HasDefaultValueSql("((1))");
 
@@ -362,7 +372,7 @@ namespace ARTHS_Data.Entities
                         r => r.HasOne<MotobikeProduct>().WithMany().HasForeignKey("MotobikeProductId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__ProductVe__Motob__571DF1D5"),
                         j =>
                         {
-                            j.HasKey("MotobikeProductId", "VehicleId").HasName("PK__ProductV__9D2264093BC86EF0");
+                            j.HasKey("MotobikeProductId", "VehicleId").HasName("PK__ProductV__9D226409F8DF9B54");
 
                             j.ToTable("ProductVehicleType");
                         });
@@ -456,7 +466,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<OnlineOrderDetail>(entity =>
             {
                 entity.HasKey(e => new { e.OnlineOrderId, e.MotobikeProductId })
-                    .HasName("PK__OnlineOr__086FF039169438F2");
+                    .HasName("PK__OnlineOr__086FF0395ED03FA5");
 
                 entity.ToTable("OnlineOrderDetail");
 
@@ -480,7 +490,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<OwnerAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__OwnerAcc__349DA5A672EEC319");
+                    .HasName("PK__OwnerAcc__349DA5A63AFE85AF");
 
                 entity.ToTable("OwnerAccount");
 
@@ -544,7 +554,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<StaffAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__StaffAcc__349DA5A6267EFB5A");
+                    .HasName("PK__StaffAcc__349DA5A671B0AB8D");
 
                 entity.ToTable("StaffAccount");
 
@@ -566,7 +576,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<TellerAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__TellerAc__349DA5A69A00E981");
+                    .HasName("PK__TellerAc__349DA5A676190985");
 
                 entity.ToTable("TellerAccount");
 

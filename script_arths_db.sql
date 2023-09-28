@@ -294,7 +294,7 @@ GO
 DROP TABLE IF EXISTS InStoreOrder;
 GO
 CREATE TABLE InStoreOrder(
-	Id uniqueidentifier primary key NOT NULL,
+	Id varchar(255) primary key NOT NULL,
 	TellerId uniqueidentifier foreign key references TellerAccount(AccountId) NOT NULL,
 	StaffId uniqueidentifier foreign key references StaffAccount(AccountId) NOT NULL,
 	CustomerName nvarchar(100),
@@ -311,7 +311,7 @@ DROP TABLE IF EXISTS InStoreOrderDetail;
 GO
 CREATE TABLE InStoreOrderDetail(
 	Id uniqueidentifier primary key NOT NULL,
-	InStoreOrderId uniqueidentifier foreign key references InStoreOrder(Id) NOT NULL,
+	InStoreOrderId varchar(255) foreign key references InStoreOrder(Id) NOT NULL,
 	RepairServiceId uniqueidentifier foreign key references RepairService(Id),
 	MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id),
 	ProductQuantity int,
@@ -328,7 +328,7 @@ DROP TABLE IF EXISTS Bill;
 GO
 CREATE TABLE Bill(
 	Id uniqueidentifier primary key NOT NULL,
-	InStoreOrderId uniqueidentifier unique foreign key references InStoreOrder(Id) NOT NULL,
+	InStoreOrderId varchar(255) unique foreign key references InStoreOrder(Id) NOT NULL,
 	PaymentMethod nvarchar(50) NOT NULL,
 	BillDate datetime NOT NULL default getdate()
 );
