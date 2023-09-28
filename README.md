@@ -16,7 +16,7 @@
 ### 🛍️ Owner
 - 🔑 Login/Logout
 - 🧑‍💼 Manage staffs
-- 🛒 Manage product 
+- 🛒 Manage product
 - 🔧 Manage repair services
 - 🎉 Manage promotion
 - 📢 View feedback
