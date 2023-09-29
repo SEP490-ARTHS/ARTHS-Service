@@ -44,8 +44,8 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Build and Deploy
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     environment: production
 
