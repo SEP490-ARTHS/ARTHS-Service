@@ -7,7 +7,6 @@ using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Helpers;
 using ARTHS_Utility.Settings;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

@@ -1,6 +1,7 @@
 ﻿using ARTHS_Data.Models.Internal;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc;
+using ARTHS_Utility.Exceptions;
 
 namespace ARTHS_API.Configurations.Middleware
 {
@@ -20,7 +21,7 @@ namespace ARTHS_API.Configurations.Middleware
             var auth = (AuthModel?)context.HttpContext.Items["User"];
             if (auth == null)
             {
-                context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+                throw new UnauthorizedException("Unauthorized");
             }
             else
             {
@@ -32,7 +33,7 @@ namespace ARTHS_API.Configurations.Middleware
                 }
                 if (!isValid)
                 {
-                    context.Result = new JsonResult(new { message = "Forbidden" }) { StatusCode = StatusCodes.Status403Forbidden };
+                    throw new ForbiddenException("Forbidden");
                 }
             }
         }

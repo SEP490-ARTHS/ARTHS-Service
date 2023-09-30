@@ -1,6 +1,6 @@
-﻿namespace ARTHS_Utility.Enums
+﻿namespace ARTHS_Utility.Constants
 {
-    public static class AccountStatus
+    public static class UserStatus
     {
         public const string Active = "Đang hoạt động";
         public const string InActive = "Không hoạt động";

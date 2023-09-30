@@ -17,8 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\Requests\Filters\" />
-    <Folder Include="Models\Requests\Filters\" />
     <Folder Include="Models\Requests\Get\" />
   </ItemGroup>
 
