@@ -17,7 +17,8 @@ namespace ARTHS_Data
         private IAccountRoleRepository _accountRole = null!;
         private ICartRepository _cart = null!;
         private ICartItemRepository _cartItem = null!;
-        
+        private ICategoryRepository _category = null!;
+        private IVehicleRepository _vehicle = null!;
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -64,6 +65,15 @@ namespace ARTHS_Data
             get { return _staff ??= new StaffRepository(_context); }
         }
 
+        public ICategoryRepository Category
+        {
+            get { return _category ??= new CategoryRepository(_context); }
+        }
+
+        public IVehicleRepository Vehicle
+        {
+            get { return _vehicle ??= new VehicleRepository(_context); }
+        }
         public async Task<int> SaveChanges()
         {
             return await _context.SaveChangesAsync();

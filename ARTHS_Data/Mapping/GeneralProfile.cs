@@ -53,7 +53,8 @@ namespace ARTHS_Data.Mapping
                                                             (src.OwnerAccount != null ? src.OwnerAccount.Avatar :
                                                             (src.TellerAccount != null ? src.TellerAccount.Avatar :
                                                             (src.StaffAccount != null ? src.StaffAccount.Avatar : null)))));
-
+            CreateMap<Category, CategoryViewModel>();
+            CreateMap<Vehicle, VehicleViewModel>();
         }
     }
 }
