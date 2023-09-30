@@ -3,7 +3,6 @@ using ARTHS_Data;
 using ARTHS_Service.Implementations;
 using ARTHS_Service.Interfaces;
 using Microsoft.OpenApi.Models;
-using System.Reflection;
 
 namespace ARTHS_API.Configurations
 {
@@ -71,6 +70,11 @@ namespace ARTHS_API.Configurations
         public static void UseJwt(this IApplicationBuilder app)
         {
             app.UseMiddleware<JwtMiddleware>();
+        }
+
+        public static void UseExceptionHandling(this IApplicationBuilder app)
+        {
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
         }
 
     }

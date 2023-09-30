@@ -5,7 +5,8 @@ using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
-using ARTHS_Utility.Enums;
+using ARTHS_Utility.Constants;
+using ARTHS_Utility.Exceptions;
 using ARTHS_Utility.Helpers;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -17,24 +18,24 @@ namespace ARTHS_Service.Implementations
     public class CustomerService : BaseService, ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
-        private readonly IAccountRepository _accountRepository;
-        private readonly IAccountRoleRepository _accountRoleRepository;
         private readonly ICartRepository _cartRepository;
+
+        private readonly IAccountService _accountService;
         private readonly ICloudStorageService _cloudStorageService;
-        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService) : base(unitOfWork, mapper)
+
+
+        public CustomerService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService, IAccountService accountService) : base(unitOfWork, mapper)
         {
             _customerRepository = unitOfWork.Customer;
-            _accountRepository = unitOfWork.Account;
-            _accountRoleRepository = unitOfWork.AccountRole;
             _cartRepository = unitOfWork.Cart;
             _cloudStorageService = cloudStorageService;
+            _accountService = accountService;
         }
 
 
         public async Task<CustomerViewModel> GetCustomer(Guid id)
         {
             return await _customerRepository.GetMany(customer => customer.AccountId.Equals(id))
-                .Include(customer => customer.Account)
                 .ProjectTo<CustomerViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync() ?? null!;
         }
@@ -49,7 +50,7 @@ namespace ARTHS_Service.Implementations
                 try
                 {
                     //create account
-                    accountId = await CreateAccount(model.PhoneNumber, model.Password);
+                    accountId = await _accountService.CreateAccount(model.PhoneNumber, model.Password, UserRole.Customer);
 
                     //create customer
                     var customer = new CustomerAccount
@@ -87,7 +88,7 @@ namespace ARTHS_Service.Implementations
             var customer = await _customerRepository.GetMany(customer => customer.AccountId.Equals(id))
                                                 .Include(customer => customer.Account)
                                                 .FirstOrDefaultAsync();
-            if(customer != null)
+            if (customer != null)
             {
                 customer.FullName = model.FullName ?? customer.FullName;
                 customer.Gender = model.Gender ?? customer.Gender;
@@ -97,9 +98,9 @@ namespace ARTHS_Service.Implementations
                 {
                     if (!PasswordHasher.VerifyPassword(model.OldPassword, customer.Account.PasswordHash))
                     {
-                        throw new Exception("Mật khẩu cũ không chính sát.");
+                        throw new InvalidOldPasswordException("Mật khẩu cũ không chính sát.");
                     }
-                    if(model.NewPassword != null)
+                    if (model.NewPassword != null)
                     {
                         customer.Account.PasswordHash = PasswordHasher.HashPassword(model.NewPassword);
                     }
@@ -108,7 +109,7 @@ namespace ARTHS_Service.Implementations
             }
             else
             {
-                throw new Exception("Không tìm thấy customer");
+                throw new AccountNotFoundException("Không tìm thấy customer");
             }
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetCustomer(customer.AccountId) : null!;
@@ -118,63 +119,23 @@ namespace ARTHS_Service.Implementations
         public async Task<CustomerViewModel> UploadAvatar(Guid id, IFormFile image)
         {
             var customer = await _customerRepository.GetMany(customer => customer.AccountId.Equals(id)).FirstOrDefaultAsync();
-            if(customer == null)
+            if (customer != null)
             {
-                throw new Exception("Không tìm thấy customer");
+                //xóa hình cũ trong firebase
+                if (!string.IsNullOrEmpty(customer.Avatar))
+                {
+                    await _cloudStorageService.Delete(id);
+                }
+
+                //upload hình mới
+                var url = await _cloudStorageService.Upload(id, image.ContentType, image.OpenReadStream());
+
+                customer.Avatar = url;
+
+                _customerRepository.Update(customer);
             }
-
-            //xóa hình cũ trong firebase
-            if (!string.IsNullOrEmpty(customer.Avatar))
-            {
-                await _cloudStorageService.Delete(id);
-            }
-
-            //upload hình mới
-            var url = await _cloudStorageService.Upload(id, image.ContentType, image.OpenReadStream());
-
-            customer.Avatar = url;
-
-            _customerRepository.Update(customer);
             var result = await _unitOfWork.SaveChanges();
-            return result > 0 ? await GetCustomer(customer.AccountId) : null!;
+            return result > 0 ? await GetCustomer(id) : null!;
         }
-
-        //CREATE ACCOUNT
-        private async Task<Guid> CreateAccount(string phoneNumber, string password)
-        {
-            //Check phone number
-            var existingUser = await _accountRepository.GetMany(account => account.PhoneNumber.Equals(phoneNumber))
-                                                        .FirstOrDefaultAsync();
-            if (existingUser != null)
-            {
-                throw new Exception("Số điện thoại đã được sử dụng");
-            }
-
-            var accountRole = await _accountRoleRepository.GetMany(role => role.RoleName.Equals(Role.Customer))
-                                                            .FirstOrDefaultAsync();
-            if (accountRole == null)
-            {
-                throw new Exception("Không tìm thấy role " + Role.Customer);
-            }
-
-            var passwordHash = PasswordHasher.HashPassword(password);
-
-            var id = Guid.NewGuid();
-
-            var account = new Account
-            {
-                Id = id,
-                PhoneNumber = phoneNumber,
-                PasswordHash = passwordHash,
-                RoleId = accountRole.Id,
-                Status = AccountStatus.Pending
-            };
-            _accountRepository.Add(account);
-
-            var result = await _unitOfWork.SaveChanges();
-            return result > 0 ? id : Guid.Empty;
-        }
-
-
     }
 }

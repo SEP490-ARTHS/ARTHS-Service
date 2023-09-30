@@ -59,7 +59,13 @@ app.UseCors(MyAllowSpecificOrigins);
     app.UseSwaggerUI();
 //}
 
+//--------------------
 app.UseJwt();
+
+app.UseExceptionHandling();
+
+//--------------------
+
 
 app.UseHttpsRedirection();
 

@@ -2,12 +2,10 @@
 using ARTHS_Data.Models.Internal;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
-using ARTHS_Service.Implementations;
 using ARTHS_Service.Interfaces;
-using ARTHS_Utility.Enums;
+using ARTHS_Utility.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace ARTHS_API.Controllers
@@ -44,12 +42,12 @@ namespace ARTHS_API.Controllers
             }
             else
             {
-                return new StatusCodeResult(StatusCodes.Status404NotFound);
+                return BadRequest(new { message = "Not found this account." });
             }
         }
 
         [HttpGet]
-        [Authorize(Role.Customer)]
+        [Authorize(UserRole.Customer)]
         [Route("customers")]
         [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -74,7 +72,7 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Role.Staff)]
+        [Authorize(UserRole.Staff)]
         [Route("staffs")]
         [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -99,7 +97,7 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Role.Owner)]
+        [Authorize(UserRole.Owner)]
         [Route("owners")]
         [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -124,7 +122,7 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [Authorize(Role.Teller)]
+        [Authorize(UserRole.Teller)]
         [Route("tellers")]
         [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
