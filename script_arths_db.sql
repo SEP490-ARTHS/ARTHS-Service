@@ -19,7 +19,11 @@ CREATE TABLE AccountRole(
 GO
 
 INSERT INTO AccountRole (Id, RoleName)
-VALUES (NEWID(), 'Customer');
+VALUES 
+(NEWID(), 'Customer'),
+(NEWID(), 'Staff'),
+(NEWID(), 'Owner'),
+(NEWID(), 'Teller');
 GO
 
 --Table account
@@ -299,6 +303,7 @@ CREATE TABLE InStoreOrder(
 	StaffId uniqueidentifier foreign key references StaffAccount(AccountId) NOT NULL,
 	CustomerName nvarchar(100),
 	CustomerPhone varchar(30) NOT NULL,
+	LicensePlate varchar(50), -- Thêm cột biển số xe
 	Status nvarchar(100) NOT NULL,
 	TotalAmount int NOT NULL,
 	OrderType nvarchar(100) NOT NULL, --Purchase or Repair
