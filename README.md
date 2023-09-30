@@ -10,7 +10,7 @@
 ## 🌟 Features
 
 ### 🔐 Admin
-- 🔑 Login/Logout
+- 🔑 Login/Logout 
 - 🧑‍💼 Manage account
 
 ### 🛍️ Owner
