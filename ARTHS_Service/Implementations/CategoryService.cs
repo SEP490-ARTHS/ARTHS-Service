@@ -50,7 +50,7 @@ namespace ARTHS_Service.Implementations
 
                 if (_categoryRepository.Any(category => category.CategoryName.Equals(categoryNameToLower)))
                 {
-                    throw new NameAlreadyExistsException("Danh mục này đã tồn tại!");
+                    throw new ConflictException("Danh mục này đã tồn tại!");
                 }
 
                 var category = new Category
@@ -86,14 +86,14 @@ namespace ARTHS_Service.Implementations
 
                 if (category == null)
                 {
-                    throw new SearchNotFoundException("không tìm thấy");
+                    throw new NotFoundException("không tìm thấy");
                 }
 
                 var updatedName = request.Name?.ToLower() ?? category.CategoryName;
 
                 if (_categoryRepository.Any(c => c.CategoryName.Equals(updatedName) && c.Id != Id))
                 {
-                    throw new NameAlreadyExistsException("Tên danh mục đã tồn tại");
+                    throw new ConflictException("Tên danh mục đã tồn tại");
                 }
 
                 category.CategoryName = updatedName;
@@ -131,7 +131,7 @@ namespace ARTHS_Service.Implementations
                 }
                 throw new Exception("xóa không thành công");
             }
-            throw new SearchNotFoundException("không tìm thấy");
+            throw new NotFoundException("không tìm thấy");
         }
     }
 }

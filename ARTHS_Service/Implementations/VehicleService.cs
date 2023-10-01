@@ -49,7 +49,7 @@ namespace ARTHS_Service.Implementations
 
                 if (_vehicleRepository.Any(v => v.VehicleName.Equals(vehicleNameToLower)))
                 {
-                    throw new NameAlreadyExistsException("Hãng xe đã tồn tại!");
+                    throw new ConflictException("Hãng xe đã tồn tại!");
                 }
 
                 var vehicle = new Vehicle
@@ -85,14 +85,14 @@ namespace ARTHS_Service.Implementations
 
                 if (vehicle == null)
                 {
-                    throw new SearchNotFoundException("không tìm thấy");
+                    throw new NotFoundException("không tìm thấy");
                 }
 
                 var updatedName = request.VehicleName?.ToLower() ?? vehicle.VehicleName;
 
                 if (_vehicleRepository.Any(v => v.VehicleName.Equals(updatedName)))
                 {
-                    throw new NameAlreadyExistsException("Tên phương tiện đã tồn tại");
+                    throw new ConflictException("Tên phương tiện đã tồn tại");
                 }
 
                 vehicle.VehicleName = updatedName;
@@ -130,7 +130,7 @@ namespace ARTHS_Service.Implementations
                 }
                 throw new Exception("xóa không thành công");
             }
-            throw new SearchNotFoundException("không tìm thấy");
+            throw new NotFoundException("không tìm thấy");
         }
     }
 }

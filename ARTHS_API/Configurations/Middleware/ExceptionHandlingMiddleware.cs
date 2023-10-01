@@ -51,19 +51,7 @@ namespace ARTHS_API.Configurations.Middleware
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             }
-            else if (exception is AccountNotFoundException)
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            }
-            else if (exception is SearchNotFoundException)
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
-            }
-            else if (exception is NameAlreadyExistsException)
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Conflict;
-
-            }
+            
             else
             {
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
