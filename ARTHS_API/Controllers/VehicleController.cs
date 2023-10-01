@@ -8,7 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace ARTHS_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/vehicles")]
     [ApiController]
     public class VehicleController : ControllerBase
     {
@@ -20,17 +20,16 @@ namespace ARTHS_API.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        [SwaggerOperation(Summary = "Get Vehicle by id.")]
+        [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Get vehicle by id.")]
         public async Task<ActionResult> GetVehicle([FromRoute] Guid id)
         {
             try
             {
                 var result = await _vehicleService.GetVehicle(id);
-                if (result == null)
-                {
-                    return NotFound("ko tim thay hãng xe");
-                }
-                return Ok(result);
+                return result != null ? Ok(result) : NotFound();
+
             }
             catch (Exception ex)
             {
@@ -39,17 +38,15 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [SwaggerOperation(Summary = "Get all Vehicle or search by name.")]
+        [ProducesResponseType(typeof(List<VehicleViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Get all vehicle or search by name.")]
         public async Task<ActionResult> GetVehicles([FromQuery] VehicleFilterModel filter)
         {
             try
             {
                 var result = await _vehicleService.GetVehicles(filter);
-                if (result != null)
-                {
-                    return Ok(result);
-                }
-                return BadRequest("Something wrong!!!");
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -59,13 +56,15 @@ namespace ARTHS_API.Controllers
 
         [HttpPost]
         [Route("create")]
+        [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Create new Vehicle.")]
         public async Task<ActionResult<VehicleViewModel>> CreateVehicle([FromBody] CreateVehicleRequest request)
         {
             try
             {
                 var result = await _vehicleService.CreateVehicle(request);
-                return Ok(result);
+                return CreatedAtAction(nameof(GetVehicle), new { id = result.Id }, result);
             }
             catch (Exception ex)
             {
@@ -75,19 +74,16 @@ namespace ARTHS_API.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        [SwaggerOperation(Summary = "Update Vehicle.")]
+        [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Update vehicle.")]
         public async Task<IActionResult> UpdateVehicle([FromRoute] Guid id,
                                                         [FromBody] UpdateVehicleRequest request)
         {
             try
             {
                 var result = await _vehicleService.UpdateVehicle(id, request);
-                if (result == null)
-                {
-                    return StatusCode(StatusCodes.Status404NotFound, "không tìm thấy hãng xe");
-
-                }
-                return StatusCode(StatusCodes.Status201Created, result);
+                return CreatedAtAction(nameof(GetVehicle), new { id = result.Id }, result);
             }
             catch (Exception ex)
             {
@@ -103,11 +99,8 @@ namespace ARTHS_API.Controllers
             try
             {
                 var result = await _vehicleService.DeleteVehicle(id);
-                if (result != null)
-                {
-                    return Ok("xóa thành công");
-                }
-                return BadRequest("Somethings wrong!!!");
+                return result != null ? Ok("xóa thành công") : NotFound();
+
             }
             catch (Exception ex)
             {

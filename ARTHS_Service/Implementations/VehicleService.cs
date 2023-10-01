@@ -6,6 +6,7 @@ using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,7 @@ namespace ARTHS_Service.Implementations
             if (filter.VehicleName != null)
             {
                 query = query.Where(vehicle => vehicle.VehicleName.Contains(filter.VehicleName));
+
             }
 
             return await query.ProjectTo<VehicleViewModel>(_mapper.ConfigurationProvider).ToListAsync();
@@ -47,7 +49,7 @@ namespace ARTHS_Service.Implementations
 
                 if (_vehicleRepository.Any(v => v.VehicleName.Equals(vehicleNameToLower)))
                 {
-                    throw new Exception("This vehicle already exists!");
+                    throw new NameAlreadyExistsException("Hãng xe đã tồn tại!");
                 }
 
                 var vehicle = new Vehicle
@@ -65,7 +67,7 @@ namespace ARTHS_Service.Implementations
                     return await GetVehicle(vehicle.Id);
                 }
 
-                throw new Exception("Failed to create vehicle!");
+                throw new Exception("Tạo thất bại!");
             }
             catch (Exception ex)
             {
@@ -83,14 +85,14 @@ namespace ARTHS_Service.Implementations
 
                 if (vehicle == null)
                 {
-                    throw new Exception("không tìm thấy");
+                    throw new SearchNotFoundException("không tìm thấy");
                 }
 
                 var updatedName = request.VehicleName?.ToLower() ?? vehicle.VehicleName;
 
-                if (_vehicleRepository.Any(v => v.VehicleName.Equals(updatedName) && v.Id != Id))
+                if (_vehicleRepository.Any(v => v.VehicleName.Equals(updatedName)))
                 {
-                    throw new Exception("Tên phương tiện đã tồn tại");
+                    throw new NameAlreadyExistsException("Tên phương tiện đã tồn tại");
                 }
 
                 vehicle.VehicleName = updatedName;
@@ -128,7 +130,7 @@ namespace ARTHS_Service.Implementations
                 }
                 throw new Exception("xóa không thành công");
             }
-            throw new Exception("không tìm thấy");
+            throw new SearchNotFoundException("không tìm thấy");
         }
     }
 }

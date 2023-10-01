@@ -8,7 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace ARTHS_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/categoryes")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -20,17 +20,15 @@ namespace ARTHS_API.Controllers
 
         [HttpGet]
         [Route("{id}")]
+        [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get Category by id.")]
         public async Task<ActionResult> GetCategory([FromRoute] Guid id)
         {
             try
             {
                 var result = await _categoryService.GetCategory(id);
-                if (result == null)
-                {
-                    return NotFound("ko tim thay danh muc");
-                }
-                return Ok(result);
+                return result != null ? Ok(result) : NotFound();
             }
             catch (Exception ex)
             {
@@ -39,17 +37,15 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [SwaggerOperation(Summary = "Det all Category or search by name.")]
+        [ProducesResponseType(typeof(List<CategoryViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Get all Category or search by name.")]
         public async Task<ActionResult> GetCategories([FromQuery] CategoryFilterModel filter)
         {
             try
             {
                 var result = await _categoryService.GetCategories(filter);
-                if (result != null)
-                {
-                    return Ok(result);
-                }
-                return BadRequest("Something wrong!!!");
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -59,13 +55,15 @@ namespace ARTHS_API.Controllers
 
         [HttpPost]
         [Route("create")]
+        [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Create new Category.")]
         public async Task<ActionResult<CategoryViewModel>> CreateCategory([FromBody] CreateCategoryRequest request)
         {
             try
             {
                 var result = await _categoryService.CreateCategory(request);
-                return Ok(result);
+                return CreatedAtAction(nameof(GetCategory), new { id = result.Id }, result);
             }
             catch (Exception ex)
             {
@@ -75,6 +73,8 @@ namespace ARTHS_API.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Update Category.")]
         public async Task<IActionResult> UpdateCategory([FromRoute] Guid id,
                                                         [FromBody] UpdateCategoryRequest request)
@@ -82,12 +82,7 @@ namespace ARTHS_API.Controllers
             try
             {
                 var result = await _categoryService.UpdateCategory(id, request);
-                if (result == null)
-                {
-                    return StatusCode(StatusCodes.Status404NotFound, "Not found this category");
-
-                }
-                return StatusCode(StatusCodes.Status201Created, result);
+                return CreatedAtAction(nameof(GetCategory), new { id = result.Id }, result);
             }
             catch (Exception ex)
             {
@@ -103,11 +98,7 @@ namespace ARTHS_API.Controllers
             try
             {
                 var result = await _categoryService.DeleteCategory(id);
-                if (result != null)
-                {
-                    return Ok("xóa thành công");
-                }
-                return BadRequest("Somethings wrong!!!");
+                return result != null ? Ok("xóa thành công") : NotFound();
             }
             catch (Exception ex)
             {
