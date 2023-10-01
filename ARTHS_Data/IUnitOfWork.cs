@@ -15,6 +15,7 @@ namespace ARTHS_Data
         public ICartItemRepository CartItem { get; }
         public ICategoryRepository Category { get; }
         public IVehicleRepository Vehicle { get; }
+        public IRepairServiceRepository RepairService { get; }
         //-----------------
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

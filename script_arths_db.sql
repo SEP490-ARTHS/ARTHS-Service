@@ -1,6 +1,54 @@
 ﻿USE master
 GO
 
+
+-- Step 1
+DROP TABLE IF EXISTS OnlineOrderDetail;
+DROP TABLE IF EXISTS InStoreOrderDetail;
+DROP TABLE IF EXISTS CartItem;
+DROP TABLE IF EXISTS FeedbackProduct;
+DROP TABLE IF EXISTS ProductVehicleType;
+DROP TABLE IF EXISTS MotobikeProductImage;
+DROP TABLE IF EXISTS MotobikeProductPrice;
+GO
+
+-- Step 2
+DROP TABLE IF EXISTS OnlineOrder;
+DROP TABLE IF EXISTS InStoreOrder;
+DROP TABLE IF EXISTS Cart;
+DROP TABLE IF EXISTS FeedbackStaff;
+DROP TABLE IF EXISTS [Notification];
+DROP TABLE IF EXISTS Bill;
+DROP TABLE IF EXISTS RepairBooking;
+GO
+
+-- Step 3
+DROP TABLE IF EXISTS MotobikeProduct;
+DROP TABLE IF EXISTS RepairService;
+GO
+
+-- Step 4
+DROP TABLE IF EXISTS Vehicle;
+DROP TABLE IF EXISTS Discount;
+DROP TABLE IF EXISTS Warranty;
+DROP TABLE IF EXISTS Category;
+GO
+
+-- Step 5
+DROP TABLE IF EXISTS CustomerAccount;
+DROP TABLE IF EXISTS OwnerAccount;
+DROP TABLE IF EXISTS StaffAccount;
+DROP TABLE IF EXISTS TellerAccount;
+GO
+
+-- Step 6
+DROP TABLE IF EXISTS Account;
+GO
+
+-- Step 7
+DROP TABLE IF EXISTS AccountRole;
+GO
+
 DROP DATABASE IF EXISTS ARTHS_DB;
 GO
 CREATE DATABASE ARTHS_DB
@@ -114,6 +162,7 @@ CREATE TABLE [Notification](
 );
 GO
 
+
 --Table category
 DROP TABLE IF EXISTS Category;
 GO
@@ -122,6 +171,9 @@ CREATE TABLE Category(
 	CategoryName nvarchar(100) NOT NULL,
 );
 GO
+
+
+
 
 --Table vehicle
 DROP TABLE IF EXISTS Vehicle;

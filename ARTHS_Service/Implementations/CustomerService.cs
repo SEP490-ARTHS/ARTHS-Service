@@ -109,7 +109,7 @@ namespace ARTHS_Service.Implementations
             }
             else
             {
-                throw new AccountNotFoundException("Không tìm thấy customer");
+                throw new NotFoundException("Không tìm thấy customer");
             }
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetCustomer(customer.AccountId) : null!;
