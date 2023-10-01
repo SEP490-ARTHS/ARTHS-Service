@@ -13,8 +13,8 @@ namespace ARTHS_Data
         public IAccountRoleRepository AccountRole { get; }
         public ICartRepository Cart { get; }
         public ICartItemRepository CartItem { get; }
-
-
+        public ICategoryRepository Category { get; }
+        public IVehicleRepository Vehicle { get; }
         //-----------------
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

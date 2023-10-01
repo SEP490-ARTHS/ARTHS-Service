@@ -17,6 +17,8 @@ namespace ARTHS_API.Configurations
             services.AddScoped<ITellerService, TellerService>();
             services.AddScoped<IOwnerService, OwnerService>();
             services.AddScoped<ICloudStorageService, CloudStorageService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IVehicleService, VehicleService>();
 
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
@@ -26,7 +28,8 @@ namespace ARTHS_API.Configurations
         {
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
                     Title = "ARTHS Service Interface",
                     Description = @"APIs for Application to manage motorbikes accessories and repair business of Thanh Huy store in Ho Chi Minh City.
                         <br/>
