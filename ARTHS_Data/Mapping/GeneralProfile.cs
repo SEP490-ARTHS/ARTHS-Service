@@ -55,6 +55,7 @@ namespace ARTHS_Data.Mapping
                                                             (src.StaffAccount != null ? src.StaffAccount.Avatar : null)))));
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();
+            CreateMap<RepairService, RepairServiceViewModel>();
         }
     }
 }

@@ -93,7 +93,7 @@ namespace ARTHS_Service.Implementations
             }
             else
             {
-                throw new AccountNotFoundException("Không tìm thấy owner");
+                throw new NotFoundException("Không tìm thấy owner");
             }
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetOwner(owner.AccountId) : null!;

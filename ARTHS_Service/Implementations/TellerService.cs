@@ -95,7 +95,7 @@ namespace ARTHS_Service.Implementations
             }
             else
             {
-                throw new AccountNotFoundException("Không tìm thấy teller");
+                throw new NotFoundException("Không tìm thấy teller");
             }
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetTeller(teller.AccountId) : null!;

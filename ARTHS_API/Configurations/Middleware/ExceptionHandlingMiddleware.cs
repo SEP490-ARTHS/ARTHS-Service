@@ -26,13 +26,9 @@ namespace ARTHS_API.Configurations.Middleware
         {
             context.Response.ContentType = "application/json";
 
-            if (exception is PhoneNumberAlreadyExistsException)
+            if (exception is ConflictException)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Conflict;
-            }
-            else if (exception is RoleNotFoundException)
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             }
             else if (exception is UnauthorizedException)
             {
@@ -46,9 +42,13 @@ namespace ARTHS_API.Configurations.Middleware
             {
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             }
-            else if(exception is AccountNotFoundException)
+            else if(exception is NotFoundException)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            }
+            else if(exception is InvalidRefreshTokenException)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             }
             else
             {

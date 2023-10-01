@@ -65,7 +65,7 @@ namespace ARTHS_Service.Implementations
             var account = await _accountRepository.GetMany(account => account.RefreshToken!.Equals(model.refreshToken)).Include(account => account.Role).FirstOrDefaultAsync();
             if(account == null)
             {
-                throw new AccountNotFoundException("Không tìm thấy account");
+                throw new NotFoundException("Không tìm thấy account");
             }
             if (!IsRefreshTokenValid(model.refreshToken))
             {

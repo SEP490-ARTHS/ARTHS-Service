@@ -19,6 +19,7 @@ namespace ARTHS_Data
         private ICartItemRepository _cartItem = null!;
         private ICategoryRepository _category = null!;
         private IVehicleRepository _vehicle = null!;
+        private IRepairServiceRepository _repair = null!;
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -73,6 +74,11 @@ namespace ARTHS_Data
         public IVehicleRepository Vehicle
         {
             get { return _vehicle ??= new VehicleRepository(_context); }
+        }
+
+        public IRepairServiceRepository RepairService
+        {
+            get { return _repair ??= new RepairServiceRepository(_context); }
         }
         public async Task<int> SaveChanges()
         {

@@ -123,14 +123,14 @@ namespace ARTHS_Service.Implementations
                                                         .FirstOrDefaultAsync();
             if (existingUser != null)
             {
-                throw new PhoneNumberAlreadyExistsException("Số điện thoại đã được sử dụng");
+                throw new ConflictException("Số điện thoại đã được sử dụng");
             }
 
             var accountRole = await _accountRoleRepository.GetMany(ro => ro.RoleName.Equals(role))
                                                             .FirstOrDefaultAsync();
             if (accountRole == null)
             {
-                throw new RoleNotFoundException("Không tìm thấy role " + role);
+                throw new NotFoundException("Không tìm thấy role " + role);
             }
 
             var passwordHash = PasswordHasher.HashPassword(password);
