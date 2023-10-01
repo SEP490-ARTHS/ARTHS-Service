@@ -4,6 +4,7 @@ using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Exceptions;
 using ARTHS_Utility.Helpers;
 using ARTHS_Utility.Settings;
 using AutoMapper;
@@ -28,27 +29,67 @@ namespace ARTHS_Service.Implementations
             _accountRepository = unitOfWork.Account;
         }
 
-        public async Task<AuthViewModel> AuthenticatedUser(AuthRequest auth)
+        public async Task<TokenViewModel> Authenticated(AuthRequest auth)
         {
-            var user = await _accountRepository.GetMany(account => account.PhoneNumber.Equals(auth.PhoneNumber))
+            var account = await _accountRepository.GetMany(account => account.PhoneNumber.Equals(auth.PhoneNumber))
                                                 .Include(account => account.Role)
                                                 .FirstOrDefaultAsync();
 
-            if (user != null && PasswordHasher.VerifyPassword(auth.Password, user.PasswordHash))
+            if (account != null && PasswordHasher.VerifyPassword(auth.Password, account.PasswordHash))
             {
-                var token = GenerateJwtToken(new AuthModel
+                var accessToken = GenerateJwtToken(new AuthModel
                 {
-                    Id = user.Id,
-                    Role = user.Role.RoleName,
-                    Status = user.Status
+                    Id = account.Id,
+                    Role = account.Role.RoleName,
+                    Status = account.Status
                 });
 
-                return new AuthViewModel
+                var refreshToken = GenerateRefreshToken();
+                account.RefreshToken = refreshToken;
+                _accountRepository.Update(account);
+                var result = await _unitOfWork.SaveChanges();
+                if (result > 0)
                 {
-                    AccessToken = token
-                };
+                    return new TokenViewModel
+                    {
+                        AccessToken = accessToken,
+                        RefreshToken = refreshToken
+                    };
+                }
+            }
+            return null!;
+        }
+
+        public async Task<TokenViewModel> RefreshAuthentication(RefreshTokenModel model)
+        {
+            var account = await _accountRepository.GetMany(account => account.RefreshToken!.Equals(model.refreshToken)).Include(account => account.Role).FirstOrDefaultAsync();
+            if(account == null)
+            {
+                throw new AccountNotFoundException("Không tìm thấy account");
+            }
+            if (!IsRefreshTokenValid(model.refreshToken))
+            {
+                throw new InvalidRefreshTokenException("Refresh token đã hết hạn");
             }
 
+            var newAccessToken = GenerateJwtToken(new AuthModel
+            {
+                Id = account.Id,
+                Role = account.Role.RoleName,
+                Status = account.Status
+            });
+            var newRefreshToken = GenerateRefreshToken();
+            account.RefreshToken = newRefreshToken;
+            _accountRepository.Update(account);
+
+            if (await _unitOfWork.SaveChanges() > 0)
+            {
+                return new TokenViewModel
+                {
+                    AccessToken = newAccessToken,
+                    RefreshToken = newRefreshToken
+                };
+            }
             return null!;
         }
 
@@ -77,8 +118,37 @@ namespace ARTHS_Service.Implementations
         //        .FirstOrDefaultAsync();
         //}
 
-
+        //---------------------------------------------------------------------------------------
         //PRIVATE METHOD
+        private bool IsRefreshTokenValid(string refreshToken)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_appSettings.RefreshTokenSecret);
+
+            try
+            {
+                var tokenParams = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                tokenHandler.ValidateToken(refreshToken, tokenParams, out SecurityToken validatedToken);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
+
         private string GenerateJwtToken(AuthModel auth)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -92,6 +162,23 @@ namespace ARTHS_Service.Implementations
                     new Claim("role", auth.Role.ToString()),
 
                     new Claim("status", auth.Status.ToString()),
+                }),
+                Expires = DateTime.Now.AddMinutes(10),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(_appSettings.RefreshTokenSecret);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(new[]
+                {
+                    new Claim("type", "refreshToken"),
                 }),
                 Expires = DateTime.Now.AddDays(7),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)

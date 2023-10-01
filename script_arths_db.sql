@@ -34,6 +34,7 @@ CREATE TABLE Account(
 	RoleId uniqueidentifier foreign key references AccountRole(Id) NOT NULL,
 	PhoneNumber varchar(30) unique NOT NULL,
 	PasswordHash varchar(255) NOT NULL,
+	RefreshToken varchar(255),
 	Status nvarchar(100) NOT NULL,
 	CreateAt datetime NOT NULL default getdate()
 );
@@ -310,6 +311,7 @@ CREATE TABLE InStoreOrder(
 	OrderDate datetime NOT NULL default getdate()
 );
 GO
+
 
 --Table repair order item
 DROP TABLE IF EXISTS InStoreOrderDetail;

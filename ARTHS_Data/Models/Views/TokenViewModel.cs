@@ -1,7 +1,9 @@
 ﻿namespace ARTHS_Data.Models.Views
 {
-    public class AuthViewModel
+    public class TokenViewModel
     {
         public string AccessToken { get; set; } = null!;
+        public string RefreshToken { get; set; } = null!;
+
     }
 }

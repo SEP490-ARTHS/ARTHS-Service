@@ -30,21 +30,32 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(AuthViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TokenViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Login.")]
-        public async Task<IActionResult> AuthenticatedUser([FromBody][Required] AuthRequest auth)
+        public async Task<IActionResult> Authenticated([FromBody][Required] AuthRequest auth)
         {
-            var customer = await _authService.AuthenticatedUser(auth);
-            if (customer != null)
+            var account = await _authService.Authenticated(auth);
+            if (account != null)
             {
-                return Ok(customer);
+                return Ok(account);
             }
             else
             {
                 return BadRequest(new { message = "Not found this account." });
             }
         }
+
+        [HttpPost]
+        [Route("refresh-token")]
+        [ProducesResponseType(typeof(TokenViewModel), StatusCodes.Status200OK)]
+        [SwaggerOperation(Summary = "Refresh token.")]
+        public async Task<ActionResult<TokenViewModel>> RefreshAuthentication([FromBody][Required] RefreshTokenModel model)
+        {
+            var account = await _authService.RefreshAuthentication(model);
+            return account;
+        }
+
 
         [HttpGet]
         [Authorize(UserRole.Customer)]
