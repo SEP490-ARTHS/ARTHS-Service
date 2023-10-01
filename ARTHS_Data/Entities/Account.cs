@@ -14,6 +14,7 @@ namespace ARTHS_Data.Entities
         public Guid RoleId { get; set; }
         public string PhoneNumber { get; set; } = null!;
         public string PasswordHash { get; set; } = null!;
+        public string? RefreshToken { get; set; }
         public string Status { get; set; } = null!;
         public DateTime CreateAt { get; set; }
 

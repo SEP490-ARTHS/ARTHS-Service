@@ -6,7 +6,8 @@ namespace ARTHS_Service.Interfaces
 {
     public interface IAuthService
     {
-        Task<AuthViewModel> AuthenticatedUser(AuthRequest auth);
+        Task<TokenViewModel> Authenticated(AuthRequest auth);
         Task<AuthModel?> GetAuthAccount(Guid id);
+        Task<TokenViewModel> RefreshAuthentication(RefreshTokenModel model);
     }
 }

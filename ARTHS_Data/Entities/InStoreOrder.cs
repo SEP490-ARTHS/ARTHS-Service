@@ -15,6 +15,7 @@ namespace ARTHS_Data.Entities
         public Guid StaffId { get; set; }
         public string? CustomerName { get; set; }
         public string CustomerPhone { get; set; } = null!;
+        public string? LicensePlate { get; set; }
         public string Status { get; set; } = null!;
         public int TotalAmount { get; set; }
         public string OrderType { get; set; } = null!;

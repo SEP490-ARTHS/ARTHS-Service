@@ -57,7 +57,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Account");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Account__85FB4E38484875CC")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Account__85FB4E38059EA563")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -72,6 +72,10 @@ namespace ARTHS_Data.Entities
 
                 entity.Property(e => e.PhoneNumber)
                     .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.RefreshToken)
+                    .HasMaxLength(255)
                     .IsUnicode(false);
 
                 entity.Property(e => e.Status).HasMaxLength(100);
@@ -96,7 +100,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Bill");
 
-                entity.HasIndex(e => e.InStoreOrderId, "UQ__Bill__AFEA978F0FA40AD6")
+                entity.HasIndex(e => e.InStoreOrderId, "UQ__Bill__AFEA978FBF01CC06")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -122,7 +126,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Cart");
 
-                entity.HasIndex(e => e.CustomerId, "UQ__Cart__A4AE64D9F9C93100")
+                entity.HasIndex(e => e.CustomerId, "UQ__Cart__A4AE64D97B437AE7")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -137,7 +141,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<CartItem>(entity =>
             {
                 entity.HasKey(e => new { e.CartId, e.MotobikeProductId })
-                    .HasName("PK__CartItem__4B299AA3F43705C2");
+                    .HasName("PK__CartItem__4B299AA3E8972D19");
 
                 entity.ToTable("CartItem");
 
@@ -170,7 +174,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<CustomerAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__Customer__349DA5A6E6A28A49");
+                    .HasName("PK__Customer__349DA5A6736C690D");
 
                 entity.ToTable("CustomerAccount");
 
@@ -270,6 +274,10 @@ namespace ARTHS_Data.Entities
 
                 entity.Property(e => e.CustomerPhone)
                     .HasMaxLength(30)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.LicensePlate)
+                    .HasMaxLength(50)
                     .IsUnicode(false);
 
                 entity.Property(e => e.OrderDate)
@@ -372,7 +380,7 @@ namespace ARTHS_Data.Entities
                         r => r.HasOne<MotobikeProduct>().WithMany().HasForeignKey("MotobikeProductId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__ProductVe__Motob__571DF1D5"),
                         j =>
                         {
-                            j.HasKey("MotobikeProductId", "VehicleId").HasName("PK__ProductV__9D226409F8DF9B54");
+                            j.HasKey("MotobikeProductId", "VehicleId").HasName("PK__ProductV__9D2264090B7EF998");
 
                             j.ToTable("ProductVehicleType");
                         });
@@ -466,7 +474,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<OnlineOrderDetail>(entity =>
             {
                 entity.HasKey(e => new { e.OnlineOrderId, e.MotobikeProductId })
-                    .HasName("PK__OnlineOr__086FF0395ED03FA5");
+                    .HasName("PK__OnlineOr__086FF039CE4BDF11");
 
                 entity.ToTable("OnlineOrderDetail");
 
@@ -490,7 +498,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<OwnerAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__OwnerAcc__349DA5A63AFE85AF");
+                    .HasName("PK__OwnerAcc__349DA5A642D1B1A6");
 
                 entity.ToTable("OwnerAccount");
 
@@ -554,7 +562,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<StaffAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__StaffAcc__349DA5A671B0AB8D");
+                    .HasName("PK__StaffAcc__349DA5A6B817AC84");
 
                 entity.ToTable("StaffAccount");
 
@@ -576,7 +584,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<TellerAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__TellerAc__349DA5A676190985");
+                    .HasName("PK__TellerAc__349DA5A6D4095D9C");
 
                 entity.ToTable("TellerAccount");
 
