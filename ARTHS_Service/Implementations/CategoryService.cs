@@ -6,6 +6,7 @@ using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +50,7 @@ namespace ARTHS_Service.Implementations
 
                 if (_categoryRepository.Any(category => category.CategoryName.Equals(categoryNameToLower)))
                 {
-                    throw new InvalidOperationException("This category already exists!");
+                    throw new NameAlreadyExistsException("Danh mục này đã tồn tại!");
                 }
 
                 var category = new Category
@@ -67,7 +68,7 @@ namespace ARTHS_Service.Implementations
                     return await GetCategory(category.Id);
                 }
 
-                throw new InvalidOperationException("Failed to create category!");
+                throw new Exception("Tạo thất bại!");
             }
             catch (Exception ex)
             {
@@ -85,14 +86,14 @@ namespace ARTHS_Service.Implementations
 
                 if (category == null)
                 {
-                    throw new Exception("không tìm thấy");
+                    throw new SearchNotFoundException("không tìm thấy");
                 }
 
                 var updatedName = request.Name?.ToLower() ?? category.CategoryName;
 
                 if (_categoryRepository.Any(c => c.CategoryName.Equals(updatedName) && c.Id != Id))
                 {
-                    throw new Exception("Tên danh mục đã tồn tại");
+                    throw new NameAlreadyExistsException("Tên danh mục đã tồn tại");
                 }
 
                 category.CategoryName = updatedName;
@@ -130,7 +131,7 @@ namespace ARTHS_Service.Implementations
                 }
                 throw new Exception("xóa không thành công");
             }
-            throw new Exception("không tìm thấy");
+            throw new SearchNotFoundException("không tìm thấy");
         }
     }
 }

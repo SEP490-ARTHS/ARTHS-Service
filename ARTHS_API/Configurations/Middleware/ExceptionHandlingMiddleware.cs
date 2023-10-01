@@ -42,13 +42,21 @@ namespace ARTHS_API.Configurations.Middleware
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             }
-            else if(exception is InvalidOldPasswordException)
+            else if (exception is InvalidOldPasswordException)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             }
-            else if(exception is AccountNotFoundException)
+            else if (exception is AccountNotFoundException)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            }
+            else if (exception is SearchNotFoundException)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+            }
+            else if (exception is NameAlreadyExistsException)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Conflict;
             }
             else
             {
