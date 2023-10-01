@@ -163,7 +163,7 @@ namespace ARTHS_Service.Implementations
 
                     new Claim("status", auth.Status.ToString()),
                 }),
-                Expires = DateTime.Now.AddMinutes(10),
+                Expires = DateTime.Now.AddDays(1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
