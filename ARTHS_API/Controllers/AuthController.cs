@@ -35,10 +35,19 @@ namespace ARTHS_API.Controllers
         [SwaggerOperation(Summary = "Login.")]
         public async Task<IActionResult> Authenticated([FromBody][Required] AuthRequest auth)
         {
-            var account = await _authService.Authenticated(auth);
-            if (account != null)
+            var token = await _authService.Authenticated(auth);
+            if (token != null)
             {
-                return Ok(account);
+                //set cookie
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    MaxAge = TimeSpan.FromDays(1),
+                };
+                Response.Cookies.Append("accessToken", token.AccessToken, cookieOptions);
+
+                return Ok(token);
             }
             else
             {
@@ -46,14 +55,23 @@ namespace ARTHS_API.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("refresh-token")]
         [ProducesResponseType(typeof(TokenViewModel), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Refresh token.")]
         public async Task<ActionResult<TokenViewModel>> RefreshAuthentication([FromBody][Required] RefreshTokenModel model)
         {
-            var account = await _authService.RefreshAuthentication(model);
-            return account;
+            var token = await _authService.RefreshAuthentication(model);
+
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                MaxAge = TimeSpan.FromDays(1),
+            };
+            Response.Cookies.Append("accessToken", token.AccessToken, cookieOptions);
+
+            return token;
         }
 
 
