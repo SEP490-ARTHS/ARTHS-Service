@@ -56,6 +56,7 @@ namespace ARTHS_Data.Mapping
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();
             CreateMap<RepairService, RepairServiceViewModel>();
+            CreateMap<Discount, DiscountViewModel>();
         }
     }
 }

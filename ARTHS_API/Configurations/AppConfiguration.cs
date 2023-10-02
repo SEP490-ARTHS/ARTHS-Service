@@ -20,7 +20,7 @@ namespace ARTHS_API.Configurations
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IVehicleService, VehicleService>();
             services.AddScoped<IRepairServiceService, RepairServiceService>();
-
+            services.AddScoped<IDiscountService, DiscountService>();
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
         }
