@@ -20,6 +20,7 @@ namespace ARTHS_Data
         private ICategoryRepository _category = null!;
         private IVehicleRepository _vehicle = null!;
         private IRepairServiceRepository _repair = null!;
+        private IDiscountRepository _discount = null!;
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -79,6 +80,11 @@ namespace ARTHS_Data
         public IRepairServiceRepository RepairService
         {
             get { return _repair ??= new RepairServiceRepository(_context); }
+        }
+
+        public IDiscountRepository Discount
+        {
+            get { return _discount ??= new DiscountRepository(_context); }
         }
         public async Task<int> SaveChanges()
         {
