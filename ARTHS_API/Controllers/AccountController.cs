@@ -19,7 +19,6 @@ namespace ARTHS_API.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(List<AccountViewModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get all accounts.")]
         public async Task<ActionResult<List<AccountViewModel>>> GetAccounts([FromQuery] AccountFilterModel filter)
         {

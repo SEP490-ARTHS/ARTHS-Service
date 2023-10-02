@@ -4,6 +4,7 @@ using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -15,53 +16,45 @@ namespace ARTHS_API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly ICustomerService _customerService;
-        private readonly IOwnerService _ownerService;
-        private readonly IStaffService _staffService;
-        private readonly ITellerService _tellerService;
 
-        public AuthController(IAuthService authService, ICustomerService customerService, IOwnerService ownerService, IStaffService staffService, ITellerService tellerService)
+
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
-            _customerService = customerService;
-            _ownerService = ownerService;
-            _staffService = staffService;
-            _tellerService = tellerService;
+
         }
 
         [HttpPost]
         [ProducesResponseType(typeof(TokenViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Login.")]
         public async Task<IActionResult> Authenticated([FromBody][Required] AuthRequest auth)
         {
             var token = await _authService.Authenticated(auth);
-            if (token != null)
-            {
-                //set cookie
-                var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    MaxAge = TimeSpan.FromDays(1),
-                };
-                Response.Cookies.Append("accessToken", token.AccessToken, cookieOptions);
 
-                return Ok(token);
-            }
-            else
+            //set cookie
+            var cookieOptions = new CookieOptions
             {
-                return BadRequest(new { message = "Not found this account." });
-            }
+                HttpOnly = true,
+                Secure = true,
+                MaxAge = TimeSpan.FromDays(1),
+            };
+            Response.Cookies.Append("accessToken", token.AccessToken, cookieOptions);
+
+            return Ok(token);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("refresh-token")]
+        [Authorize(UserRole.Owner, UserRole.Teller, UserRole.Staff, UserRole.Customer)]
         [ProducesResponseType(typeof(TokenViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
         [SwaggerOperation(Summary = "Refresh token.")]
-        public async Task<ActionResult<TokenViewModel>> RefreshAuthentication([FromBody][Required] RefreshTokenModel model)
+        public async Task<ActionResult<TokenViewModel>> RefreshAuthentication()
         {
-            var token = await _authService.RefreshAuthentication(model);
+            var currentToken = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            
+            var token = await _authService.RefreshAuthentication(currentToken!);
 
             var cookieOptions = new CookieOptions
             {
@@ -74,107 +67,15 @@ namespace ARTHS_API.Controllers
             return token;
         }
 
-
         [HttpGet]
-        [Authorize(UserRole.Customer)]
-        [Route("customers")]
-        [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerOperation(Summary = "Get details of the authenticated customer.")]
-        public async Task<ActionResult<CustomerViewModel>> GetCustomer()
+        [Authorize(UserRole.Owner, UserRole.Teller, UserRole.Staff, UserRole.Customer)]
+        [ProducesResponseType(typeof(AccountViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+        [SwaggerOperation(Summary = "Get information of auth account.")]
+        public async Task<ActionResult<AccountViewModel>> GetAccount()
         {
-            try
-            {
-                var auth = (AuthModel?)HttpContext.Items["User"];
-                if (auth != null)
-                {
-                    var customer = await _customerService.GetCustomer(auth.Id);
-                    return customer != null ? Ok(customer) : NotFound();
-                }
-                return BadRequest();
-            }
-            catch (Exception e)
-            {
-                return StatusCode(StatusCodes.Status400BadRequest, e.InnerException != null ? e.InnerException.Message : e.Message);
-            }
-            
+            var auth = (AuthModel?)HttpContext.Items["User"];
+            return await _authService.GetAccount(auth!.Id);
         }
-
-        [HttpGet]
-        [Authorize(UserRole.Staff)]
-        [Route("staffs")]
-        [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerOperation(Summary = "Get details of the authenticated staff.")]
-        public async Task<ActionResult<CustomerViewModel>> GetStaff()
-        {
-            try
-            {
-                var auth = (AuthModel?)HttpContext.Items["User"];
-                if (auth != null)
-                {
-                    var customer = await _staffService.GetStaff(auth.Id);
-                    return customer != null ? Ok(customer) : NotFound();
-                }
-                return BadRequest();
-            }
-            catch (Exception e)
-            {
-                return StatusCode(StatusCodes.Status400BadRequest, e.InnerException != null ? e.InnerException.Message : e.Message);
-            }
-
-        }
-
-        [HttpGet]
-        [Authorize(UserRole.Owner)]
-        [Route("owners")]
-        [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerOperation(Summary = "Get details of the authenticated owner.")]
-        public async Task<ActionResult<CustomerViewModel>> GetOwner()
-        {
-            try
-            {
-                var auth = (AuthModel?)HttpContext.Items["User"];
-                if (auth != null)
-                {
-                    var customer = await _ownerService.GetOwner(auth.Id);
-                    return customer != null ? Ok(customer) : NotFound();
-                }
-                return BadRequest();
-            }
-            catch (Exception e)
-            {
-                return StatusCode(StatusCodes.Status400BadRequest, e.InnerException != null ? e.InnerException.Message : e.Message);
-            }
-
-        }
-
-        [HttpGet]
-        [Authorize(UserRole.Teller)]
-        [Route("tellers")]
-        [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerOperation(Summary = "Get details of the authenticated teller.")]
-        public async Task<ActionResult<CustomerViewModel>> GetTeller()
-        {
-            try
-            {
-                var auth = (AuthModel?)HttpContext.Items["User"];
-                if (auth != null)
-                {
-                    var customer = await _tellerService.GetTeller(auth.Id);
-                    return customer != null ? Ok(customer) : NotFound();
-                }
-                return BadRequest();
-            }
-            catch (Exception e)
-            {
-                return StatusCode(StatusCodes.Status400BadRequest, e.InnerException != null ? e.InnerException.Message : e.Message);
-            }
-
-        }
-
-
     }
 }

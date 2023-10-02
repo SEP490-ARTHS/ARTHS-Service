@@ -37,7 +37,7 @@ namespace ARTHS_Service.Implementations
         {
             return await _customerRepository.GetMany(customer => customer.AccountId.Equals(id))
                 .ProjectTo<CustomerViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync() ?? null!;
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy customer.");
         }
 
 

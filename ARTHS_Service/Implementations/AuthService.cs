@@ -8,9 +8,11 @@ using ARTHS_Utility.Exceptions;
 using ARTHS_Utility.Helpers;
 using ARTHS_Utility.Settings;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -43,58 +45,82 @@ namespace ARTHS_Service.Implementations
                     Role = account.Role.RoleName,
                     Status = account.Status
                 });
-
-                var refreshToken = GenerateRefreshToken();
-                account.RefreshToken = refreshToken;
-                _accountRepository.Update(account);
-                var result = await _unitOfWork.SaveChanges();
-                if (result > 0)
-                {
-                    return new TokenViewModel
-                    {
-                        AccessToken = accessToken,
-                        RefreshToken = refreshToken
-                    };
-                }
-            }
-            return null!;
-        }
-
-        public async Task<TokenViewModel> RefreshAuthentication(RefreshTokenModel model)
-        {
-            var account = await _accountRepository.GetMany(account => account.RefreshToken!.Equals(model.refreshToken)).Include(account => account.Role).FirstOrDefaultAsync();
-            if(account == null)
-            {
-                throw new NotFoundException("Không tìm thấy account");
-            }
-            if (!IsRefreshTokenValid(model.refreshToken))
-            {
-                throw new InvalidRefreshTokenException("Refresh token đã hết hạn");
-            }
-
-            var newAccessToken = GenerateJwtToken(new AuthModel
-            {
-                Id = account.Id,
-                Role = account.Role.RoleName,
-                Status = account.Status
-            });
-            var newRefreshToken = GenerateRefreshToken();
-            account.RefreshToken = newRefreshToken;
-            _accountRepository.Update(account);
-
-            if (await _unitOfWork.SaveChanges() > 0)
-            {
                 return new TokenViewModel
                 {
-                    AccessToken = newAccessToken,
-                    RefreshToken = newRefreshToken
+                    AccessToken = accessToken
                 };
             }
-            return null!;
+            throw new NotFoundException("Sai tài khoản hoặc mật khẩu.");
         }
 
+        public async Task<TokenViewModel> RefreshAuthentication(string currentToken)
+        {
+            try
+            {
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(_appSettings.SecretKey);
+                tokenHandler.ValidateToken(currentToken, new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+                var jwtToken = (JwtSecurityToken)validatedToken;
+                
+                if(jwtToken.ValidTo > DateTime.Now)
+                {
+                    //trả về token cũ nếu chưa expire
+                    return new TokenViewModel { AccessToken = currentToken };
+                }
+                var userId = Guid.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                var user = await GetAuth(userId);
+                return new TokenViewModel
+                {
+                    AccessToken = GenerateJwtToken(user!)
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.ToString());
+            }
+        }
 
-        public async Task<AuthModel?> GetAuthAccount(Guid id)
+        //public async Task<TokenViewModel> RefreshAuthentication(RefreshTokenModel model)
+        //{
+        //    var account = await _accountRepository.GetMany(account => account.RefreshToken!.Equals(model.refreshToken)).Include(account => account.Role).FirstOrDefaultAsync();
+        //    if(account == null)
+        //    {
+        //        throw new NotFoundException("Không tìm thấy account");
+        //    }
+        //    if (!IsRefreshTokenValid(model.refreshToken))
+        //    {
+        //        throw new InvalidRefreshTokenException("Refresh token đã hết hạn");
+        //    }
+
+        //    var newAccessToken = GenerateJwtToken(new AuthModel
+        //    {
+        //        Id = account.Id,
+        //        Role = account.Role.RoleName,
+        //        Status = account.Status
+        //    });
+        //    var newRefreshToken = GenerateRefreshToken();
+        //    account.RefreshToken = newRefreshToken;
+        //    _accountRepository.Update(account);
+
+        //    if (await _unitOfWork.SaveChanges() > 0)
+        //    {
+        //        return new TokenViewModel
+        //        {
+        //            AccessToken = newAccessToken,
+        //            RefreshToken = newRefreshToken
+        //        };
+        //    }
+        //    return null!;
+        //}
+
+        public async Task<AuthModel> GetAuth(Guid id)
         {
             var auth = await _accountRepository.GetMany(account => account.Id.Equals(id))
                                                 .Include(account => account.Role)
@@ -108,44 +134,45 @@ namespace ARTHS_Service.Implementations
                     Status = auth.Status
                 };
             }
-            return null!;
+            throw new NotFoundException("Không tìm thấy account.");
         }
 
-        //public async Task<AccountViewModel?> GetAccount(Guid id)
-        //{
-        //    return await _accountRepository.GetMany(account => account.Id.Equals(id))
-        //        .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
-        //        .FirstOrDefaultAsync();
-        //}
+
+        public async Task<AccountViewModel> GetAccount(Guid id)
+        {
+            return await _accountRepository.GetMany(account => account.Id.Equals(id))
+                .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy account.");
+        }
 
         //---------------------------------------------------------------------------------------
         //PRIVATE METHOD
-        private bool IsRefreshTokenValid(string refreshToken)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_appSettings.RefreshTokenSecret);
+        //private bool IsRefreshTokenValid(string refreshToken)
+        //{
+        //    var tokenHandler = new JwtSecurityTokenHandler();
+        //    var key = Encoding.UTF8.GetBytes(_appSettings.RefreshTokenSecret);
 
-            try
-            {
-                var tokenParams = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
+        //    try
+        //    {
+        //        var tokenParams = new TokenValidationParameters
+        //        {
+        //            ValidateIssuerSigningKey = true,
+        //            IssuerSigningKey = new SymmetricSecurityKey(key),
+        //            ValidateIssuer = false,
+        //            ValidateAudience = false,
+        //            ValidateLifetime = true,
+        //            ClockSkew = TimeSpan.Zero
+        //        };
 
-                tokenHandler.ValidateToken(refreshToken, tokenParams, out SecurityToken validatedToken);
+        //        tokenHandler.ValidateToken(refreshToken, tokenParams, out SecurityToken validatedToken);
 
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        //        return true;
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
 
 
 
@@ -170,21 +197,21 @@ namespace ARTHS_Service.Implementations
             return tokenHandler.WriteToken(token);
         }
 
-        private string GenerateRefreshToken()
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_appSettings.RefreshTokenSecret);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim("type", "refreshToken"),
-                }),
-                Expires = DateTime.Now.AddDays(7),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
-        }
+        //private string GenerateRefreshToken()
+        //{
+        //    var tokenHandler = new JwtSecurityTokenHandler();
+        //    var key = Encoding.UTF8.GetBytes(_appSettings.RefreshTokenSecret);
+        //    var tokenDescriptor = new SecurityTokenDescriptor
+        //    {
+        //        Subject = new ClaimsIdentity(new[]
+        //        {
+        //            new Claim("type", "refreshToken"),
+        //        }),
+        //        Expires = DateTime.Now.AddDays(7),
+        //        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        //    };
+        //    var token = tokenHandler.CreateToken(tokenDescriptor);
+        //    return tokenHandler.WriteToken(token);
+        //}
     }
 }

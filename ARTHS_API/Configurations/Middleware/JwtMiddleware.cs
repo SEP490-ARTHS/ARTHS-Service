@@ -42,7 +42,7 @@ namespace ARTHS_API.Configurations.Middleware
                 }, out SecurityToken validatedToken);
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var userId = Guid.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
-                var user = await authService.GetAuthAccount(userId);
+                var user = await authService.GetAuth(userId);
                 context.Items["User"] = user;
             }
             catch (Exception e)

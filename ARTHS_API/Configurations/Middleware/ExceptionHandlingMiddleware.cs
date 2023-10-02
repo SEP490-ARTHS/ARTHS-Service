@@ -1,4 +1,5 @@
 ﻿using ARTHS_Utility.Exceptions;
+using ARTHS_Utility.Helpers;
 using Newtonsoft.Json;
 using System.Net;
 
@@ -25,6 +26,12 @@ namespace ARTHS_API.Configurations.Middleware
         private Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
             context.Response.ContentType = "application/json";
+
+            //error response
+            var errorResponse = new ErrorResponse
+            {
+                Message = exception.Message
+            };
 
             if (exception is ConflictException)
             {
@@ -57,7 +64,7 @@ namespace ARTHS_API.Configurations.Middleware
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
             }
 
-            var result = JsonConvert.SerializeObject(new { message = exception.Message });
+            var result = JsonConvert.SerializeObject(errorResponse);
             return context.Response.WriteAsync(result);
         }
     }
