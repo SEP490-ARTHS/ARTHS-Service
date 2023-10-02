@@ -21,7 +21,8 @@ namespace ARTHS_API.Configurations.Middleware
             var auth = (AuthModel?)context.HttpContext.Items["User"];
             if (auth == null)
             {
-                throw new UnauthorizedException("Unauthorized");
+                context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+                //throw new UnauthorizedException("Unauthorized");
             }
             else
             {
@@ -33,7 +34,8 @@ namespace ARTHS_API.Configurations.Middleware
                 }
                 if (!isValid)
                 {
-                    throw new ForbiddenException("Forbidden");
+                    context.Result = new JsonResult(new { message = "Forbidden" }) { StatusCode = StatusCodes.Status403Forbidden };
+                    //throw new ForbiddenException("Forbidden");
                 }
             }
         }

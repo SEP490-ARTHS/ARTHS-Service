@@ -34,7 +34,7 @@ namespace ARTHS_Service.Implementations
         {
             return await _tellerRepository.GetMany(teller => teller.AccountId.Equals(id))
                 .ProjectTo<TellerViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync() ?? null!;
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy teller.");
         }
 
 

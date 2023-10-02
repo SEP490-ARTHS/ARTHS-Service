@@ -9,6 +9,7 @@ namespace ARTHS_Data.Mapping
         public GeneralProfile()
         {
             CreateMap<AccountRole, RoleViewModel>();
+
             CreateMap<CustomerAccount, CustomerViewModel>()
                 .ForMember(dest => dest.AccountId, opt => opt.MapFrom(src => src.AccountId))
                 .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))

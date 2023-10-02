@@ -33,7 +33,7 @@ namespace ARTHS_Service.Implementations
         {
             return await _ownerRepository.GetMany(owner => owner.AccountId.Equals(id))
                 .ProjectTo<OwnerViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync() ?? null!;
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy owner.");
         }
 
         public async Task<OwnerViewModel> CreateOwner(RegisterOwnerModel model)

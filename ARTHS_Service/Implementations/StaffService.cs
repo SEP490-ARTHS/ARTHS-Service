@@ -32,7 +32,7 @@ namespace ARTHS_Service.Implementations
         {
             return await _staffRepository.GetMany(staff => staff.AccountId.Equals(id))
                 .ProjectTo<StaffViewModel>(_mapper.ConfigurationProvider)
-                .FirstOrDefaultAsync() ?? null!;
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy staff.");
         }
 
         public async Task<StaffViewModel> CreateStaff(RegisterStaffModel model)
