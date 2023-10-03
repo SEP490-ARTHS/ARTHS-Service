@@ -47,7 +47,6 @@ namespace ARTHS_Service.Implementations
             {
                 var vehicleNameToLower = request.VehicleName?.ToLower();
 
-                if (_vehicleRepository.Any(v => v.VehicleName.Equals(vehicleNameToLower)))
                 if (_vehicleRepository.Any(v => v.VehicleName.Equals(request.VehicleName)))
                 {
                     throw new ConflictException("Hãng xe đã tồn tại!");
@@ -56,7 +55,6 @@ namespace ARTHS_Service.Implementations
                 var vehicle = new Vehicle
                 {
                     Id = Guid.NewGuid(),
-                    VehicleName = vehicleNameToLower,
                     VehicleName = request.VehicleName,
                 };
 
@@ -93,10 +91,10 @@ namespace ARTHS_Service.Implementations
                 var updatedName = request.VehicleName?.ToLower() ?? vehicle.VehicleName;
 
                 if (_vehicleRepository.Any(v => v.VehicleName.Equals(updatedName)))
-                if (_vehicleRepository.Any(v => v.VehicleName.Equals(request.VehicleName)))
-                {
-                    throw new ConflictException("Tên phương tiện đã tồn tại");
-                }
+                    if (_vehicleRepository.Any(v => v.VehicleName.Equals(request.VehicleName)))
+                    {
+                        throw new ConflictException("Tên phương tiện đã tồn tại");
+                    }
 
                 vehicle.VehicleName = updatedName;
                 vehicle.VehicleName = request.VehicleName;
