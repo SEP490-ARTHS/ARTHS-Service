@@ -46,9 +46,8 @@ namespace ARTHS_Service.Implementations
         {
             try
             {
-                var categoryNameToLower = request.CategoryName.ToLower();
 
-                if (_categoryRepository.Any(category => category.CategoryName.Equals(categoryNameToLower)))
+                if (_categoryRepository.Any(category => category.CategoryName.Equals(request.CategoryName)))
                 {
                     throw new ConflictException("Danh mục này đã tồn tại!");
                 }
@@ -56,7 +55,7 @@ namespace ARTHS_Service.Implementations
                 var category = new Category
                 {
                     Id = Guid.NewGuid(),
-                    CategoryName = categoryNameToLower,
+                    CategoryName = request.CategoryName,
                 };
 
                 _categoryRepository.Add(category);
@@ -89,14 +88,13 @@ namespace ARTHS_Service.Implementations
                     throw new NotFoundException("không tìm thấy");
                 }
 
-                var updatedName = request.Name?.ToLower() ?? category.CategoryName;
 
-                if (_categoryRepository.Any(c => c.CategoryName.Equals(updatedName) && c.Id != Id))
+                if (_categoryRepository.Any(c => c.CategoryName.Equals(request.Name) && c.Id != Id))
                 {
                     throw new ConflictException("Tên danh mục đã tồn tại");
                 }
 
-                category.CategoryName = updatedName;
+                category.CategoryName = request.Name;
 
                 _categoryRepository.Update(category);
 

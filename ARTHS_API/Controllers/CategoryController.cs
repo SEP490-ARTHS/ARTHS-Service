@@ -8,7 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace ARTHS_API.Controllers
 {
-    [Route("api/categoryes")]
+    [Route("api/categories")]
     [ApiController]
     public class CategoryController : ControllerBase
     {

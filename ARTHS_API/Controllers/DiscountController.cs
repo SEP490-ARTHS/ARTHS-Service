@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ARTHS_API.Controllers
 {
-    [Route("api/discount")]
+    [Route("api/discounts")]
     [ApiController]
     public class DiscountController : ControllerBase
     {

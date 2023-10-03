@@ -45,7 +45,6 @@ namespace ARTHS_Service.Implementations
         {
             try
             {
-                var vehicleNameToLower = request.VehicleName?.ToLower();
 
                 if (_vehicleRepository.Any(v => v.VehicleName.Equals(request.VehicleName)))
                 {
@@ -88,15 +87,12 @@ namespace ARTHS_Service.Implementations
                     throw new NotFoundException("không tìm thấy");
                 }
 
-                var updatedName = request.VehicleName?.ToLower() ?? vehicle.VehicleName;
+                if (_vehicleRepository.Any(v => v.VehicleName.Equals(request.VehicleName)))
+                {
+                    throw new ConflictException("Tên phương tiện đã tồn tại");
+                }
 
-                if (_vehicleRepository.Any(v => v.VehicleName.Equals(updatedName)))
-                    if (_vehicleRepository.Any(v => v.VehicleName.Equals(request.VehicleName)))
-                    {
-                        throw new ConflictException("Tên phương tiện đã tồn tại");
-                    }
-
-                vehicle.VehicleName = updatedName;
+                vehicle.VehicleName = request.VehicleName;
                 vehicle.VehicleName = request.VehicleName;
 
                 _vehicleRepository.Update(vehicle);
