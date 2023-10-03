@@ -105,7 +105,7 @@ namespace ARTHS_Service.Implementations
 
             if (discount == null)
             {
-                throw new NotFoundException("Không tìm thấy repair service");
+                throw new NotFoundException("Không tìm thấy khuyến mãi");
             }
 
             discount.Title = model.Title ?? discount.Title;
