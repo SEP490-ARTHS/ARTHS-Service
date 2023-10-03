@@ -9,8 +9,8 @@ namespace ARTHS_Data.Entities
         {
             CartItems = new HashSet<CartItem>();
             FeedbackProducts = new HashSet<FeedbackProduct>();
+            Images = new HashSet<Image>();
             InStoreOrderDetails = new HashSet<InStoreOrderDetail>();
-            MotobikeProductImages = new HashSet<MotobikeProductImage>();
             MotobikeProductPrices = new HashSet<MotobikeProductPrice>();
             OnlineOrderDetails = new HashSet<OnlineOrderDetail>();
             Vehicles = new HashSet<Vehicle>();
@@ -35,8 +35,8 @@ namespace ARTHS_Data.Entities
         public virtual Warranty? Warranty { get; set; }
         public virtual ICollection<CartItem> CartItems { get; set; }
         public virtual ICollection<FeedbackProduct> FeedbackProducts { get; set; }
+        public virtual ICollection<Image> Images { get; set; }
         public virtual ICollection<InStoreOrderDetail> InStoreOrderDetails { get; set; }
-        public virtual ICollection<MotobikeProductImage> MotobikeProductImages { get; set; }
         public virtual ICollection<MotobikeProductPrice> MotobikeProductPrices { get; set; }
         public virtual ICollection<OnlineOrderDetail> OnlineOrderDetails { get; set; }
 

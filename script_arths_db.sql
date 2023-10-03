@@ -216,7 +216,6 @@ CREATE TABLE RepairService(
 	Id uniqueidentifier primary key NOT NULL,
 	Name nvarchar(255) NOT NULL,
 	Price int NOT NULL,
-	ImageUrl varchar(max) NOT NULL,
 	Description nvarchar(max) NOT NULL,
 	Status nvarchar(100) NOT NULL,
 	CreateAt datetime NOT NULL default getdate()
@@ -250,16 +249,18 @@ CREATE TABLE MotobikeProductPrice(
 	Id uniqueidentifier primary key NOT NULL,
 	MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id) NOT NULL,
 	DateApply datetime NOT NULL,
-	PriceCurrent int NOT NULL
+	PriceCurrent int NOT NULL,
+	CreateAt datetime NOT NULL default getdate()
 );
 GO
 
 --Table product image
-DROP TABLE IF EXISTS MotobikeProductImage;
+DROP TABLE IF EXISTS [Image];
 GO
-CREATE TABLE MotobikeProductImage(
+CREATE TABLE [Image](
 	Id uniqueidentifier primary key NOT NULL,
-	MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id) NOT NULL,
+	MotobikeProductId uniqueidentifier foreign key references MotobikeProduct(Id),
+	RepairServiceId uniqueidentifier foreign key references RepairService(Id) ,
 	Thumbnail bit NOT NULL default 0,
 	ImageUrl varchar(max) NOT NULL
 );

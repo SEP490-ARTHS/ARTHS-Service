@@ -1,4 +1,7 @@
-﻿namespace ARTHS_Data.Entities
+﻿using System;
+using System.Collections.Generic;
+
+namespace ARTHS_Data.Entities
 {
     public partial class Discount
     {

@@ -10,6 +10,7 @@ using ARTHS_Utility.Constants;
 using ARTHS_Utility.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace ARTHS_Service.Implementations
@@ -17,12 +18,14 @@ namespace ARTHS_Service.Implementations
     public class RepairServiceService : BaseService, IRepairServiceService
     {
         private readonly IRepairServiceRepository _repairRepository;
+        private readonly IImageRepository _imageRepository;
 
         private readonly ICloudStorageService _cloudStorageService;
 
         public RepairServiceService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService) : base(unitOfWork, mapper)
         {
             _repairRepository = unitOfWork.RepairService;
+            _imageRepository = unitOfWork.Image;
 
             _cloudStorageService = cloudStorageService;
         }
@@ -31,14 +34,14 @@ namespace ARTHS_Service.Implementations
         public async Task<List<RepairServiceViewModel>> GetRepairServices(RepairServiceFilterModel filter)
         {
             var query = _repairRepository.GetAll();
-            
-            if(filter.Name != null)
+
+            if (filter.Name != null)
             {
                 query = query.Where(repair => repair.Name.Contains(filter.Name));
             }
 
             // Phân trang
-            if (filter.PageSize <= 0) filter.PageSize = 5;  // kích thước trang luôn dương
+            if (filter.PageSize <= 0) filter.PageSize = 10;  // kích thước trang luôn dương
             int skip = (filter.PageNumber - 1) * filter.PageSize; // Tính số items cần bỏ qua
             query = _repairRepository.SkipAndTake(skip, filter.PageSize);
 
@@ -56,6 +59,19 @@ namespace ARTHS_Service.Implementations
 
         public async Task<RepairServiceViewModel> CreateRepairService(CreateRepairServiceModel model)
         {
+            var imageCount = model.Images.Count();
+            if (imageCount < 1 || imageCount > 4)
+            {
+                throw new BadRequestException("Phải có ít nhất một hình để tạo và không được quá 4 hình.");
+            }
+            foreach (IFormFile image in model.Images)
+            {
+                if (!image.ContentType.StartsWith("image/"))
+                {
+                    throw new BadRequestException("File không phải là hình ảnh");
+                }
+            }
+
             var result = 0;
             var repairServiceId = Guid.Empty;
             using (var transaction = _unitOfWork.Transaction())
@@ -63,18 +79,18 @@ namespace ARTHS_Service.Implementations
                 try
                 {
                     repairServiceId = Guid.NewGuid();
-                    var imageUrl = await _cloudStorageService.Upload(repairServiceId, model.Image.ContentType, model.Image.OpenReadStream());
                     var repairService = new RepairService
                     {
                         Id = repairServiceId,
                         Name = model.Name,
                         Price = model.Price,
-                        ImageUrl = imageUrl,
                         Description = model.Description,
                         Status = RepairServiceStatus.Active
                     };
 
                     _repairRepository.Add(repairService);
+                    await CreateRepairServiceImage(repairServiceId, model.Images);
+
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }
@@ -93,7 +109,25 @@ namespace ARTHS_Service.Implementations
 
             if (repairService == null)
             {
-                throw new NotFoundException("Không tìm thấy repair service");
+                throw new NotFoundException("Không tìm thấy repair service.");
+            }
+
+            if (model.Images != null && model.Images.Count > 0)
+            {
+                if(model.Images.Count > 4)
+                {
+                    throw new BadRequestException("Chỉ được chứa bốn hình ảnh.");
+                }
+
+                foreach (IFormFile image in model.Images)
+                {
+                    if (!image.ContentType.StartsWith("image/"))
+                    {
+                        throw new BadRequestException("File không phải là hình ảnh");
+                    }
+                }
+
+                await UpdateRepairServiceImage(id, model.Images);
             }
 
             repairService.Name = model.Name ?? repairService.Name;
@@ -101,17 +135,50 @@ namespace ARTHS_Service.Implementations
             repairService.Description = model.Description ?? repairService.Description;
             repairService.Status = model.Status ?? repairService.Status;
 
-            if (model.Image != null)
-            {
-                //xóa hình cũ và update hình mới trong firebase
-                await _cloudStorageService.Delete(id);
-                var newImageUrl = await _cloudStorageService.Upload(id, model.Image.ContentType, model.Image.OpenReadStream());
-                repairService.ImageUrl = newImageUrl;
-            }
+            
 
             _repairRepository.Update(repairService);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetRepairService(id) : null!;
+        }
+
+
+
+
+
+        //PRIVATE METHOD
+        private async Task<ICollection<Image>> CreateRepairServiceImage(Guid id, ICollection<IFormFile> images)
+        {
+            var listImage = new List<Image>();
+            foreach (IFormFile image in images)
+            {
+                var imageId = Guid.NewGuid();
+                var url = await _cloudStorageService.Upload(imageId, image.ContentType, image.OpenReadStream());
+                var newImage = new Image
+                {
+                    Id = imageId,
+                    RepairServiceId = id,
+                    ImageUrl = url
+                };
+                listImage.Add(newImage);
+            }
+            _imageRepository.AddRange(listImage);
+            return listImage;
+        }
+
+        private async Task<bool> UpdateRepairServiceImage(Guid id, ICollection<IFormFile> images)
+        {
+            var existImages = await _imageRepository.GetMany(image => image.RepairServiceId.Equals(id)).ToListAsync();
+            foreach (var image in existImages)
+            {
+                await _cloudStorageService.Delete(image.Id);
+                //_imageRepository.Remove(image);
+            }
+            _imageRepository.RemoveRange(existImages);
+            //await _unitOfWork.SaveChanges();
+
+            var uploadedImages = await CreateRepairServiceImage(id, images);
+            return uploadedImages != null && uploadedImages.Count == images.Count;
         }
     }
 }

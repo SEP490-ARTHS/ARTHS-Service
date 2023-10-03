@@ -38,6 +38,10 @@ namespace ARTHS_Service.Implementations
                 query = query.Where(account => account.PhoneNumber.Contains(filter.PhoneNumber));
             }
 
+            if(filter.PageSize <= 0) filter.PageSize = 10;
+            int skip = (filter.PageNumber - 1) * filter.PageSize;
+            query = _accountRepository.SkipAndTake(skip, filter.PageSize);
+
             return await query
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
