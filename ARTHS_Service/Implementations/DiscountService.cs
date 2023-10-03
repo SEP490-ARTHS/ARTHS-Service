@@ -47,7 +47,7 @@ namespace ARTHS_Service.Implementations
             }
 
             // Phân trang
-            if (filter.PageSize <= 0) filter.PageSize = 5;  // kích thước trang luôn dương
+            if (filter.PageSize <= 0) filter.PageSize = 10;  // kích thước trang luôn dương
             int skip = (filter.PageNumber - 1) * filter.PageSize; // Tính số items cần bỏ qua
             query = _repository.SkipAndTake(skip, filter.PageSize);
 

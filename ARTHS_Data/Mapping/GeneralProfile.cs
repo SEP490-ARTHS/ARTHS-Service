@@ -54,10 +54,24 @@ namespace ARTHS_Data.Mapping
                                                             (src.OwnerAccount != null ? src.OwnerAccount.Avatar :
                                                             (src.TellerAccount != null ? src.TellerAccount.Avatar :
                                                             (src.StaffAccount != null ? src.StaffAccount.Avatar : null)))));
+            CreateMap<RepairService, RepairServiceViewModel>();
+            CreateMap<MotobikeProduct, MotobikeProductViewModel>()
+                .ForMember(dest => dest.PriceCurrent, otp => otp.MapFrom(src => src.MotobikeProductPrices.OrderByDescending(price => price.CreateAt).FirstOrDefault()!.PriceCurrent))
+                .ForMember(dest => dest.WarrantyDuration, otp => otp.MapFrom(src => src.Warranty != null ? src.Warranty.Duration : 0));
+            CreateMap<MotobikeProduct, MotobikeProductDetailViewModel>()
+                .ForMember(dest => dest.PriceCurrent, otp => otp.MapFrom(src => src.MotobikeProductPrices.OrderByDescending(price => price.CreateAt).FirstOrDefault()!.PriceCurrent))
+                .ForMember(dest => dest.MotobikeProductPrices, otp => otp.MapFrom(src => src.MotobikeProductPrices.OrderByDescending(price => price.CreateAt)))
+                .ForMember(dest => dest.WarrantyDuration, otp => otp.MapFrom(src => src.Warranty != null ? src.Warranty.Duration : 0));
+            CreateMap<Image, ImageViewModel>();
+            CreateMap<MotobikeProductPrice, MotobikeProductPriceViewModel>();
+
+            //------------------------------------------
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();
-            CreateMap<RepairService, RepairServiceViewModel>();
             CreateMap<Discount, DiscountViewModel>();
+
+            
+
         }
     }
 }

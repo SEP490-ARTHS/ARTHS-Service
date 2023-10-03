@@ -49,7 +49,6 @@ namespace ARTHS_API.Configurations.Middleware
             {
                 context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
             }
-
             else if(exception is NotFoundException)
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotFound;
@@ -58,7 +57,10 @@ namespace ARTHS_API.Configurations.Middleware
             {
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
             }
-            
+            else if(exception is BadRequestException)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            }
             else
             {
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;

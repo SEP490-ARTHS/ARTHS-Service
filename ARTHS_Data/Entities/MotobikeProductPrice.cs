@@ -9,6 +9,7 @@ namespace ARTHS_Data.Entities
         public Guid MotobikeProductId { get; set; }
         public DateTime DateApply { get; set; }
         public int PriceCurrent { get; set; }
+        public DateTime CreateAt { get; set; }
 
         public virtual MotobikeProduct MotobikeProduct { get; set; } = null!;
     }

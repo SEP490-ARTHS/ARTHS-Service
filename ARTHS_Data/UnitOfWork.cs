@@ -21,6 +21,9 @@ namespace ARTHS_Data
         private IVehicleRepository _vehicle = null!;
         private IRepairServiceRepository _repair = null!;
         private IDiscountRepository _discount = null!;
+        private IMotobikeProductRepository _motobikeProduct = null!;
+        private IImageRepository _image = null!;
+        private IMotobikeProductPriceRepository _motobikeProductPrice = null!;
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -85,6 +88,20 @@ namespace ARTHS_Data
         public IDiscountRepository Discount
         {
             get { return _discount ??= new DiscountRepository(_context); }
+        }
+
+        public IImageRepository Image
+        {
+            get { return _image ??= new ImageRepository(_context); }
+        }
+        public IMotobikeProductRepository MotobikeProduct
+        {
+            get { return _motobikeProduct ??= new MotobikeProductRepository(_context); }
+        }
+
+        public IMotobikeProductPriceRepository MotobikeProductPrice
+        {
+            get { return _motobikeProductPrice ??= new MotobikeProductPriceRepository(_context); }
         }
         public async Task<int> SaveChanges()
         {
