@@ -45,9 +45,8 @@ namespace ARTHS_Service.Implementations
         {
             try
             {
-                var vehicleNameToLower = request.VehicleName?.ToLower();
 
-                if (_vehicleRepository.Any(v => v.VehicleName.Equals(vehicleNameToLower)))
+                if (_vehicleRepository.Any(v => v.VehicleName.Equals(request.VehicleName)))
                 {
                     throw new NameAlreadyExistsException("Hãng xe đã tồn tại!");
                 }
@@ -55,7 +54,7 @@ namespace ARTHS_Service.Implementations
                 var vehicle = new Vehicle
                 {
                     Id = Guid.NewGuid(),
-                    VehicleName = vehicleNameToLower,
+                    VehicleName = request.VehicleName,
                 };
 
                 _vehicleRepository.Add(vehicle);
@@ -88,14 +87,13 @@ namespace ARTHS_Service.Implementations
                     throw new SearchNotFoundException("không tìm thấy");
                 }
 
-                var updatedName = request.VehicleName?.ToLower() ?? vehicle.VehicleName;
 
-                if (_vehicleRepository.Any(v => v.VehicleName.Equals(updatedName)))
+                if (_vehicleRepository.Any(v => v.VehicleName.Equals(request.VehicleName)))
                 {
                     throw new NameAlreadyExistsException("Tên phương tiện đã tồn tại");
                 }
 
-                vehicle.VehicleName = updatedName;
+                vehicle.VehicleName = request.VehicleName;
 
                 _vehicleRepository.Update(vehicle);
 
