@@ -145,6 +145,7 @@ namespace ARTHS_Service.Implementations
             motobikeProduct.DiscountId = model.DiscountId ?? motobikeProduct.DiscountId;
             motobikeProduct.WarrantyId = model.WarrantyId ?? motobikeProduct.WarrantyId;
             motobikeProduct.CategoryId = model.CategoryId ?? motobikeProduct.CategoryId;
+            motobikeProduct.UpdateAt = DateTime.Now;
 
             if(model.VehiclesId != null && model.VehiclesId.Count > 0)
             {

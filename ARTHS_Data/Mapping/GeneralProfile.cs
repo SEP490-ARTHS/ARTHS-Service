@@ -64,6 +64,17 @@ namespace ARTHS_Data.Mapping
                 .ForMember(dest => dest.WarrantyDuration, otp => otp.MapFrom(src => src.Warranty != null ? src.Warranty.Duration : 0));
             CreateMap<Image, ImageViewModel>();
             CreateMap<MotobikeProductPrice, MotobikeProductPriceViewModel>();
+            CreateMap<InStoreOrder, InStoreOrderViewModel>()
+                .ForMember(dest => dest.TellerName, otp => otp.MapFrom(src => src.Teller.FullName))
+                .ForMember(dest => dest.StaffName, otp => otp.MapFrom(src => src.Staff.FullName));
+            CreateMap<InStoreOrder, BasicInStoreOrderViewModel>()
+                .ForMember(dest => dest.TellerName, otp => otp.MapFrom(src => src.Teller.FullName))
+                .ForMember(dest => dest.StaffName, otp => otp.MapFrom(src => src.Staff.FullName));
+            CreateMap<MotobikeProduct, BasicMotobikeProductViewModel>()
+                .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl));
+            CreateMap<RepairService, BasicRepairServiceViewModel>()
+                .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl));
+            CreateMap<InStoreOrderDetail, InStoreOrderDetailViewModel>();
 
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();

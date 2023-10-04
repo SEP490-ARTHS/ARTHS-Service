@@ -24,6 +24,8 @@ namespace ARTHS_Data
         private IMotobikeProductRepository _motobikeProduct = null!;
         private IImageRepository _image = null!;
         private IMotobikeProductPriceRepository _motobikeProductPrice = null!;
+        private IInStoreOrderRepository _inStoreOrder = null!;
+        private IInStoreOrderDetailRepository _inStoreOrderDetail = null!;
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -102,6 +104,16 @@ namespace ARTHS_Data
         public IMotobikeProductPriceRepository MotobikeProductPrice
         {
             get { return _motobikeProductPrice ??= new MotobikeProductPriceRepository(_context); }
+        }
+
+        public IInStoreOrderRepository InStoreOrder
+        {
+            get { return _inStoreOrder ??= new InStoreOrderRepository(_context); }
+        }
+
+        public IInStoreOrderDetailRepository InStoreOrderDetail
+        {
+            get { return _inStoreOrderDetail ??= new InStoreOrderDetailRepository(_context); }
         }
         public async Task<int> SaveChanges()
         {

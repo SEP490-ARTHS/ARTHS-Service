@@ -14,6 +14,16 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.Configure<AppSetting>(builder.Configuration.GetSection("AppSetting"));
 builder.Services.AddDbContext<ARTHS_DBContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//builder.Services.AddDbContext<ARTHS_DBContext>(options =>
+//        options.UseSqlServer(
+//            builder.Configuration.GetConnectionString("DefaultConnection"),
+//            sqlOptions =>
+//            {
+//                sqlOptions.EnableRetryOnFailure(
+//                    maxRetryCount: 5, // Number of times to retry before giving up
+//                    maxRetryDelay: TimeSpan.FromSeconds(10), // Maximum delay between retries
+//                    errorNumbersToAdd: null); // SQL error codes to treat as transient. Can be null.
+//            }));
 
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews()

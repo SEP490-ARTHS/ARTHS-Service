@@ -20,6 +20,8 @@ namespace ARTHS_Data
         public IImageRepository Image { get; }
         public IMotobikeProductRepository MotobikeProduct { get; }
         public IMotobikeProductPriceRepository MotobikeProductPrice { get; }
+        public IInStoreOrderRepository InStoreOrder { get; }
+        public IInStoreOrderDetailRepository InStoreOrderDetail { get; }
         //-----------------
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();
