@@ -38,7 +38,10 @@ namespace ARTHS_Service.Implementations
 
             }
 
-            return await query.ProjectTo<VehicleViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+            return await query
+                .ProjectTo<VehicleViewModel>(_mapper.ConfigurationProvider)
+                .OrderBy(vehicle => vehicle.VehicleName)
+                .ToListAsync();
         }
 
         public async Task<VehicleViewModel> CreateVehicle(CreateVehicleRequest request)

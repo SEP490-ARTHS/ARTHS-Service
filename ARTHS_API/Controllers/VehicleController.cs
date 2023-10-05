@@ -19,6 +19,23 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(List<VehicleViewModel>), StatusCodes.Status200OK)]
+        [SwaggerOperation(Summary = "Get all vehicles.")]
+        public async Task<ActionResult> GetVehicles([FromQuery] VehicleFilterModel filter)
+        {
+            try
+            {
+                var result = await _vehicleService.GetVehicles(filter);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
+        [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get vehicle by id.")]
@@ -36,25 +53,10 @@ namespace ARTHS_API.Controllers
             }
         }
 
-        [HttpGet]
-        [ProducesResponseType(typeof(List<VehicleViewModel>), StatusCodes.Status200OK)]
-        [SwaggerOperation(Summary = "Get all vehicle or search by name.")]
-        public async Task<ActionResult> GetVehicles([FromQuery] VehicleFilterModel filter)
-        {
-            try
-            {
-                var result = await _vehicleService.GetVehicles(filter);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
+        
         [HttpPost]
         [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
-        [SwaggerOperation(Summary = "Create new Vehicle.")]
+        [SwaggerOperation(Summary = "Create vehicle.")]
         public async Task<ActionResult<VehicleViewModel>> CreateVehicle([FromBody] CreateVehicleRequest request)
         {
             try
@@ -88,7 +90,7 @@ namespace ARTHS_API.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        [SwaggerOperation(Summary = "Delete Vehicle.")]
+        [SwaggerOperation(Summary = "Delete vehicle.")]
         public async Task<IActionResult> DeleteVehicle([FromRoute] Guid id)
         {
             try

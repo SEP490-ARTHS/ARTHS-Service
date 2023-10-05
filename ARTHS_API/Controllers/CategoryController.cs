@@ -19,6 +19,22 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
+        [ProducesResponseType(typeof(List<CategoryViewModel>), StatusCodes.Status200OK)]
+        [SwaggerOperation(Summary = "Get all category.")]
+        public async Task<ActionResult> GetCategories([FromQuery] CategoryFilterModel filter)
+        {
+            try
+            {
+                var result = await _categoryService.GetCategories(filter);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get category by id.")]
@@ -35,22 +51,7 @@ namespace ARTHS_API.Controllers
             }
         }
 
-        [HttpGet]
-        [ProducesResponseType(typeof(List<CategoryViewModel>), StatusCodes.Status200OK)]
-        [SwaggerOperation(Summary = "Get all category.")]
-        public async Task<ActionResult> GetCategories([FromQuery] CategoryFilterModel filter)
-        {
-            try
-            {
-                var result = await _categoryService.GetCategories(filter);
-                return CreatedAtAction(nameof(GetCategory), new { id = result.Id }, result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
+        
         [HttpPost]
         [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Create category.")]
@@ -87,7 +88,7 @@ namespace ARTHS_API.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        [SwaggerOperation(Summary = "Delete Category.")]
+        [SwaggerOperation(Summary = "Delete category.")]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {
             try

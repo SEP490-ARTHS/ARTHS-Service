@@ -71,7 +71,7 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Owner, UserRole.Teller, UserRole.Staff, UserRole.Customer)]
         [ProducesResponseType(typeof(AccountViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-        [SwaggerOperation(Summary = "Get information of auth account.")]
+        [SwaggerOperation(Summary = "Retrieve logged-in account details.")]
         public async Task<ActionResult<AccountViewModel>> GetAccount()
         {
             var auth = (AuthModel?)HttpContext.Items["User"];

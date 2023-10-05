@@ -38,10 +38,7 @@ namespace ARTHS_Service.Implementations
                 query = query.Where(account => account.PhoneNumber.Contains(filter.PhoneNumber));
             }
 
-            if(filter.PageSize <= 0) filter.PageSize = 10;
-            int skip = (filter.PageNumber - 1) * filter.PageSize;
-            query = _accountRepository.SkipAndTake(skip, filter.PageSize);
-
+            
             return await query
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -49,17 +46,17 @@ namespace ARTHS_Service.Implementations
 
         public async Task<List<AccountViewModel>> GetCustomers(AccountFilterModel filter)
         {
-            var query = _accountRepository.GetAll();
+            var customerAccountQuery = _accountRepository.GetAll().Where(account => account.CustomerAccount != null);
             if (!string.IsNullOrEmpty(filter.FullName))
             {
-                query = query.Where(account => account.CustomerAccount != null && account.CustomerAccount.FullName.Contains(filter.FullName));
+                customerAccountQuery = customerAccountQuery.Where(account => account.CustomerAccount != null && account.CustomerAccount.FullName.Contains(filter.FullName));
             }
             if (!string.IsNullOrEmpty(filter.PhoneNumber))
             {
-                query = query.Where(account => account.PhoneNumber.Contains(filter.PhoneNumber));
+                customerAccountQuery = customerAccountQuery.Where(account => account.PhoneNumber.Contains(filter.PhoneNumber));
             }
 
-            return await query
+            return await customerAccountQuery
                 .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }

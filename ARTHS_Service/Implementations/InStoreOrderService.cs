@@ -2,6 +2,7 @@
 using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Post;
+using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
@@ -31,11 +32,11 @@ namespace ARTHS_Service.Implementations
         {
             var query = _inStoreOrderRepository.GetAll();
 
-            if(filter.Id != null)
+            if (filter.Id != null)
             {
                 query = query.Where(order => order.Id.Contains(filter.Id));
             }
-            if(filter.CustomerName != null)
+            if (filter.CustomerName != null)
             {
                 query = query.Where(order => (order.CustomerName != null && order.CustomerName.Contains(filter.CustomerName)));
             }
@@ -44,11 +45,6 @@ namespace ARTHS_Service.Implementations
                 query = query.Where(order => order.CustomerPhone.Contains(filter.CustomerPhone));
             }
 
-            // Phân trang
-            if (filter.PageSize <= 0) filter.PageSize = 10;  // kích thước trang luôn dương
-            int skip = (filter.PageNumber - 1) * filter.PageSize; // Tính số items cần bỏ qua
-            query = _inStoreOrderRepository.SkipAndTake(skip, filter.PageSize);
-            
             return await query
                 .ProjectTo<BasicInStoreOrderViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -72,7 +68,7 @@ namespace ARTHS_Service.Implementations
                 {
                     inStoreOrderId = GenerateOrderId();
                     var totalPrice = await CreateInStoreOrderDetail(inStoreOrderId, model.OrderDetailModel);
-
+                    bool isPurchaseOrder = model.OrderDetailModel.All(detail => !detail.RepairServiceId.HasValue); //nếu không có thì là đơn mua
                     var inStoreOrder = new InStoreOrder
                     {
                         Id = inStoreOrderId,
@@ -82,7 +78,7 @@ namespace ARTHS_Service.Implementations
                         CustomerPhone = model.CustomerPhone,
                         LicensePlate = model.LicensePlate,
                         Status = InStoreOrderStatus.NewOrder,
-                        OrderType = model.OrderType,
+                        OrderType = isPurchaseOrder ? "Purchase" : "Repair",
                         TotalAmount = totalPrice
                     };
                     _inStoreOrderRepository.Add(inStoreOrder);
@@ -97,6 +93,36 @@ namespace ARTHS_Service.Implementations
                 }
             };
             return result > 0 ? await GetInStoreOrder(inStoreOrderId) : null!;
+        }
+
+        public async Task<InStoreOrderViewModel> UpdateInStoreOrder(string orderId, UpdateInStoreOrderModel model)
+        {
+            var inStoreOrder = await _inStoreOrderRepository.GetMany(order => order.Id.Equals(orderId)).FirstOrDefaultAsync();
+            if (inStoreOrder == null)
+            {
+                throw new NotFoundException("Không tìm thấy order.");
+            }
+            if (inStoreOrder.Status.Equals(InStoreOrderStatus.Finished))
+            {
+                throw new BadRequestException("Đơn đã hoàn thành không thể chỉnh sữa");
+            }
+
+            bool isPurchaseOrder = model.OrderDetailModel != null && model.OrderDetailModel.All(detail => !detail.RepairServiceId.HasValue); //nếu không có thì là đơn mua
+            
+            inStoreOrder.OrderType = isPurchaseOrder ? "Purchase" : "Repair";
+            inStoreOrder.StaffId = model.StaffId ?? inStoreOrder.StaffId;
+            inStoreOrder.CustomerName = model.CustomerName ?? inStoreOrder.CustomerName;
+            inStoreOrder.CustomerPhone = model.CustomerPhone ?? inStoreOrder.CustomerPhone;
+            inStoreOrder.LicensePlate = model.LicensePlate ?? inStoreOrder.LicensePlate;
+            inStoreOrder.Status = model.Status ?? inStoreOrder.Status;
+
+            if (model.OrderDetailModel != null && model.OrderDetailModel.Count > 0)
+            {
+                inStoreOrder.TotalAmount = await UpdateInStoreOrder(orderId, model.OrderDetailModel);
+            }
+
+            _inStoreOrderRepository.Update(inStoreOrder);
+            return await _unitOfWork.SaveChanges() > 0 ? await GetInStoreOrder(orderId) : null!;
         }
 
 
@@ -114,12 +140,13 @@ namespace ARTHS_Service.Implementations
                 int? warrantyOfProduct = product?.Warranty?.Duration;
                 int? servicePrice = repairService?.Price;
 
-                int productTotalPrice = 0;
-                if (productPrice.HasValue && productPrice.Value > 0 && detail.ProductQuantity.HasValue && detail.ProductQuantity.Value > 0)
-                {
-                    productTotalPrice = productPrice.Value * detail.ProductQuantity.Value;
-                }
-
+                //int productTotalPrice = 0;
+                //if (productPrice.HasValue && productPrice.Value > 0 && detail.ProductQuantity.HasValue && detail.ProductQuantity.Value > 0)
+                //{
+                //    productTotalPrice = productPrice.Value * detail.ProductQuantity.Value;
+                //}
+                int productTotalPrice = productPrice.HasValue && productPrice.Value > 0
+                    ? productPrice.Value * (detail.ProductQuantity == null || detail.ProductQuantity == 0 ? 1 : detail.ProductQuantity.Value) : 0;
                 int serviceTotalPrice = servicePrice.HasValue && servicePrice.Value > 0 ? servicePrice.Value : 0;
 
                 int detailTotalPrice = productTotalPrice + serviceTotalPrice;
@@ -134,7 +161,7 @@ namespace ARTHS_Service.Implementations
                     InStoreOrderId = orderId,
                     RepairServiceId = detail.RepairServiceId,
                     MotobikeProductId = detail.MotobikeProductId,
-                    ProductQuantity = detail.ProductQuantity,
+                    ProductQuantity = detail.ProductQuantity == null || detail.ProductQuantity == 0 ? 1 : detail.ProductQuantity,
                     ProductPrice = productPrice,
                     ServicePrice = servicePrice,
                     WarrantyPeriod = warrantyPeriod
@@ -144,6 +171,56 @@ namespace ARTHS_Service.Implementations
             }
             _inStoreOrderDetailRepository.AddRange(listOrderDetail);
             return totalAmount;
+        }
+
+        private async Task<int> UpdateInStoreOrder(string orderId, List<CreateInStoreOrderDetailModel> listDetails)
+        {
+            int totalAmount = 0;
+            var listOrderDetail = new List<InStoreOrderDetail>();
+
+            //xóa details cũ
+            var existDetails = await _inStoreOrderDetailRepository.GetMany(detail => detail.InStoreOrderId.Equals(orderId)).ToListAsync();
+            _inStoreOrderDetailRepository.RemoveRange(existDetails);
+
+            // Thêm các chi tiết đơn hàng mới từ model
+            foreach (var detail in listDetails)
+            {
+                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(detail.MotobikeProductId)).Include(product => product.Warranty).FirstOrDefaultAsync();
+                var repairService = await _repairServiceRepository.GetMany(repair => repair.Id.Equals(detail.RepairServiceId)).FirstOrDefaultAsync();
+
+                int? productPrice = product?.PriceCurrent;
+                int? warrantyOfProduct = product?.Warranty?.Duration;
+                int? servicePrice = repairService?.Price;
+
+                int productTotalPrice = productPrice.HasValue && productPrice.Value > 0
+                    ? productPrice.Value * (detail.ProductQuantity == null || detail.ProductQuantity == 0 ? 1 : detail.ProductQuantity.Value) : 0;    
+                int serviceTotalPrice = servicePrice.HasValue && servicePrice.Value > 0 ? servicePrice.Value : 0;
+
+                int detailTotalPrice = productTotalPrice + serviceTotalPrice;
+
+                totalAmount += detailTotalPrice; // Cộng dồn vào tổng tiền
+
+                DateTime warrantyPeriod = warrantyOfProduct.HasValue ? DateTime.UtcNow.AddMonths(warrantyOfProduct.Value) : DateTime.UtcNow;
+
+                var orderDetail = new InStoreOrderDetail
+                {
+                    Id = Guid.NewGuid(),
+                    InStoreOrderId = orderId,
+                    RepairServiceId = detail.RepairServiceId,
+                    MotobikeProductId = detail.MotobikeProductId,
+                    ProductQuantity = detail.ProductQuantity == null || detail.ProductQuantity == 0 ? 1 : detail.ProductQuantity,
+                    ProductPrice = productPrice,
+                    ServicePrice = servicePrice,
+                    WarrantyPeriod = warrantyPeriod
+                };
+
+                listOrderDetail.Add(orderDetail);
+            }
+
+            _inStoreOrderDetailRepository.AddRange(listOrderDetail);
+            await _unitOfWork.SaveChanges();
+            return totalAmount;
+
         }
 
         private string GenerateOrderId()

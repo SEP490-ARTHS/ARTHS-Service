@@ -2,6 +2,7 @@
 using ARTHS_Data.Models.Internal;
 using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Post;
+using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
@@ -47,6 +48,17 @@ namespace ARTHS_API.Controllers
         {
             var auth = (AuthModel?)HttpContext.Items["User"];
             var order = await _inStoreOrderService.CreateInStoreOrder(auth!.Id, model);
+            return CreatedAtAction(nameof(GetInStoreOrder), new { id = order.Id }, order);
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        [Authorize(UserRole.Teller)]
+        [ProducesResponseType(typeof(InStoreOrderViewModel), StatusCodes.Status200OK)]
+        [SwaggerOperation(Summary = "Update in store order")]
+        public async Task<ActionResult<InStoreOrderViewModel>> UpdateInStoreOrder([FromRoute] string Id, [FromBody] UpdateInStoreOrderModel model)
+        {
+            var order = await _inStoreOrderService.UpdateInStoreOrder(Id, model);
             return CreatedAtAction(nameof(GetInStoreOrder), new { id = order.Id }, order);
         }
     }

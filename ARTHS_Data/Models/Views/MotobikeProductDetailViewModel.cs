@@ -16,7 +16,7 @@ namespace ARTHS_Data.Models.Views
 
         public virtual CategoryViewModel? Category { get; set; }
         public virtual DiscountViewModel? Discount { get; set; }
-        public virtual RepairServiceViewModel? RepairService { get; set; }
+        public virtual BasicRepairServiceViewModel? RepairService { get; set; }
         //public virtual ICollection<FeedbackProduct> FeedbackProducts { get; set; } = new List<FeedbackProduct>();
         public virtual ICollection<ImageViewModel> Images { get; set; } = new List<ImageViewModel>();
         public virtual ICollection<MotobikeProductPriceViewModel> MotobikeProductPrices { get; set; } = new List<MotobikeProductPriceViewModel>();
