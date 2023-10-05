@@ -8,6 +8,6 @@ namespace ARTHS_Service.Interfaces
     {
         Task<List<BasicInStoreOrderViewModel>> GetInStoreOrders(InStoreOrderFilterModel filter);
         Task<InStoreOrderViewModel> GetInStoreOrder(string id);
-        Task<InStoreOrderViewModel> CreateInStoreOrder(CreateInStoreOrderModel model);
+        Task<InStoreOrderViewModel> CreateInStoreOrder(Guid tellerId, CreateInStoreOrderModel model);
     }
 }

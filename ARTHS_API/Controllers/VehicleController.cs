@@ -21,7 +21,6 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get vehicle by id.")]
         public async Task<ActionResult> GetVehicle([FromRoute] Guid id)
         {
@@ -39,7 +38,6 @@ namespace ARTHS_API.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(List<VehicleViewModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Get all vehicle or search by name.")]
         public async Task<ActionResult> GetVehicles([FromQuery] VehicleFilterModel filter)
         {
@@ -55,9 +53,7 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpPost]
-        [Route("create")]
         [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Create new Vehicle.")]
         public async Task<ActionResult<VehicleViewModel>> CreateVehicle([FromBody] CreateVehicleRequest request)
         {
@@ -75,7 +71,6 @@ namespace ARTHS_API.Controllers
         [HttpPut]
         [Route("{id}")]
         [ProducesResponseType(typeof(VehicleViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [SwaggerOperation(Summary = "Update vehicle.")]
         public async Task<IActionResult> UpdateVehicle([FromRoute] Guid id,
                                                         [FromBody] UpdateVehicleRequest request)

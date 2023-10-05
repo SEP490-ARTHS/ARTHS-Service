@@ -62,7 +62,7 @@ namespace ARTHS_Service.Implementations
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy order");
         }
 
-        public async Task<InStoreOrderViewModel> CreateInStoreOrder(CreateInStoreOrderModel model)
+        public async Task<InStoreOrderViewModel> CreateInStoreOrder(Guid tellerId, CreateInStoreOrderModel model)
         {
             var result = 0;
             var inStoreOrderId = string.Empty;
@@ -76,7 +76,7 @@ namespace ARTHS_Service.Implementations
                     var inStoreOrder = new InStoreOrder
                     {
                         Id = inStoreOrderId,
-                        TellerId = model.TellerId,
+                        TellerId = tellerId,
                         StaffId = model.StaffId,
                         CustomerName = model.CustomerName,
                         CustomerPhone = model.CustomerPhone,

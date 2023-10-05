@@ -57,6 +57,7 @@ namespace ARTHS_API.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        [Authorize(UserRole.Owner)]
         [ProducesResponseType(typeof(OwnerViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update owner.")]

@@ -1,7 +1,10 @@
-﻿using ARTHS_Data.Models.Requests.Filters;
+﻿using ARTHS_API.Configurations.Middleware;
+using ARTHS_Data.Models.Internal;
+using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -37,11 +40,13 @@ namespace ARTHS_API.Controllers
 
 
         [HttpPost]
+        [Authorize(UserRole.Teller)]
         [ProducesResponseType(typeof(InStoreOrderViewModel), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get order in store by id.")]
         public async Task<ActionResult<InStoreOrderViewModel>> CreateOrder([FromBody] CreateInStoreOrderModel model)
         {
-            var order = await _inStoreOrderService.CreateInStoreOrder(model);
+            var auth = (AuthModel?)HttpContext.Items["User"];
+            var order = await _inStoreOrderService.CreateInStoreOrder(auth!.Id, model);
             return CreatedAtAction(nameof(GetInStoreOrder), new { id = order.Id }, order);
         }
     }
