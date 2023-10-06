@@ -67,8 +67,8 @@ namespace ARTHS_Service.Implementations
                 try
                 {
                     inStoreOrderId = GenerateOrderId();
-                    var totalPrice = await CreateInStoreOrderDetail(inStoreOrderId, model.OrderDetailModel);
-                    bool isPurchaseOrder = model.OrderDetailModel.All(detail => !detail.RepairServiceId.HasValue); //nếu không có thì là đơn mua
+                    var totalPrice = await HandleInStoreOrderDetail(inStoreOrderId, model.OrderDetailModel, true);
+                    var orderType = StoreOrderType(model.OrderDetailModel);
                     var inStoreOrder = new InStoreOrder
                     {
                         Id = inStoreOrderId,
@@ -78,7 +78,7 @@ namespace ARTHS_Service.Implementations
                         CustomerPhone = model.CustomerPhone,
                         LicensePlate = model.LicensePlate,
                         Status = InStoreOrderStatus.NewOrder,
-                        OrderType = isPurchaseOrder ? "Purchase" : "Repair",
+                        OrderType = orderType,
                         TotalAmount = totalPrice
                     };
                     _inStoreOrderRepository.Add(inStoreOrder);
@@ -107,9 +107,7 @@ namespace ARTHS_Service.Implementations
                 throw new BadRequestException("Đơn đã hoàn thành không thể chỉnh sữa");
             }
 
-            bool isPurchaseOrder = model.OrderDetailModel != null && model.OrderDetailModel.All(detail => !detail.RepairServiceId.HasValue); //nếu không có thì là đơn mua
             
-            inStoreOrder.OrderType = isPurchaseOrder ? "Purchase" : "Repair";
             inStoreOrder.StaffId = model.StaffId ?? inStoreOrder.StaffId;
             inStoreOrder.CustomerName = model.CustomerName ?? inStoreOrder.CustomerName;
             inStoreOrder.CustomerPhone = model.CustomerPhone ?? inStoreOrder.CustomerPhone;
@@ -118,7 +116,8 @@ namespace ARTHS_Service.Implementations
 
             if (model.OrderDetailModel != null && model.OrderDetailModel.Count > 0)
             {
-                inStoreOrder.TotalAmount = await UpdateInStoreOrder(orderId, model.OrderDetailModel);
+                inStoreOrder.TotalAmount = await HandleInStoreOrderDetail(orderId, model.OrderDetailModel, false);
+                inStoreOrder.OrderType = StoreOrderType(model.OrderDetailModel);
             }
 
             _inStoreOrderRepository.Update(inStoreOrder);
@@ -127,33 +126,30 @@ namespace ARTHS_Service.Implementations
 
 
         //PRIVATE METHOD
-        private async Task<int> CreateInStoreOrderDetail(string orderId, List<CreateInStoreOrderDetailModel> listDetails)
+        /// <summary>
+        /// Processes in-store order details and returns the total amount.
+        /// </summary>
+        /// <param name="orderId">The in-store order ID.</param>
+        /// <param name="listDetails">Details for the order.</param>
+        /// <param name="isNewOrder">Whether it's a new order or an update.</param>
+        /// <returns>Total amount of the order.</returns>
+        private async Task<int> HandleInStoreOrderDetail(string orderId, List<CreateInStoreOrderDetailModel> listDetails, bool isNewOrder)
         {
             int totalAmount = 0;
             var listOrderDetail = new List<InStoreOrderDetail>();
+
+            if (!isNewOrder)
+            {
+                var existOrderDetails = await _inStoreOrderDetailRepository.GetMany(detail => detail.InStoreOrderId.Equals(orderId)).ToListAsync();
+                _inStoreOrderDetailRepository.RemoveRange(existOrderDetails);
+            }
+
             foreach (var detail in listDetails)
             {
-                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(detail.MotobikeProductId)).Include(product => product.Warranty).FirstOrDefaultAsync();
-                var repairService = await _repairServiceRepository.GetMany(repair => repair.Id.Equals(detail.RepairServiceId)).FirstOrDefaultAsync();
+                (int totalProductPrice, DateTime warrantyPeriod) = await GetProductPriceAndWarranty(detail.MotobikeProductId, detail.ProductQuantity);
+                int repairServicePrice = await GetRepairServicePrice(detail.RepairServiceId);
 
-                int? productPrice = product?.PriceCurrent;
-                int? warrantyOfProduct = product?.Warranty?.Duration;
-                int? servicePrice = repairService?.Price;
-
-                //int productTotalPrice = 0;
-                //if (productPrice.HasValue && productPrice.Value > 0 && detail.ProductQuantity.HasValue && detail.ProductQuantity.Value > 0)
-                //{
-                //    productTotalPrice = productPrice.Value * detail.ProductQuantity.Value;
-                //}
-                int productTotalPrice = productPrice.HasValue && productPrice.Value > 0
-                    ? productPrice.Value * (detail.ProductQuantity == null || detail.ProductQuantity == 0 ? 1 : detail.ProductQuantity.Value) : 0;
-                int serviceTotalPrice = servicePrice.HasValue && servicePrice.Value > 0 ? servicePrice.Value : 0;
-
-                int detailTotalPrice = productTotalPrice + serviceTotalPrice;
-
-                totalAmount += detailTotalPrice; // Cộng dồn vào tổng tiền
-
-                DateTime warrantyPeriod = warrantyOfProduct.HasValue ? DateTime.UtcNow.AddMonths(warrantyOfProduct.Value) : DateTime.UtcNow;
+                totalAmount += totalProductPrice + repairServicePrice;
 
                 var orderDetail = new InStoreOrderDetail
                 {
@@ -161,9 +157,9 @@ namespace ARTHS_Service.Implementations
                     InStoreOrderId = orderId,
                     RepairServiceId = detail.RepairServiceId,
                     MotobikeProductId = detail.MotobikeProductId,
-                    ProductQuantity = detail.ProductQuantity == null || detail.ProductQuantity == 0 ? 1 : detail.ProductQuantity,
-                    ProductPrice = productPrice,
-                    ServicePrice = servicePrice,
+                    ProductQuantity = detail.MotobikeProductId != null ? detail.ProductQuantity : (int?)null,
+                    ProductPrice = totalProductPrice,
+                    ServicePrice = repairServicePrice,
                     WarrantyPeriod = warrantyPeriod
                 };
 
@@ -173,54 +169,70 @@ namespace ARTHS_Service.Implementations
             return totalAmount;
         }
 
-        private async Task<int> UpdateInStoreOrder(string orderId, List<CreateInStoreOrderDetailModel> listDetails)
+
+        /// <summary>
+        /// Retrieves the total product price and warranty period for a given product.
+        /// </summary>
+        /// <param name="productId">ID of the product.</param>
+        /// <param name="quantity">Quantity of the product.</param>
+        /// <returns>Total product price and warranty expiration date.</returns>
+        private async Task<(int totalProductPrice, DateTime warrantyPeriod)> GetProductPriceAndWarranty(Guid? productId, int? quantity)
         {
-            int totalAmount = 0;
-            var listOrderDetail = new List<InStoreOrderDetail>();
-
-            //xóa details cũ
-            var existDetails = await _inStoreOrderDetailRepository.GetMany(detail => detail.InStoreOrderId.Equals(orderId)).ToListAsync();
-            _inStoreOrderDetailRepository.RemoveRange(existDetails);
-
-            // Thêm các chi tiết đơn hàng mới từ model
-            foreach (var detail in listDetails)
+            if (!productId.HasValue)
             {
-                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(detail.MotobikeProductId)).Include(product => product.Warranty).FirstOrDefaultAsync();
-                var repairService = await _repairServiceRepository.GetMany(repair => repair.Id.Equals(detail.RepairServiceId)).FirstOrDefaultAsync();
-
-                int? productPrice = product?.PriceCurrent;
-                int? warrantyOfProduct = product?.Warranty?.Duration;
-                int? servicePrice = repairService?.Price;
-
-                int productTotalPrice = productPrice.HasValue && productPrice.Value > 0
-                    ? productPrice.Value * (detail.ProductQuantity == null || detail.ProductQuantity == 0 ? 1 : detail.ProductQuantity.Value) : 0;    
-                int serviceTotalPrice = servicePrice.HasValue && servicePrice.Value > 0 ? servicePrice.Value : 0;
-
-                int detailTotalPrice = productTotalPrice + serviceTotalPrice;
-
-                totalAmount += detailTotalPrice; // Cộng dồn vào tổng tiền
-
-                DateTime warrantyPeriod = warrantyOfProduct.HasValue ? DateTime.UtcNow.AddMonths(warrantyOfProduct.Value) : DateTime.UtcNow;
-
-                var orderDetail = new InStoreOrderDetail
-                {
-                    Id = Guid.NewGuid(),
-                    InStoreOrderId = orderId,
-                    RepairServiceId = detail.RepairServiceId,
-                    MotobikeProductId = detail.MotobikeProductId,
-                    ProductQuantity = detail.ProductQuantity == null || detail.ProductQuantity == 0 ? 1 : detail.ProductQuantity,
-                    ProductPrice = productPrice,
-                    ServicePrice = servicePrice,
-                    WarrantyPeriod = warrantyPeriod
-                };
-
-                listOrderDetail.Add(orderDetail);
+                return (0, DateTime.UtcNow);
             }
 
-            _inStoreOrderDetailRepository.AddRange(listOrderDetail);
-            await _unitOfWork.SaveChanges();
-            return totalAmount;
+            var product = await _motobikeProductRepository.GetMany(p => p.Id.Equals(productId))
+                                                          .Include(p => p.Warranty)
+                                                          .FirstOrDefaultAsync();
+            if(product == null)
+            {
+                throw new NotFoundException("Không tìm thấy product.");
+            }
 
+            int price = product.PriceCurrent;
+            int actualQuantity = (quantity ?? 0) <= 0 ? 1 : quantity!.Value;
+            int totalProductPrice = price * actualQuantity;
+
+            DateTime warrantyPeriod = product?.Warranty?.Duration != null
+                ? DateTime.UtcNow.AddMonths(product.Warranty.Duration)
+                : DateTime.UtcNow;
+
+            return (totalProductPrice, warrantyPeriod);
+        }
+
+        /// <summary>
+        /// Retrieves the price of a specific repair service.
+        /// </summary>
+        /// <param name="repairServiceId">ID of the repair service.</param>
+        /// <returns>Price of the repair service.</returns>
+        private async Task<int> GetRepairServicePrice(Guid? repairServiceId)
+        {
+            if (!repairServiceId.HasValue)
+            {
+                return 0;
+            }
+
+            var service = await _repairServiceRepository.GetMany(service => service.Id.Equals(repairServiceId)).FirstOrDefaultAsync();
+            if(service == null)
+            {
+                throw new NotFoundException("Không tìm thấy repair service");
+            }
+            return service.Price;
+        }
+
+        /// <summary>
+        /// Determines the type of order based on its details.
+        /// </summary>
+        /// <returns>Purchase order or Repair order.</returns>
+        private string StoreOrderType(List<CreateInStoreOrderDetailModel> details)
+        {
+            if(details.All(detail => !detail.RepairServiceId.HasValue))
+            {
+                return InStoreOrderType.Purchase;
+            }
+            return InStoreOrderType.Repair;
         }
 
         private string GenerateOrderId()

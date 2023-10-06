@@ -1,5 +1,6 @@
 ﻿using ARTHS_Data;
 using ARTHS_Data.Entities;
+using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
@@ -32,9 +33,33 @@ namespace ARTHS_Service.Implementations
             _cloudStorageService = cloudStorageService;
         }
 
-        public async Task<List<MotobikeProductViewModel>> GetMotobikeProducts()
+        public async Task<List<MotobikeProductViewModel>> GetMotobikeProducts(MotobikeProductFilterModel filter)
         {
             var query = _motobikeProductRepository.GetAll();
+
+            if (!string.IsNullOrEmpty(filter.Name))
+            {
+                query = query.Where(product => product.Name.Contains(filter.Name));
+            }
+            if (!string.IsNullOrEmpty(filter.RepairService))
+            {
+                query = query.Include(product => product.RepairService)
+                    .Where(product => product.RepairService != null && product.RepairService.Name.Contains(filter.RepairService));
+            }
+            if (!string.IsNullOrEmpty(filter.Category))
+            {
+                query = query.Include(product => product.Category)
+                    .Where(product => product.Category != null && product.Category.CategoryName.Contains(filter.Category));
+            }
+            if (!string.IsNullOrEmpty(filter.VehiclesName))
+            {
+                query = query.Include(product => product.Vehicles)
+                    .Where(product => product.Vehicles.Any(vehicle => vehicle.VehicleName.Contains(filter.VehiclesName)));
+            }
+            if (filter.DiscountId.HasValue)
+            {
+                query = query.Where(product => product.DiscountId.Equals(filter.DiscountId.Value));
+            }
 
             return await query
                 .ProjectTo<MotobikeProductViewModel>(_mapper.ConfigurationProvider)
