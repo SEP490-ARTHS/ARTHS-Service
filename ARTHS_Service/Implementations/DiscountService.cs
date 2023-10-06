@@ -46,10 +46,8 @@ namespace ARTHS_Service.Implementations
                 query = query.Where(discount => discount.EndDate <= filter.EndDate);
             }
 
-            // Phân trang
-            if (filter.PageSize <= 0) filter.PageSize = 10;  // kích thước trang luôn dương
-            int skip = (filter.PageNumber - 1) * filter.PageSize; // Tính số items cần bỏ qua
-            query = _repository.SkipAndTake(skip, filter.PageSize);
+            
+
 
             return await query
                 .ProjectTo<DiscountViewModel>(_mapper.ConfigurationProvider)
@@ -89,7 +87,7 @@ namespace ARTHS_Service.Implementations
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     transaction.Rollback();
                     throw;

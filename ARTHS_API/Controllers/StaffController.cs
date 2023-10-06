@@ -57,6 +57,7 @@ namespace ARTHS_API.Controllers
 
         [HttpPut]
         [Route("{id}")]
+        //[Authorize(UserRole.Staff)]
         [ProducesResponseType(typeof(StaffViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update staff.")]

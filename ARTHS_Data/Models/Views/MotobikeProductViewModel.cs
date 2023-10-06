@@ -11,10 +11,13 @@ namespace ARTHS_Data.Models.Views
         public int WarrantyDuration { get; set; }
         public string Status { get; set; } = null!;
 
-        public virtual CategoryViewModel? Category { get; set; }
-        public virtual DiscountViewModel? Discount { get; set; }
-        public virtual RepairServiceViewModel? RepairService { get; set; }
-        public virtual ICollection<ImageViewModel> Images { get; set; } = new List<ImageViewModel>();
+        //public virtual CategoryViewModel? Category { get; set; }
+        public int DiscountAmount { get; set; }
+        //public virtual DiscountViewModel? Discount { get; set; }
+        public virtual BasicRepairServiceViewModel? RepairService { get; set; }
+
+        public string ImageUrl { get; set; } = null!;
+        //public virtual ICollection<ImageViewModel> Images { get; set; } = new List<ImageViewModel>();
 
         //public virtual Warranty? Warranty { get; set; }
     }

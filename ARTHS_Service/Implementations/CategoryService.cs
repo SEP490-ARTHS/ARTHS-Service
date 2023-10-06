@@ -94,7 +94,7 @@ namespace ARTHS_Service.Implementations
                     throw new ConflictException("Tên danh mục đã tồn tại");
                 }
 
-                category.CategoryName = request.Name;
+                category.CategoryName = request.Name ?? category.CategoryName;
 
                 _categoryRepository.Update(category);
 

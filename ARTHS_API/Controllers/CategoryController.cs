@@ -19,27 +19,8 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [Route("{id}")]
-        [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerOperation(Summary = "Get Category by id.")]
-        public async Task<ActionResult> GetCategory([FromRoute] Guid id)
-        {
-            try
-            {
-                var result = await _categoryService.GetCategory(id);
-                return result != null ? Ok(result) : NotFound();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
-        [HttpGet]
         [ProducesResponseType(typeof(List<CategoryViewModel>), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerOperation(Summary = "Get all Category or search by name.")]
+        [SwaggerOperation(Summary = "Get all category.")]
         public async Task<ActionResult> GetCategories([FromQuery] CategoryFilterModel filter)
         {
             try
@@ -53,11 +34,27 @@ namespace ARTHS_API.Controllers
             }
         }
 
-        [HttpPost]
-        [Route("create")]
+        [HttpGet]
+        [Route("{id}")]
         [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerOperation(Summary = "Create new Category.")]
+        [SwaggerOperation(Summary = "Get category by id.")]
+        public async Task<ActionResult> GetCategory([FromRoute] Guid id)
+        {
+            try
+            {
+                var result = await _categoryService.GetCategory(id);
+                return result != null ? Ok(result) : NotFound();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        
+        [HttpPost]
+        [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Create category.")]
         public async Task<ActionResult<CategoryViewModel>> CreateCategory([FromBody] CreateCategoryRequest request)
         {
             try
@@ -73,9 +70,8 @@ namespace ARTHS_API.Controllers
 
         [HttpPut]
         [Route("{id}")]
-        [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [SwaggerOperation(Summary = "Update Category.")]
+        [ProducesResponseType(typeof(CategoryViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Update category.")]
         public async Task<IActionResult> UpdateCategory([FromRoute] Guid id,
                                                         [FromBody] UpdateCategoryRequest request)
         {
@@ -92,7 +88,7 @@ namespace ARTHS_API.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        [SwaggerOperation(Summary = "Delete Category.")]
+        [SwaggerOperation(Summary = "Delete category.")]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {
             try
@@ -105,8 +101,5 @@ namespace ARTHS_API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
-
-
     }
 }

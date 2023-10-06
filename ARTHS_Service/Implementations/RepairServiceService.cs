@@ -40,11 +40,7 @@ namespace ARTHS_Service.Implementations
                 query = query.Where(repair => repair.Name.Contains(filter.Name));
             }
 
-            // Phân trang
-            if (filter.PageSize <= 0) filter.PageSize = 10;  // kích thước trang luôn dương
-            int skip = (filter.PageNumber - 1) * filter.PageSize; // Tính số items cần bỏ qua
-            query = _repairRepository.SkipAndTake(skip, filter.PageSize);
-
+            
             return await query
                 .ProjectTo<RepairServiceViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
