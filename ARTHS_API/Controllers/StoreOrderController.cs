@@ -11,7 +11,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace ARTHS_API.Controllers
 {
-    [Route("api/store-order")]
+    [Route("api/store-orders")]
     [ApiController]
     public class StoreOrderController : ControllerBase
     {

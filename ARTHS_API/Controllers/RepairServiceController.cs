@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ARTHS_API.Controllers
 {
-    [Route("api/repair-service")]
+    [Route("api/repair-services")]
     [ApiController]
     public class RepairServiceController : ControllerBase
     {
