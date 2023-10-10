@@ -22,6 +22,8 @@ namespace ARTHS_Data
         public IMotobikeProductPriceRepository MotobikeProductPrice { get; }
         public IInStoreOrderRepository InStoreOrder { get; }
         public IInStoreOrderDetailRepository InStoreOrderDetail { get; }
+        public IOnlineOrderRepository OnlineOrder { get; }
+        public IOnlineOrderDetailRepository OnlineOrderDetail { get; }
         //-----------------
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

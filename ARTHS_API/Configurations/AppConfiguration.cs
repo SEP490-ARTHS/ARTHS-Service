@@ -24,6 +24,7 @@ namespace ARTHS_API.Configurations
             services.AddScoped<IMotobikeProductService, MotobikeProductService>();
             services.AddScoped<IInStoreOrderService, InStoreOrderService>();
             services.AddScoped<ICartService, CartService>();
+            services.AddScoped<IOnlineOrderService, OnlineOrderService>();
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
         }

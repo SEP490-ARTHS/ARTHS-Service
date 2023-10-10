@@ -8,6 +8,6 @@ namespace ARTHS_Service.Interfaces
     {
         Task<CartViewModel> GetCartByCustomerId(Guid customerId);
         Task<CartViewModel> AddToCart(Guid customerId, CreateCartModel model);
-        Task<CartViewModel> UpdateCart(Guid customerId, UpdateCartModel model);
+        Task<CartViewModel> UpdateCart(Guid cartId, UpdateCartModel model);
     }
 }

@@ -25,6 +25,8 @@ namespace ARTHS_Service.Implementations
             _productRepository = unitOfWork.MotobikeProduct;
         }
 
+        
+
         public async Task<CartViewModel> GetCartByCustomerId(Guid customerId)
         {
             return await _cartRepository.GetMany(cart => cart.CustomerId.Equals(customerId))
@@ -66,9 +68,9 @@ namespace ARTHS_Service.Implementations
         }
 
 
-        public async Task<CartViewModel> UpdateCart(Guid customerId, UpdateCartModel model)
+        public async Task<CartViewModel> UpdateCart(Guid cartId, UpdateCartModel model)
         {
-            var cart = await _cartRepository.GetMany(cart => cart.CustomerId.Equals(customerId))
+            var cart = await _cartRepository.GetMany(cart => cart.Id.Equals(cartId))
                 .Include(item => item.CartItems)
                 .FirstOrDefaultAsync();
             if(cart == null)
@@ -99,7 +101,7 @@ namespace ARTHS_Service.Implementations
             }
             _cartRepository.Update(cart);
             var result = await _unitOfWork.SaveChanges();
-            return result > 0 ? await GetCartByCustomerId(customerId) : null!;
+            return result > 0 ? await GetCartByCustomerId(cart.CustomerId) : null!;
         }
 
         
