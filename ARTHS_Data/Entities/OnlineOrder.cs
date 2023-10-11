@@ -24,6 +24,7 @@ namespace ARTHS_Data.Entities
 
         public virtual CustomerAccount Customer { get; set; } = null!;
         public virtual StaffAccount? Staff { get; set; }
+        public virtual Transaction? Transaction { get; set; }
         public virtual ICollection<OnlineOrderDetail> OnlineOrderDetails { get; set; }
     }
 }
