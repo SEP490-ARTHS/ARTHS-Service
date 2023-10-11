@@ -39,6 +39,7 @@ namespace ARTHS_Data.Entities
         public virtual DbSet<RepairService> RepairServices { get; set; } = null!;
         public virtual DbSet<StaffAccount> StaffAccounts { get; set; } = null!;
         public virtual DbSet<TellerAccount> TellerAccounts { get; set; } = null!;
+        public virtual DbSet<Transaction> Transactions { get; set; } = null!;
         public virtual DbSet<Vehicle> Vehicles { get; set; } = null!;
         public virtual DbSet<Warranty> Warranties { get; set; } = null!;
 
@@ -46,8 +47,8 @@ namespace ARTHS_Data.Entities
         {
             if (!optionsBuilder.IsConfigured)
             {
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                //optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
             }
         }
 
@@ -607,6 +608,45 @@ namespace ARTHS_Data.Entities
                     .HasForeignKey<TellerAccount>(d => d.AccountId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__TellerAcc__Accou__3E1D39E1");
+            });
+
+            modelBuilder.Entity<Transaction>(entity =>
+            {
+                entity.ToTable("Transaction");
+
+                entity.HasIndex(e => e.OnlineOrderId, "UQ__Transact__12FABD2C83CED009")
+                    .IsUnique();
+
+                entity.HasIndex(e => e.InStoreOrderId, "UQ__Transact__AFEA978F159D70E1")
+                    .IsUnique();
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.InStoreOrderId)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+
+                entity.Property(e => e.Status).HasMaxLength(100);
+
+                entity.Property(e => e.TransactionDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.Type).HasMaxLength(50);
+
+                entity.Property(e => e.UpdateAt).HasColumnType("datetime");
+
+                entity.HasOne(d => d.InStoreOrder)
+                    .WithOne(p => p.Transaction)
+                    .HasForeignKey<Transaction>(d => d.InStoreOrderId)
+                    .HasConstraintName("FK__Transacti__InSto__28ED12D1");
+
+                entity.HasOne(d => d.OnlineOrder)
+                    .WithOne(p => p.Transaction)
+                    .HasForeignKey<Transaction>(d => d.OnlineOrderId)
+                    .HasConstraintName("FK__Transacti__Onlin__29E1370A");
             });
 
             modelBuilder.Entity<Vehicle>(entity =>

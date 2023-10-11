@@ -394,6 +394,23 @@ CREATE TABLE Bill(
 );
 GO
 
+
+--Table transaction
+DROP TABLE IF EXISTS [Transaction];
+GO
+CREATE TABLE [Transaction](
+	Id uniqueidentifier primary key NOT NULL,
+	InStoreOrderId varchar(255) unique foreign key references InStoreOrder(Id),
+	OnlineOrderId uniqueidentifier unique foreign key references OnlineOrder(Id),
+	TotalAmount int NOT NULL,
+	Type nvarchar(50) NOT NULL,
+	PaymentMethod nvarchar(50) NOT NULL,
+	Status nvarchar(100) NOT NULL,
+	UpdateAt datetime,
+	TransactionDate datetime NOT NULL default getdate()
+);
+GO
+
 --Table booking
 DROP TABLE IF EXISTS RepairBooking;
 GO
