@@ -28,7 +28,7 @@ namespace ARTHS_Data
         private IInStoreOrderDetailRepository _inStoreOrderDetail = null!;
         private IOnlineOrderRepository _onlineOrder = null!;
         private IOnlineOrderDetailRepository _onlineOrderDetail = null!;
-
+        private IWarrantyRepository _warranty = null!;
         public UnitOfWork(ARTHS_DBContext context)
         {
             _context = context;
@@ -126,6 +126,12 @@ namespace ARTHS_Data
         {
             get { return _onlineOrderDetail ??= new OnlineOrderDetailRepository(_context); }
         }
+        public IWarrantyRepository Warranty
+        {
+            get { return _warranty ??= new WarrantyRepository(_context); }
+
+        }
+
         public async Task<int> SaveChanges()
         {
             return await _context.SaveChangesAsync();

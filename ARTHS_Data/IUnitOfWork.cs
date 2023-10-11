@@ -24,6 +24,7 @@ namespace ARTHS_Data
         public IInStoreOrderDetailRepository InStoreOrderDetail { get; }
         public IOnlineOrderRepository OnlineOrder { get; }
         public IOnlineOrderDetailRepository OnlineOrderDetail { get; }
+        public IWarrantyRepository Warranty { get; }
         //-----------------
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

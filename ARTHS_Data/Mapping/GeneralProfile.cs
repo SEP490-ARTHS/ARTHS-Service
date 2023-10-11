@@ -53,7 +53,7 @@ namespace ARTHS_Data.Mapping
                 .ForMember(dest => dest.PriceCurrent, otp => otp.MapFrom(src => src.MotobikeProductPrices.OrderByDescending(price => price.CreateAt).FirstOrDefault()!.PriceCurrent))
                 .ForMember(dest => dest.MotobikeProductPrices, otp => otp.MapFrom(src => src.MotobikeProductPrices.OrderByDescending(price => price.CreateAt)))
                 .ForMember(dest => dest.WarrantyDuration, otp => otp.MapFrom(src => src.Warranty != null ? src.Warranty.Duration : 0));
-            
+
             CreateMap<Image, ImageViewModel>();
 
             CreateMap<MotobikeProductPrice, MotobikeProductPriceViewModel>();
@@ -81,8 +81,8 @@ namespace ARTHS_Data.Mapping
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();
             CreateMap<Discount, DiscountViewModel>();
+            CreateMap<Warranty, WarrantyViewModel>();
 
-            
 
         }
     }
