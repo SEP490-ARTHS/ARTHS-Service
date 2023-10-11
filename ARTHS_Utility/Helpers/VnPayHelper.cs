@@ -11,22 +11,22 @@ namespace ARTHS_Utility.Helpers
         public static string CreateRequestUrl(VnPayRequestModel model, string baseUrl, string vnp_HashSecret)
         {
             var requestParams = new SortedList<string, string?>(new VnPayComparer())
-        {
-            { "vnp_Version", model.Version },
-            { "vnp_Locale", model.Locale },
-            { "vnp_CurrCode", model.CurrencyCode },
-            { "vnp_Command", model.Command },
-            { "vnp_TmnCode", model.TmnCode },
-            { "vnp_Amount", (model.Amount * 100).ToString() },
-            { "vnp_CreateDate", model.CreateDate.ToString("yyyyMMddHHmmss") },
-            { "vnp_ExpireDate", model.ExpireDate.ToString("yyyyMMddHHmmss") },
-            { "vnp_IpAddr", model.IpAddress },
-            { "vnp_OrderInfo", model.OrderInfo },
-            { "vnp_ReturnUrl", model.ReturnUrl },
-            { "vnp_TxnRef", model.TxnRef.ToString() },
-            { "vnp_OrderType", model.OrderType },
-            { "vnp_BankCode", model.BankCode }
-        };
+            {
+                { "vnp_Version", model.Version },
+                { "vnp_Locale", model.Locale },
+                { "vnp_CurrCode", model.CurrencyCode },
+                { "vnp_Command", model.Command },
+                { "vnp_TmnCode", model.TmnCode },
+                { "vnp_Amount", (model.Amount * 100).ToString() },
+                { "vnp_CreateDate", model.CreateDate.ToString("yyyyMMddHHmmss") },
+                { "vnp_ExpireDate", model.ExpireDate.ToString("yyyyMMddHHmmss") },
+                { "vnp_IpAddr", model.IpAddress },
+                { "vnp_OrderInfo", model.OrderInfo },
+                { "vnp_ReturnUrl", model.ReturnUrl },
+                { "vnp_TxnRef", model.TxnRef.ToString() },
+                { "vnp_OrderType", model.OrderType },
+                { "vnp_BankCode", model.BankCode }
+            };
 
             var data = new StringBuilder();
             foreach (var pair in requestParams.Where(kv => kv.Value != null))
@@ -79,6 +79,7 @@ namespace ARTHS_Utility.Helpers
             };
             return model;
         }
+
         public static bool ValidateSignature(string secretKey, IDictionary<string, string> queryParams)
         {
             var inputHash = _tryGetRequiredParam("vnp_SecureHash", queryParams);
@@ -116,6 +117,7 @@ namespace ARTHS_Utility.Helpers
             queryParams.TryGetValue(key, out var value);
             return value;
         }
+
     }
 
     public class VnPayComparer : IComparer<string>

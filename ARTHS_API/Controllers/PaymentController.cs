@@ -28,7 +28,7 @@ namespace ARTHS_API.Controllers
         [HttpPost]
         [Route("online-orders")]
         [Authorize(UserRole.Customer, UserRole.Teller)]
-        public async Task<ActionResult<string>> CreateOnlineOrderPayment(PaymentModel model)
+        public async Task<ActionResult<string>> CreateOnlineOrderPayment([FromBody]PaymentModel model)
         {
             var now = DateTime.UtcNow.AddHours(7);
             var clientIp = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "";
@@ -42,10 +42,11 @@ namespace ARTHS_API.Controllers
                 Amount = model.Amount,
                 CreateDate = now,
                 ExpireDate = now.AddMinutes(15),
-                OrderInfo = $"Thanh toan hoa don: {model.Amount} VND",
+                OrderInfo = $"Thanh toán hóa đơn cửa hảng Thanh Huy. Tổng tiền: {model.Amount} VNĐ",
                 IpAddress = clientIp,
                 ReturnUrl = _appSetting.ReturnUrl,
-                TmnCode = _appSetting.MerchantId
+                TmnCode = _appSetting.MerchantId,
+                OrderType = "Other"
             };
 
             var result = await _vnPayService.ProcessOnlineOrderPayment(model.OnlineOrderId, requestModel);
