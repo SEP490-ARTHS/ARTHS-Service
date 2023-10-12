@@ -20,6 +20,7 @@ namespace ARTHS_Service.Implementations
         private readonly IInStoreOrderDetailRepository _inStoreOrderDetailRepository;
         private readonly IMotobikeProductRepository _motobikeProductRepository;
         private readonly IRepairServiceRepository _repairServiceRepository;
+        private readonly ITransactionRepository _transactionRepository;
 
         public InStoreOrderService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
@@ -27,6 +28,7 @@ namespace ARTHS_Service.Implementations
             _inStoreOrderDetailRepository = unitOfWork.InStoreOrderDetail;
             _motobikeProductRepository = unitOfWork.MotobikeProduct;
             _repairServiceRepository = unitOfWork.RepairService;
+            _transactionRepository = unitOfWork.Transactions;
         }
         public async Task<List<BasicInStoreOrderViewModel>> GetInStoreOrders(InStoreOrderFilterModel filter)
         {
@@ -107,12 +109,21 @@ namespace ARTHS_Service.Implementations
                 throw new BadRequestException("Đơn đã hoàn thành không thể chỉnh sữa");
             }
 
-            
+
             inStoreOrder.StaffId = model.StaffId ?? inStoreOrder.StaffId;
             inStoreOrder.CustomerName = model.CustomerName ?? inStoreOrder.CustomerName;
             inStoreOrder.CustomerPhone = model.CustomerPhone ?? inStoreOrder.CustomerPhone;
             inStoreOrder.LicensePlate = model.LicensePlate ?? inStoreOrder.LicensePlate;
-            inStoreOrder.Status = model.Status ?? inStoreOrder.Status;
+
+            //khi nào status là paid thì mới tạo transaction
+            if (model.Status != null)
+            {
+                if (model.Status.Equals(InStoreOrderStatus.Paid) && !inStoreOrder.Status.Equals(InStoreOrderStatus.Paid))
+                {
+                    inStoreOrder.Status = model.Status;
+                    await CreateTransaction(inStoreOrder);
+                }
+            }
 
             if (model.OrderDetailModel != null && model.OrderDetailModel.Count > 0)
             {
@@ -126,6 +137,24 @@ namespace ARTHS_Service.Implementations
 
 
         //PRIVATE METHOD
+        private async Task CreateTransaction(InStoreOrder inStoreOrder)
+        {
+            var transaction = new Transaction
+            {
+                Id = Guid.NewGuid(),
+                InStoreOrderId = inStoreOrder.Id,
+                TotalAmount = inStoreOrder.TotalAmount,
+                Type = "Thanh toán đơn hàng tại cửa hàng Thanh Huy",
+                PaymentMethod = "Tiền mặt",
+                Status = "Thành công"
+            };
+
+            _transactionRepository.Add(transaction);
+            await _unitOfWork.SaveChanges();
+        }
+
+
+
         /// <summary>
         /// Processes in-store order details and returns the total amount.
         /// </summary>
@@ -186,7 +215,7 @@ namespace ARTHS_Service.Implementations
             var product = await _motobikeProductRepository.GetMany(p => p.Id.Equals(productId))
                                                           .Include(p => p.Warranty)
                                                           .FirstOrDefaultAsync();
-            if(product == null)
+            if (product == null)
             {
                 throw new NotFoundException("Không tìm thấy product.");
             }
@@ -215,7 +244,7 @@ namespace ARTHS_Service.Implementations
             }
 
             var service = await _repairServiceRepository.GetMany(service => service.Id.Equals(repairServiceId)).FirstOrDefaultAsync();
-            if(service == null)
+            if (service == null)
             {
                 throw new NotFoundException("Không tìm thấy repair service");
             }
@@ -228,7 +257,7 @@ namespace ARTHS_Service.Implementations
         /// <returns>Purchase order or Repair order.</returns>
         private string StoreOrderType(List<CreateInStoreOrderDetailModel> details)
         {
-            if(details.All(detail => !detail.RepairServiceId.HasValue))
+            if (details.All(detail => !detail.RepairServiceId.HasValue))
             {
                 return InStoreOrderType.Purchase;
             }

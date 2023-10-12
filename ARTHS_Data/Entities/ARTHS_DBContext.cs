@@ -614,12 +614,6 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Transaction");
 
-                entity.HasIndex(e => e.OnlineOrderId, "UQ__Transact__12FABD2C83CED009")
-                    .IsUnique();
-
-                entity.HasIndex(e => e.InStoreOrderId, "UQ__Transact__AFEA978F159D70E1")
-                    .IsUnique();
-
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.InStoreOrderId)
@@ -639,14 +633,14 @@ namespace ARTHS_Data.Entities
                 entity.Property(e => e.UpdateAt).HasColumnType("datetime");
 
                 entity.HasOne(d => d.InStoreOrder)
-                    .WithOne(p => p.Transaction)
-                    .HasForeignKey<Transaction>(d => d.InStoreOrderId)
-                    .HasConstraintName("FK__Transacti__InSto__28ED12D1");
+                    .WithMany(p => p.Transactions)
+                    .HasForeignKey(d => d.InStoreOrderId)
+                    .HasConstraintName("FK__Transacti__InSto__36470DEF");
 
                 entity.HasOne(d => d.OnlineOrder)
-                    .WithOne(p => p.Transaction)
-                    .HasForeignKey<Transaction>(d => d.OnlineOrderId)
-                    .HasConstraintName("FK__Transacti__Onlin__29E1370A");
+                    .WithMany(p => p.Transactions)
+                    .HasForeignKey(d => d.OnlineOrderId)
+                    .HasConstraintName("FK__Transacti__Onlin__373B3228");
             });
 
             modelBuilder.Entity<Vehicle>(entity =>

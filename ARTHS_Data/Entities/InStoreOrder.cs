@@ -8,6 +8,7 @@ namespace ARTHS_Data.Entities
         public InStoreOrder()
         {
             InStoreOrderDetails = new HashSet<InStoreOrderDetail>();
+            Transactions = new HashSet<Transaction>();
         }
 
         public string Id { get; set; } = null!;
@@ -24,7 +25,7 @@ namespace ARTHS_Data.Entities
         public virtual StaffAccount Staff { get; set; } = null!;
         public virtual TellerAccount Teller { get; set; } = null!;
         public virtual Bill? Bill { get; set; }
-        public virtual Transaction? Transaction { get; set; }
         public virtual ICollection<InStoreOrderDetail> InStoreOrderDetails { get; set; }
+        public virtual ICollection<Transaction> Transactions { get; set; }
     }
 }

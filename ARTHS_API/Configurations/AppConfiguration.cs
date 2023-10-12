@@ -26,6 +26,7 @@ namespace ARTHS_API.Configurations
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IOnlineOrderService, OnlineOrderService>();
             services.AddScoped<IVNPayService, VNPayService>();
+            services.AddScoped<ITransactionService, TransactionService>();
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
         }

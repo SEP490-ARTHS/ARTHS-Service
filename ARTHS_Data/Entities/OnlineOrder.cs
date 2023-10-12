@@ -8,6 +8,7 @@ namespace ARTHS_Data.Entities
         public OnlineOrder()
         {
             OnlineOrderDetails = new HashSet<OnlineOrderDetail>();
+            Transactions = new HashSet<Transaction>();
         }
 
         public Guid Id { get; set; }
@@ -24,7 +25,7 @@ namespace ARTHS_Data.Entities
 
         public virtual CustomerAccount Customer { get; set; } = null!;
         public virtual StaffAccount? Staff { get; set; }
-        public virtual Transaction? Transaction { get; set; }
         public virtual ICollection<OnlineOrderDetail> OnlineOrderDetails { get; set; }
+        public virtual ICollection<Transaction> Transactions { get; set; }
     }
 }
