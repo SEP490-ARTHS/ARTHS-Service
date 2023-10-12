@@ -3,6 +3,8 @@ using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Enums;
+using ARTHS_Utility.Exceptions;
 using ARTHS_Utility.Helpers;
 using ARTHS_Utility.Helpers.Models;
 using ARTHS_Utility.Settings;
@@ -26,10 +28,20 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpPost]
-        [Route("online-orders")]
+        [Route("vn-pay")]
         [Authorize(UserRole.Customer, UserRole.Teller)]
         public async Task<ActionResult<string>> CreateOnlineOrderPayment([FromBody]PaymentModel model)
         {
+            if(model.InStoreOrderId == null && model.OnlineOrderId == null)
+            {
+                throw new BadRequestException("Vui lòng nhập order id.");
+            }
+            if(model.InStoreOrderId != null && model.OnlineOrderId != null)
+            {
+                throw new BadRequestException("Vui lòng chỉ nhập 1 order id.");
+            }
+
+
             var now = DateTime.UtcNow.AddHours(7);
             var clientIp = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "";
             var requestModel = new VnPayRequestModel
@@ -42,14 +54,23 @@ namespace ARTHS_API.Controllers
                 Amount = model.Amount,
                 CreateDate = now,
                 ExpireDate = now.AddMinutes(15),
-                OrderInfo = $"Thanh toán hóa đơn cửa hảng Thanh Huy. Tổng tiền: {model.Amount} VNĐ",
+                OrderInfo = $"Thanh toán hóa đơn cửa hàng Thanh Huy. Tổng tiền: {model.Amount} VNĐ",
                 IpAddress = clientIp,
                 ReturnUrl = _appSetting.ReturnUrl,
                 TmnCode = _appSetting.MerchantId,
                 OrderType = "Other"
             };
 
-            var result = await _vnPayService.ProcessOnlineOrderPayment(model.OnlineOrderId, requestModel);
+            bool result;
+            if (model.OnlineOrderId != null)
+            {
+                result = await _vnPayService.ProcessOnlineOrderPayment((Guid)model.OnlineOrderId, requestModel);
+            }
+            else
+            {
+                result = await _vnPayService.ProcessInStoreOrderPayment(model.InStoreOrderId!, requestModel);
+            }
+
             return result ? Ok(VnPayHelper.CreateRequestUrl(requestModel, _appSetting.VNPayUrl, _appSetting.MerchantPassword)) : BadRequest();
         }
 
@@ -63,7 +84,7 @@ namespace ARTHS_API.Controllers
             }
 
             var model = VnPayHelper.ParseToResponseModel(queryParams);
-            var result = await _vnPayService.ConfirmOnlineOrderPayment(model);
+            var result = await _vnPayService.ConfirmOrderPayment(model);
             return result ? Ok() : BadRequest();
         }
 

@@ -43,7 +43,7 @@ namespace ARTHS_API.Controllers
         [HttpPost]
         [Authorize(UserRole.Teller)]
         [ProducesResponseType(typeof(InStoreOrderViewModel), StatusCodes.Status200OK)]
-        [SwaggerOperation(Summary = "Get order in store by id.")]
+        [SwaggerOperation(Summary = "Create order in store.")]
         public async Task<ActionResult<InStoreOrderViewModel>> CreateOrder([FromBody] CreateInStoreOrderModel model)
         {
             var auth = (AuthModel?)HttpContext.Items["User"];

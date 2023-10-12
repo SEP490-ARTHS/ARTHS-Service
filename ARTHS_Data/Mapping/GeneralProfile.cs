@@ -76,6 +76,8 @@ namespace ARTHS_Data.Mapping
             CreateMap<OnlineOrder, OnlineOrderViewModel>()
                 .ForMember(dest => dest.CustomerName, otp => otp.MapFrom(src => src.Customer.FullName));
             CreateMap<OnlineOrderDetail, OnlineOrderDetailViewModel>();
+            CreateMap<OnlineOrder, BasicOnlineOrderViewModel>();
+            CreateMap<Transaction, TransactionViewModel>();
 
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();
