@@ -49,6 +49,7 @@ namespace ARTHS_Service.Implementations
 
             return await query
                 .ProjectTo<BasicInStoreOrderViewModel>(_mapper.ConfigurationProvider)
+                .OrderByDescending(order => order.OrderDate)
                 .ToListAsync();
 
         }
@@ -175,7 +176,7 @@ namespace ARTHS_Service.Implementations
 
             foreach (var detail in listDetails)
             {
-                (int totalProductPrice, DateTime warrantyPeriod) = await GetProductPriceAndWarranty(detail.MotobikeProductId, detail.ProductQuantity);
+                (int productPrice, int totalProductPrice, DateTime warrantyPeriod) = await GetProductPriceAndWarranty(detail.MotobikeProductId, detail.ProductQuantity);
                 int repairServicePrice = await GetRepairServicePrice(detail.RepairServiceId);
 
                 totalAmount += totalProductPrice + repairServicePrice;
@@ -187,7 +188,7 @@ namespace ARTHS_Service.Implementations
                     RepairServiceId = detail.RepairServiceId,
                     MotobikeProductId = detail.MotobikeProductId,
                     ProductQuantity = detail.MotobikeProductId != null ? detail.ProductQuantity : (int?)null,
-                    ProductPrice = totalProductPrice,
+                    ProductPrice = productPrice,
                     ServicePrice = repairServicePrice,
                     WarrantyPeriod = warrantyPeriod
                 };
@@ -205,11 +206,11 @@ namespace ARTHS_Service.Implementations
         /// <param name="productId">ID of the product.</param>
         /// <param name="quantity">Quantity of the product.</param>
         /// <returns>Total product price and warranty expiration date.</returns>
-        private async Task<(int totalProductPrice, DateTime warrantyPeriod)> GetProductPriceAndWarranty(Guid? productId, int? quantity)
+        private async Task<(int productPrice, int totalProductPrice, DateTime warrantyPeriod)> GetProductPriceAndWarranty(Guid? productId, int? quantity)
         {
             if (!productId.HasValue)
             {
-                return (0, DateTime.UtcNow);
+                return (0, 0, DateTime.UtcNow);
             }
 
             var product = await _motobikeProductRepository.GetMany(p => p.Id.Equals(productId))
@@ -228,7 +229,7 @@ namespace ARTHS_Service.Implementations
                 ? DateTime.UtcNow.AddMonths(product.Warranty.Duration)
                 : DateTime.UtcNow;
 
-            return (totalProductPrice, warrantyPeriod);
+            return (price, totalProductPrice, warrantyPeriod);
         }
 
         /// <summary>
