@@ -22,6 +22,8 @@ namespace ARTHS_Data.Mapping
             CreateMap<StaffAccount, StaffViewModel>()
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Account.PhoneNumber));
 
+            CreateMap<CustomerAccount, CustomerFeedbackProductViewModel>();
+
             CreateMap<Cart, CartViewModel>();
 
             CreateMap<CartItem, CartItemViewModel>();
