@@ -3,6 +3,8 @@
     public class TransactionViewModel
     {
         public Guid Id { get; set; }
+        public string? InStoreOrderId { get; set; }
+        public Guid? OnlineOrderId { get; set; }
         public int TotalAmount { get; set; }
         public string Type { get; set; } = null!;
         public string PaymentMethod { get; set; } = null!;
