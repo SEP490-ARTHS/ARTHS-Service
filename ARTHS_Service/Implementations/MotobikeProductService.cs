@@ -33,7 +33,7 @@ namespace ARTHS_Service.Implementations
             _cloudStorageService = cloudStorageService;
         }
 
-        public async Task<List<MotobikeProductViewModel>> GetMotobikeProducts(MotobikeProductFilterModel filter)
+        public async Task<List<MotobikeProductDetailViewModel>> GetMotobikeProducts(MotobikeProductFilterModel filter)
         {
             var query = _motobikeProductRepository.GetAll();
 
@@ -62,7 +62,7 @@ namespace ARTHS_Service.Implementations
             }
 
             return await query
-                .ProjectTo<MotobikeProductViewModel>(_mapper.ConfigurationProvider)
+                .ProjectTo<MotobikeProductDetailViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }
 

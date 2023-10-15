@@ -78,7 +78,7 @@ namespace ARTHS_Data.Mapping
             CreateMap<OnlineOrderDetail, OnlineOrderDetailViewModel>();
             CreateMap<OnlineOrder, BasicOnlineOrderViewModel>();
             CreateMap<Transaction, TransactionViewModel>();
-
+            CreateMap<FeedbackProduct, FeedbackProductViewModel>();
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();

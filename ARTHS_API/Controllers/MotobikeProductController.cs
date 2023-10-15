@@ -24,9 +24,9 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<MotobikeProductViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<MotobikeProductDetailViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all motobike products.")]
-        public async Task<ActionResult<List<MotobikeProductViewModel>>> GetMotobikeProducts([FromQuery] MotobikeProductFilterModel filter)
+        public async Task<ActionResult<List<MotobikeProductDetailViewModel>>> GetMotobikeProducts([FromQuery] MotobikeProductFilterModel filter)
         {
             return await _motobikeProductService.GetMotobikeProducts(filter);
         }
