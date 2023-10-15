@@ -35,7 +35,7 @@ namespace ARTHS_Service.Implementations
             {
                 OnlineOrderId = onlineOrderId,
                 TotalAmount = model.Amount,
-                Type = "Thanh toán đơn hàng trực tuyến của cửa hàng Thanh Huy",
+                Type = "Thanh toán hóa đơn mua hàng online của cửa hàng Thanh Huy",
                 PaymentMethod = "VNPay",
                 Status = "Đang xử lý",
                 Id = model.TxnRef
@@ -55,7 +55,7 @@ namespace ARTHS_Service.Implementations
             {
                 InStoreOrderId = inStoreOrderId,
                 TotalAmount = model.Amount,
-                Type = "Thanh toán đơn hàng tại cửa hàng Thanh Huy",
+                Type = "Thanh toán hóa đơn tại cửa hàng Thanh Huy",
                 PaymentMethod = "VNPay",
                 Status = "Đang xử lý",
                 Id = model.TxnRef
