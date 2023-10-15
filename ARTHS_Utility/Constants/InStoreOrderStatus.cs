@@ -6,7 +6,7 @@
         public const string Repairing = "Đang sửa chữa";
         public const string WaitForPay = "Chờ thanh toán";
         public const string Finished = "Hoàn thành";
-        public const string Paid = "Paid";                 // Đã thanh toán
+        public const string Paid = "Đã thanh toán";                 // Đã thanh toán
 
     }
 }

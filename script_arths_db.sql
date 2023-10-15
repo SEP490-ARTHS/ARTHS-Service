@@ -403,7 +403,7 @@ CREATE TABLE [Transaction](
 	InStoreOrderId varchar(255) foreign key references InStoreOrder(Id),
 	OnlineOrderId uniqueidentifier foreign key references OnlineOrder(Id),
 	TotalAmount int NOT NULL,
-	Type nvarchar(50) NOT NULL,
+	Type nvarchar(255) NOT NULL,
 	PaymentMethod nvarchar(50) NOT NULL,
 	Status nvarchar(100) NOT NULL,
 	UpdateAt datetime,

@@ -29,6 +29,7 @@ namespace ARTHS_Data
         private IOnlineOrderRepository _onlineOrder = null!;
         private IOnlineOrderDetailRepository _onlineOrderDetail = null!;
         private ITransactionRepository _transactions = null!;
+        private IFeedbackProductRepository _feedbackProduct = null!;
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -131,6 +132,11 @@ namespace ARTHS_Data
         public ITransactionRepository Transactions
         {
             get { return _transactions ??= new TransactionRepository(_context); }
+        }
+
+        public IFeedbackProductRepository FeedbackProduct
+        {
+            get { return _feedbackProduct ??= new FeedbackProductRepository(_context); }
         }
         public async Task<int> SaveChanges()
         {

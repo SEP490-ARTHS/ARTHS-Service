@@ -101,7 +101,7 @@ namespace ARTHS_Service.Implementations
                 }
                 _inStoreOrderRepository.Update(inStoreOrder);
             }
-
+            transaction.UpdateAt = DateTime.UtcNow;
             _transactionRepository.Update(transaction);
 
             return await _unitOfWork.SaveChanges() > 0;
