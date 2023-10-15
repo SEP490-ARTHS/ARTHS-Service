@@ -150,7 +150,7 @@ namespace ARTHS_Service.Implementations
                 Id = Guid.NewGuid(),
                 OnlineOrderId = onlineOrder.Id,
                 TotalAmount = onlineOrder.TotalAmount,
-                Type = "Thanh toán đơn hàng trực truyến cửa hàng Thanh Huy",
+                Type = "Thanh toán hóa đơn mua hàng online của cửa hàng Thanh Huy",
                 PaymentMethod = "Tiền mặt",
                 Status = "Thành công"
             };
