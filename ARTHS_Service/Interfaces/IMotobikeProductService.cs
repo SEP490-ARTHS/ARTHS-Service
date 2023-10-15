@@ -6,7 +6,7 @@ namespace ARTHS_Service.Interfaces
 {
     public interface IMotobikeProductService
     {
-        Task<List<MotobikeProductViewModel>> GetMotobikeProducts(MotobikeProductFilterModel filter);
+        Task<List<MotobikeProductDetailViewModel>> GetMotobikeProducts(MotobikeProductFilterModel filter);
         Task<MotobikeProductDetailViewModel> GetMotobikeProduct(Guid id);
         Task<MotobikeProductDetailViewModel> CreateMotobikeProduct(CreateMotobikeProductModel model);
         Task<MotobikeProductDetailViewModel> UpdateMotobikeProduct(Guid id, UpdateMotobikeProductModel model);
