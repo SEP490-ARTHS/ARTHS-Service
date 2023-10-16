@@ -23,7 +23,7 @@ namespace ARTHS_API.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(WarrantyViewModel), StatusCodes.Status200OK)]
-        [SwaggerOperation(Summary = "Get all Warranties.")]
+        [SwaggerOperation(Summary = "Get all warranties.")]
         public async Task<ActionResult<List<WarrantyViewModel>>> GetWarranties([FromQuery] WarrantyFilterModel filter)
         {
             return await _WarrantyService.GetWarranties(filter);
@@ -32,7 +32,7 @@ namespace ARTHS_API.Controllers
         [HttpGet]
         [Route("{id}")]
         [ProducesResponseType(typeof(WarrantyViewModel), StatusCodes.Status200OK)]
-        [SwaggerOperation(Summary = "Get Warranty by id.")]
+        [SwaggerOperation(Summary = "Get warranty by id.")]
         public async Task<ActionResult<WarrantyViewModel>> GetWarranty([FromRoute] Guid id)
         {
             return await _WarrantyService.GetWarranty(id);
@@ -41,7 +41,7 @@ namespace ARTHS_API.Controllers
         [HttpPost]
         [Authorize(UserRole.Owner)]
         [ProducesResponseType(typeof(WarrantyViewModel), StatusCodes.Status201Created)]
-        [SwaggerOperation(Summary = "Create Warranty.")]
+        [SwaggerOperation(Summary = "Create new warranty.")]
         public async Task<ActionResult<WarrantyViewModel>> CreateWarranty([FromForm][Required] CreateWarrantyRequest model)
         {
             var Warranty = await _WarrantyService.CreateWarranty(model);
@@ -53,7 +53,7 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Owner)]
         [Route("{id}")]
         [ProducesResponseType(typeof(WarrantyViewModel), StatusCodes.Status201Created)]
-        [SwaggerOperation(Summary = "Update Warranty.")]
+        [SwaggerOperation(Summary = "Update warranty.")]
         public async Task<ActionResult<CustomerViewModel>> UpdateCustomer([FromRoute] Guid id, [FromForm] UpdateWarrantyRequest model)
         {
             var Warranty = await _WarrantyService.UpdateWarranty(id, model);
