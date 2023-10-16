@@ -354,7 +354,7 @@ GO
 CREATE TABLE InStoreOrder(
 	Id varchar(255) primary key NOT NULL,
 	TellerId uniqueidentifier foreign key references TellerAccount(AccountId) NOT NULL,
-	StaffId uniqueidentifier foreign key references StaffAccount(AccountId) NOT NULL,
+	StaffId uniqueidentifier foreign key references StaffAccount(AccountId),
 	CustomerName nvarchar(100),
 	CustomerPhone varchar(30) NOT NULL,
 	LicensePlate varchar(50), -- Thêm cột biển số xe
@@ -391,6 +391,23 @@ CREATE TABLE Bill(
 	InStoreOrderId varchar(255) unique foreign key references InStoreOrder(Id) NOT NULL,
 	PaymentMethod nvarchar(50) NOT NULL,
 	BillDate datetime NOT NULL default getdate()
+);
+GO
+
+
+--Table transaction
+DROP TABLE IF EXISTS [Transaction];
+GO
+CREATE TABLE [Transaction](
+	Id uniqueidentifier primary key NOT NULL,
+	InStoreOrderId varchar(255) foreign key references InStoreOrder(Id),
+	OnlineOrderId uniqueidentifier foreign key references OnlineOrder(Id),
+	TotalAmount int NOT NULL,
+	Type nvarchar(255) NOT NULL,
+	PaymentMethod nvarchar(50) NOT NULL,
+	Status nvarchar(100) NOT NULL,
+	UpdateAt datetime,
+	TransactionDate datetime NOT NULL default getdate()
 );
 GO
 

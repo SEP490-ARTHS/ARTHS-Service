@@ -21,4 +21,8 @@
     <Folder Include="Models\Requests\Get\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ARTHS_Utility\ARTHS_Utility.csproj" />
+  </ItemGroup>
+
 </Project>

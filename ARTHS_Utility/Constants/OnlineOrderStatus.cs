@@ -7,5 +7,7 @@
         public const string Transport = "Transport";       // Đang giao
         public const string Finished = "Finished";         // Đã giao
         public const string Canceled = "Canceled";         // Đã hủy
+        public const string Paid = "Paid";                 // Đã thanh toán
+
     }
 }

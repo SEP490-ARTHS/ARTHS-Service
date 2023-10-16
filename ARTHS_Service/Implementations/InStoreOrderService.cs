@@ -20,6 +20,7 @@ namespace ARTHS_Service.Implementations
         private readonly IInStoreOrderDetailRepository _inStoreOrderDetailRepository;
         private readonly IMotobikeProductRepository _motobikeProductRepository;
         private readonly IRepairServiceRepository _repairServiceRepository;
+        private readonly ITransactionRepository _transactionRepository;
 
         public InStoreOrderService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
@@ -27,6 +28,7 @@ namespace ARTHS_Service.Implementations
             _inStoreOrderDetailRepository = unitOfWork.InStoreOrderDetail;
             _motobikeProductRepository = unitOfWork.MotobikeProduct;
             _repairServiceRepository = unitOfWork.RepairService;
+            _transactionRepository = unitOfWork.Transactions;
         }
         public async Task<List<BasicInStoreOrderViewModel>> GetInStoreOrders(InStoreOrderFilterModel filter)
         {
@@ -47,6 +49,7 @@ namespace ARTHS_Service.Implementations
 
             return await query
                 .ProjectTo<BasicInStoreOrderViewModel>(_mapper.ConfigurationProvider)
+                .OrderByDescending(order => order.OrderDate)
                 .ToListAsync();
 
         }
@@ -107,12 +110,21 @@ namespace ARTHS_Service.Implementations
                 throw new BadRequestException("Đơn đã hoàn thành không thể chỉnh sữa");
             }
 
-            
+
             inStoreOrder.StaffId = model.StaffId ?? inStoreOrder.StaffId;
             inStoreOrder.CustomerName = model.CustomerName ?? inStoreOrder.CustomerName;
             inStoreOrder.CustomerPhone = model.CustomerPhone ?? inStoreOrder.CustomerPhone;
             inStoreOrder.LicensePlate = model.LicensePlate ?? inStoreOrder.LicensePlate;
-            inStoreOrder.Status = model.Status ?? inStoreOrder.Status;
+
+            //khi nào status là paid thì mới tạo transaction
+            if (model.Status != null)
+            {
+                if (model.Status.Equals(InStoreOrderStatus.Paid) && !inStoreOrder.Status.Equals(InStoreOrderStatus.Paid))
+                {
+                    inStoreOrder.Status = model.Status;
+                    await CreateTransaction(inStoreOrder);
+                }
+            }
 
             if (model.OrderDetailModel != null && model.OrderDetailModel.Count > 0)
             {
@@ -126,6 +138,24 @@ namespace ARTHS_Service.Implementations
 
 
         //PRIVATE METHOD
+        private async Task CreateTransaction(InStoreOrder inStoreOrder)
+        {
+            var transaction = new Transaction
+            {
+                Id = Guid.NewGuid(),
+                InStoreOrderId = inStoreOrder.Id,
+                TotalAmount = inStoreOrder.TotalAmount,
+                Type = "Thanh toán đơn hàng tại cửa hàng Thanh Huy",
+                PaymentMethod = "Tiền mặt",
+                Status = "Thành công"
+            };
+
+            _transactionRepository.Add(transaction);
+            await _unitOfWork.SaveChanges();
+        } 
+
+
+
         /// <summary>
         /// Processes in-store order details and returns the total amount.
         /// </summary>
@@ -146,7 +176,7 @@ namespace ARTHS_Service.Implementations
 
             foreach (var detail in listDetails)
             {
-                (int totalProductPrice, DateTime warrantyPeriod) = await GetProductPriceAndWarranty(detail.MotobikeProductId, detail.ProductQuantity);
+                (int productPrice, int totalProductPrice, DateTime warrantyPeriod) = await GetProductPriceAndWarranty(detail.MotobikeProductId, detail.ProductQuantity);
                 int repairServicePrice = await GetRepairServicePrice(detail.RepairServiceId);
 
                 totalAmount += totalProductPrice + repairServicePrice;
@@ -158,7 +188,7 @@ namespace ARTHS_Service.Implementations
                     RepairServiceId = detail.RepairServiceId,
                     MotobikeProductId = detail.MotobikeProductId,
                     ProductQuantity = detail.MotobikeProductId != null ? detail.ProductQuantity : (int?)null,
-                    ProductPrice = totalProductPrice,
+                    ProductPrice = productPrice,
                     ServicePrice = repairServicePrice,
                     WarrantyPeriod = warrantyPeriod
                 };
@@ -176,17 +206,17 @@ namespace ARTHS_Service.Implementations
         /// <param name="productId">ID of the product.</param>
         /// <param name="quantity">Quantity of the product.</param>
         /// <returns>Total product price and warranty expiration date.</returns>
-        private async Task<(int totalProductPrice, DateTime warrantyPeriod)> GetProductPriceAndWarranty(Guid? productId, int? quantity)
+        private async Task<(int productPrice, int totalProductPrice, DateTime warrantyPeriod)> GetProductPriceAndWarranty(Guid? productId, int? quantity)
         {
             if (!productId.HasValue)
             {
-                return (0, DateTime.UtcNow);
+                return (0, 0, DateTime.UtcNow);
             }
 
             var product = await _motobikeProductRepository.GetMany(p => p.Id.Equals(productId))
                                                           .Include(p => p.Warranty)
                                                           .FirstOrDefaultAsync();
-            if(product == null)
+            if (product == null)
             {
                 throw new NotFoundException("Không tìm thấy product.");
             }
@@ -199,7 +229,7 @@ namespace ARTHS_Service.Implementations
                 ? DateTime.UtcNow.AddMonths(product.Warranty.Duration)
                 : DateTime.UtcNow;
 
-            return (totalProductPrice, warrantyPeriod);
+            return (price, totalProductPrice, warrantyPeriod);
         }
 
         /// <summary>
@@ -215,7 +245,7 @@ namespace ARTHS_Service.Implementations
             }
 
             var service = await _repairServiceRepository.GetMany(service => service.Id.Equals(repairServiceId)).FirstOrDefaultAsync();
-            if(service == null)
+            if (service == null)
             {
                 throw new NotFoundException("Không tìm thấy repair service");
             }
@@ -228,7 +258,7 @@ namespace ARTHS_Service.Implementations
         /// <returns>Purchase order or Repair order.</returns>
         private string StoreOrderType(List<CreateInStoreOrderDetailModel> details)
         {
-            if(details.All(detail => !detail.RepairServiceId.HasValue))
+            if (details.All(detail => !detail.RepairServiceId.HasValue))
             {
                 return InStoreOrderType.Purchase;
             }

@@ -3,6 +3,7 @@ using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
+using ARTHS_Data.Repositories.Implementations;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
@@ -20,6 +21,7 @@ namespace ARTHS_Service.Implementations
         private readonly IMotobikeProductRepository _motobikeProductRepository;
         private readonly ICartRepository _cartRepository;
         private readonly ICartItemRepository _cartItemRepository;
+        private readonly ITransactionRepository _transactionRepository;
 
         public OnlineOrderService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
@@ -28,6 +30,7 @@ namespace ARTHS_Service.Implementations
             _motobikeProductRepository = unitOfWork.MotobikeProduct;
             _cartRepository = unitOfWork.Cart;
             _cartItemRepository = unitOfWork.CartItem;
+            _transactionRepository = unitOfWork.Transactions;
         }
 
         public async Task<List<OnlineOrderViewModel>> GetOrders()
@@ -128,10 +131,41 @@ namespace ARTHS_Service.Implementations
 
             order.Status = model.Status ?? order.Status;
 
+            if(ShouldCreateTransaction(order.PaymentMethod, order.Status))
+            {
+                await CreateTransaction(order);
+            }
+
             _onlineOrderRepository.Update(order);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetOrder(id) : null!;
 
+        }
+
+        //PRIVATE METHOD
+        private async Task CreateTransaction(OnlineOrder onlineOrder)
+        {
+            var transaction = new Transaction
+            {
+                Id = Guid.NewGuid(),
+                OnlineOrderId = onlineOrder.Id,
+                TotalAmount = onlineOrder.TotalAmount,
+                Type = "Thanh toán hóa đơn mua hàng online của cửa hàng Thanh Huy",
+                PaymentMethod = "Tiền mặt",
+                Status = "Thành công"
+            };
+
+            _transactionRepository.Add(transaction);
+            await _unitOfWork.SaveChanges();
+        }
+
+        private bool ShouldCreateTransaction(string paymentMethod, string status)
+        {
+            if (paymentMethod == PaymentMethods.COD && status == OnlineOrderStatus.Finished)
+            {
+                return true;
+            }
+            return false;
         }
 
         private async Task<int> HandleCreateOrderDetail(Guid orderId, ICollection<CartItem> items)

@@ -1,11 +1,9 @@
-﻿using ARTHS_Data.Entities;
-
-namespace ARTHS_Data.Models.Views
+﻿namespace ARTHS_Data.Models.Views
 {
-    public class OnlineOrderViewModel
+    public class BasicOnlineOrderViewModel
     {
         public Guid Id { get; set; }
-        public string CustomerName { get; set; } = null!;
+        public string? CustomerName { get; set; }
         public string PhoneNumber { get; set; } = null!;
         public string Address { get; set; } = null!;
         public string PaymentMethod { get; set; } = null!;
@@ -14,8 +12,5 @@ namespace ARTHS_Data.Models.Views
         public string? CancellationReason { get; set; }
         public DateTime? CancellationDate { get; set; }
         public DateTime OrderDate { get; set; }
-
-        //public virtual CustomerAccount Customer { get; set; } = null!;
-        public virtual ICollection<OnlineOrderDetailViewModel> OnlineOrderDetails { get; set; } = new List<OnlineOrderDetailViewModel>();
     }
 }
