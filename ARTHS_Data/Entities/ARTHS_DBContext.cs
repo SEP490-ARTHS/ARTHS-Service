@@ -47,8 +47,8 @@ namespace ARTHS_Data.Entities
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                //optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
             }
         }
 
@@ -101,7 +101,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Bill");
 
-                entity.HasIndex(e => e.InStoreOrderId, "UQ__Bill__AFEA978FA9E9284F")
+                entity.HasIndex(e => e.InStoreOrderId, "UQ__Bill__AFEA978FC7B67A27")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -120,7 +120,7 @@ namespace ARTHS_Data.Entities
                     .WithOne(p => p.Bill)
                     .HasForeignKey<Bill>(d => d.InStoreOrderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Bill__InStoreOrd__0D44F85C");
+                    .HasConstraintName("FK__Bill__InStoreOrd__4E1E9780");
             });
 
             modelBuilder.Entity<Cart>(entity =>
@@ -311,14 +311,13 @@ namespace ARTHS_Data.Entities
                 entity.HasOne(d => d.Staff)
                     .WithMany(p => p.InStoreOrders)
                     .HasForeignKey(d => d.StaffId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__InStoreOr__Staff__01D345B0");
+                    .HasConstraintName("FK__InStoreOr__Staff__42ACE4D4");
 
                 entity.HasOne(d => d.Teller)
                     .WithMany(p => p.InStoreOrders)
                     .HasForeignKey(d => d.TellerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__InStoreOr__Telle__00DF2177");
+                    .HasConstraintName("FK__InStoreOr__Telle__41B8C09B");
             });
 
             modelBuilder.Entity<InStoreOrderDetail>(entity =>
@@ -343,17 +342,17 @@ namespace ARTHS_Data.Entities
                     .WithMany(p => p.InStoreOrderDetails)
                     .HasForeignKey(d => d.InStoreOrderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__InStoreOr__InSto__05A3D694");
+                    .HasConstraintName("FK__InStoreOr__InSto__467D75B8");
 
                 entity.HasOne(d => d.MotobikeProduct)
                     .WithMany(p => p.InStoreOrderDetails)
                     .HasForeignKey(d => d.MotobikeProductId)
-                    .HasConstraintName("FK__InStoreOr__Motob__078C1F06");
+                    .HasConstraintName("FK__InStoreOr__Motob__4865BE2A");
 
                 entity.HasOne(d => d.RepairService)
                     .WithMany(p => p.InStoreOrderDetails)
                     .HasForeignKey(d => d.RepairServiceId)
-                    .HasConstraintName("FK__InStoreOr__Repai__0697FACD");
+                    .HasConstraintName("FK__InStoreOr__Repai__477199F1");
             });
 
             modelBuilder.Entity<MotobikeProduct>(entity =>
@@ -628,19 +627,19 @@ namespace ARTHS_Data.Entities
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.Type).HasMaxLength(50);
+                entity.Property(e => e.Type).HasMaxLength(255);
 
                 entity.Property(e => e.UpdateAt).HasColumnType("datetime");
 
                 entity.HasOne(d => d.InStoreOrder)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.InStoreOrderId)
-                    .HasConstraintName("FK__Transacti__InSto__36470DEF");
+                    .HasConstraintName("FK__Transacti__InSto__51EF2864");
 
                 entity.HasOne(d => d.OnlineOrder)
                     .WithMany(p => p.Transactions)
                     .HasForeignKey(d => d.OnlineOrderId)
-                    .HasConstraintName("FK__Transacti__Onlin__373B3228");
+                    .HasConstraintName("FK__Transacti__Onlin__52E34C9D");
             });
 
             modelBuilder.Entity<Vehicle>(entity =>

@@ -5,7 +5,7 @@ namespace ARTHS_Data.Models.Views
     public class OnlineOrderViewModel
     {
         public Guid Id { get; set; }
-        public string CustomerName { get; set; }
+        public string CustomerName { get; set; } = null!;
         public string PhoneNumber { get; set; } = null!;
         public string Address { get; set; } = null!;
         public string PaymentMethod { get; set; } = null!;
