@@ -2,7 +2,7 @@
 {
     public class CreateInStoreOrderModel
     {
-        public Guid StaffId { get; set; }
+        public Guid? StaffId { get; set; }
         public string? CustomerName { get; set; }
         public string CustomerPhone { get; set; } = null!;
         public string? LicensePlate { get; set; }
