@@ -28,6 +28,7 @@ namespace ARTHS_API.Configurations
             services.AddScoped<IVNPayService, VNPayService>();
             services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IFeedbackProductService, FeedbackProductService>();
+            services.AddScoped<IBookingService, BookingService>();
 
             services.AddTransient<IUnitOfWork, UnitOfWork>();
         }
