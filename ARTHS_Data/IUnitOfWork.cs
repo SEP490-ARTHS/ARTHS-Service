@@ -27,6 +27,7 @@ namespace ARTHS_Data
         public IWarrantyRepository Warranty { get; }
         public ITransactionRepository Transactions { get; }
         public IFeedbackProductRepository FeedbackProduct { get; }
+        public IRepairBookingRepository RepairBooking { get; }
 
         //-----------------
         Task<int> SaveChanges();

@@ -1,6 +1,7 @@
 ﻿using ARTHS_Data;
 using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
@@ -33,7 +34,7 @@ namespace ARTHS_Service.Implementations
             _cloudStorageService = cloudStorageService;
         }
 
-        public async Task<List<MotobikeProductDetailViewModel>> GetMotobikeProducts(MotobikeProductFilterModel filter)
+        public async Task<ListViewModel<MotobikeProductDetailViewModel>> GetMotobikeProducts(MotobikeProductFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _motobikeProductRepository.GetAll();
 
@@ -60,10 +61,24 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(product => product.DiscountId.Equals(filter.DiscountId.Value));
             }
-
-            return await query
-                .ProjectTo<MotobikeProductDetailViewModel>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+            var listProducts = query
+                .ProjectTo<MotobikeProductDetailViewModel>(_mapper.ConfigurationProvider);
+            var products = await listProducts.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
+            var totalRow = await listProducts.AsNoTracking().CountAsync();
+            if(products != null || products != null && products.Any())
+            {
+                return new ListViewModel<MotobikeProductDetailViewModel>
+                {
+                    Pagination = new PaginationViewModel
+                    {
+                        PageNumber = pagination.PageNumber,
+                        PageSize = pagination.PageSize,
+                        TotalRow = totalRow
+                    },
+                    Data = products
+                };
+            }
+            return null!;
         }
 
         public async Task<MotobikeProductDetailViewModel> GetMotobikeProduct(Guid id)

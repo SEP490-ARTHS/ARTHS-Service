@@ -22,7 +22,7 @@ namespace ARTHS_Data.Mapping
             CreateMap<StaffAccount, StaffViewModel>()
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Account.PhoneNumber));
 
-            CreateMap<CustomerAccount, CustomerFeedbackProductViewModel>();
+            CreateMap<CustomerAccount, BasicCustomerViewModel>();
 
             CreateMap<Cart, CartViewModel>();
 
@@ -81,6 +81,7 @@ namespace ARTHS_Data.Mapping
             CreateMap<OnlineOrder, BasicOnlineOrderViewModel>();
             CreateMap<Transaction, TransactionViewModel>();
             CreateMap<FeedbackProduct, FeedbackProductViewModel>();
+            CreateMap<RepairBooking, RepairBookingViewModel>();
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();

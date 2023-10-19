@@ -1,5 +1,6 @@
 ﻿using ARTHS_API.Configurations.Middleware;
 using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Implementations;
@@ -24,11 +25,11 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<MotobikeProductDetailViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ListViewModel<MotobikeProductDetailViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all motobike products.")]
-        public async Task<ActionResult<List<MotobikeProductDetailViewModel>>> GetMotobikeProducts([FromQuery] MotobikeProductFilterModel filter)
+        public async Task<ActionResult<ListViewModel<MotobikeProductDetailViewModel>>> GetMotobikeProducts([FromQuery] MotobikeProductFilterModel filter, [FromQuery] PaginationRequestModel pagination)
         {
-            return await _motobikeProductService.GetMotobikeProducts(filter);
+            return await _motobikeProductService.GetMotobikeProducts(filter, pagination);
         }
 
         [HttpGet]

@@ -1,6 +1,6 @@
 ﻿namespace ARTHS_Data.Models.Views
 {
-    public class CustomerFeedbackProductViewModel
+    public class BasicCustomerViewModel
     {
         public Guid AccountId { get; set; }
         public string FullName { get; set; } = null!;

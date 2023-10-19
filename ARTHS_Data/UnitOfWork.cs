@@ -31,6 +31,8 @@ namespace ARTHS_Data
         private IWarrantyRepository _warranty = null!;
         private ITransactionRepository _transactions = null!;
         private IFeedbackProductRepository _feedbackProduct = null!;
+        private IRepairBookingRepository _repairBooking = null!;
+        
 
 
         public UnitOfWork(ARTHS_DBContext context)
@@ -147,10 +149,16 @@ namespace ARTHS_Data
             get { return _feedbackProduct ??= new FeedbackProductRepository(_context); }
         }
 
+        public IRepairBookingRepository RepairBooking
+        {
+            get { return _repairBooking ??= new RepairBookingRepository(_context); }
+        }
+
         public async Task<int> SaveChanges()
         {
             return await _context.SaveChangesAsync();
         }
+
 
         public IDbContextTransaction Transaction()
         {

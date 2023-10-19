@@ -9,6 +9,6 @@
         public DateTime? UpdateAt { get; set; }
         public DateTime CreateAt { get; set; }
 
-        public virtual CustomerFeedbackProductViewModel? Customer { get; set; }
+        public virtual BasicCustomerViewModel? Customer { get; set; }
     }
 }
