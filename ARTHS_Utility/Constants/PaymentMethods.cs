@@ -2,7 +2,7 @@
 {
     public static class PaymentMethods
     {
-        public const string COD = "COD";
+        public const string COD = "Tiền mặt";
         public const string VNPay = "VNPay";
     }
 }

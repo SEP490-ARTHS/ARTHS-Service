@@ -229,6 +229,7 @@ namespace ARTHS_Service.Implementations
             }
 
             var product = await _motobikeProductRepository.GetMany(p => p.Id.Equals(productId))
+                                                          .Include(p => p.Discount)
                                                           .Include(p => p.Warranty)
                                                           .FirstOrDefaultAsync();
             if (product == null)
@@ -237,6 +238,10 @@ namespace ARTHS_Service.Implementations
             }
 
             int price = product.PriceCurrent;
+            if(product.Discount != null)
+            {
+                price = price * (100 - product.Discount.DiscountAmount) / 100;
+            }
             int actualQuantity = (quantity ?? 0) <= 0 ? 1 : quantity!.Value;
             int totalProductPrice = price * actualQuantity;
 

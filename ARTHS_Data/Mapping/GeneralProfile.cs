@@ -62,14 +62,16 @@ namespace ARTHS_Data.Mapping
 
             CreateMap<InStoreOrder, InStoreOrderViewModel>()
                 .ForMember(dest => dest.TellerName, otp => otp.MapFrom(src => src.Teller.FullName))
-                .ForMember(dest => dest.StaffName, otp => otp.MapFrom(src => src.Staff.FullName));
+                .ForMember(dest => dest.StaffName, otp => otp.MapFrom(src => src.Staff != null ? src.Staff.FullName : null))
+                .ForMember(dest => dest.PaymentMethod, otp => otp.MapFrom(src => src.Transactions.FirstOrDefault(transaction => transaction.Status.Equals("Thành công"))!.PaymentMethod));
 
             CreateMap<InStoreOrder, BasicInStoreOrderViewModel>()
                 .ForMember(dest => dest.TellerName, otp => otp.MapFrom(src => src.Teller.FullName))
-                .ForMember(dest => dest.StaffName, otp => otp.MapFrom(src => src.Staff.FullName));
+                .ForMember(dest => dest.StaffName, otp => otp.MapFrom(src => src.Staff != null ? src.Staff.FullName : null));
 
             CreateMap<MotobikeProduct, BasicMotobikeProductViewModel>()
-                .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl));
+                .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl))
+                .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
 
             CreateMap<RepairService, BasicRepairServiceViewModel>()
                 .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl));
