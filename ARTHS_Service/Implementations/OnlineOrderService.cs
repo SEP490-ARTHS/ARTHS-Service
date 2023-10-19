@@ -193,16 +193,22 @@ namespace ARTHS_Service.Implementations
             var listOrderDetail = new List<OnlineOrderDetail>();
             foreach (var item in items)
             {
-                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(item.MotobikeProductId)).FirstOrDefaultAsync();
+                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(item.MotobikeProductId)).Include(p => p.Discount).FirstOrDefaultAsync();
                 if (product != null)
                 {
+                    var price = product.PriceCurrent;
+                    if(product.Discount != null)
+                    {
+                        price = price * (100 - product.Discount.DiscountAmount) / 100;
+                    }
+
                     var orderDetail = new OnlineOrderDetail
                     {
                         OnlineOrderId = orderId,
                         MotobikeProductId = product.Id,
-                        Price = product.PriceCurrent,
+                        Price = price,
                         Quantity = item.Quantity,
-                        SubTotalAmount = product.PriceCurrent * item.Quantity,
+                        SubTotalAmount = price * item.Quantity,
                     };
                     listOrderDetail.Add(orderDetail);
 
