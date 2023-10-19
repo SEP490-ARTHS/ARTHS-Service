@@ -2,12 +2,11 @@
 {
     public static class OnlineOrderStatus
     {
-        public const string Processing = "Processing";     // Chờ sử lý
+        public const string Processing = "Chờ xử lý";     // Chờ sử lý
         public const string HandedOver = "HandedOver";     // Đã bàn giao cho đơn vị vận chuyển
-        public const string Transport = "Transport";       // Đang giao
-        public const string Finished = "Finished";         // Đã giao
-        public const string Canceled = "Canceled";         // Đã hủy
-        public const string Paid = "Paid";                 // Đã thanh toán
-
+        public const string Transport = "Đang giao";       // Đang giao
+        public const string Finished = "Hoàn thành";         // Đã giao
+        public const string Canceled = "Đã hủy";         // Đã hủy
+        public const string Paid = "Đã thanh toán";                 // Đã thanh toán
     }
 }

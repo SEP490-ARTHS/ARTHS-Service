@@ -62,7 +62,8 @@ namespace ARTHS_Service.Implementations
                 query = query.Where(product => product.DiscountId.Equals(filter.DiscountId.Value));
             }
             var listProducts = query
-                .ProjectTo<MotobikeProductDetailViewModel>(_mapper.ConfigurationProvider);
+                .ProjectTo<MotobikeProductDetailViewModel>(_mapper.ConfigurationProvider)
+                .OrderByDescending(product => product.CreateAt);
             var products = await listProducts.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
             var totalRow = await listProducts.AsNoTracking().CountAsync();
             if(products != null || products != null && products.Any())

@@ -4,7 +4,7 @@
     {
         const int MaxPageSize = 1000;
         public int PageNumber { get; set; } = 0;
-        private int _pageSize = 10;
+        private int _pageSize = 12;
         public int PageSize
         {
             get
