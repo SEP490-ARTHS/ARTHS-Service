@@ -18,7 +18,7 @@ namespace ARTHS_Service.Implementations
             _transactionRepository = unitOfWork.Transactions;
         }
 
-        public async Task<List<TransactionViewModel>> GetTransactions()
+        public async Task<ListViewModel<TransactionViewModel>> GetTransactions(PaginationRequestModel pagination)
         {
             var query = _transactionRepository.GetAll();
 
@@ -42,6 +42,13 @@ namespace ARTHS_Service.Implementations
                 };
             }
             return null!;
+        }
+
+        public async Task<TransactionViewModel> GetTransaction(Guid Id)
+        {
+            return await _transactionRepository.GetMany(transaction => transaction.Id.Equals(Id))
+                .ProjectTo<TransactionViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy transaction");
         }
 
     }
