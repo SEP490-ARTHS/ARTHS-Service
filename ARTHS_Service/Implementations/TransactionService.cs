@@ -1,4 +1,5 @@
 ﻿using ARTHS_Data;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
@@ -16,13 +17,30 @@ namespace ARTHS_Service.Implementations
             _transactionRepository = unitOfWork.Transactions;
         }
 
-        public async Task<List<TransactionViewModel>> GetTransactions()
+        public async Task<ListViewModel<TransactionViewModel>> GetTransactions(PaginationRequestModel pagination)
         {
             var query = _transactionRepository.GetAll();
 
-            return await query
+
+            var listTransactions = query
                 .ProjectTo<TransactionViewModel>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .OrderByDescending(transaction => transaction.TransactionDate);
+            var transactions = await listTransactions.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
+            var totalRow = await listTransactions.AsNoTracking().CountAsync();
+            if(transactions != null || transactions !=null && transactions.Any())
+            {
+                return new ListViewModel<TransactionViewModel>
+                {
+                    Pagination = new PaginationViewModel
+                    {
+                        PageNumber = pagination.PageNumber,
+                        PageSize = pagination.PageSize,
+                        TotalRow = totalRow
+                    },
+                    Data = transactions
+                };
+            }
+            return null!;
         }
 
     }

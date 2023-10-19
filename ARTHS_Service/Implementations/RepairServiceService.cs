@@ -1,6 +1,7 @@
 ﻿using ARTHS_Data;
 using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
@@ -31,7 +32,7 @@ namespace ARTHS_Service.Implementations
         }
 
 
-        public async Task<List<RepairServiceViewModel>> GetRepairServices(RepairServiceFilterModel filter)
+        public async Task<ListViewModel<RepairServiceViewModel>> GetRepairServices(RepairServiceFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _repairRepository.GetAll();
 
@@ -39,11 +40,26 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(repair => repair.Name.Contains(filter.Name));
             }
-
-            
-            return await query
+            var listService = query
                 .ProjectTo<RepairServiceViewModel>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .OrderByDescending(service => service.CreateAt);
+            var services = await listService.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
+            var totalRow = await listService.AsNoTracking().CountAsync();
+
+            if(services != null || services != null && services.Any())
+            {
+                return new ListViewModel<RepairServiceViewModel>
+                {
+                    Pagination = new PaginationViewModel
+                    {
+                        PageNumber = pagination.PageNumber,
+                        PageSize = pagination.PageSize,
+                        TotalRow = totalRow
+                    },
+                    Data = services
+                };
+            }
+            return null!;
         }
 
         public async Task<RepairServiceViewModel> GetRepairService(Guid id)

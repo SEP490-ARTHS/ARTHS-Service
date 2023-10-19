@@ -1,5 +1,6 @@
 ﻿using ARTHS_API.Configurations.Middleware;
 using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
@@ -23,11 +24,11 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(RepairServiceViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ListViewModel<RepairServiceViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all repair services.")]
-        public async Task<ActionResult<List<RepairServiceViewModel>>> GetRepairServices([FromQuery] RepairServiceFilterModel filter)
+        public async Task<ActionResult<ListViewModel<RepairServiceViewModel>>> GetRepairServices([FromQuery] RepairServiceFilterModel filter, [FromQuery] PaginationRequestModel pagination)
         {
-            return await _repairServiceService.GetRepairServices(filter);
+            return await _repairServiceService.GetRepairServices(filter, pagination);
         }
 
         [HttpGet]

@@ -1,5 +1,6 @@
 ﻿using ARTHS_Data;
 using ARTHS_Data.Entities;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
@@ -33,12 +34,30 @@ namespace ARTHS_Service.Implementations
             _transactionRepository = unitOfWork.Transactions;
         }
 
-        public async Task<List<OnlineOrderViewModel>> GetOrders()
+        public async Task<ListViewModel<OnlineOrderViewModel>> GetOrders(PaginationRequestModel pagination)
         {
-            return await _onlineOrderRepository.GetAll()
+            var query = _onlineOrderRepository.GetAll();
+
+            var listOrder = query
                 .ProjectTo<OnlineOrderViewModel>(_mapper.ConfigurationProvider)
-                .OrderByDescending(order => order.OrderDate)
-                .ToListAsync();
+                .OrderByDescending(order => order.OrderDate);
+            var orders = await listOrder.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
+            var totalRow = await listOrder.AsNoTracking().CountAsync();
+
+            if(orders != null || orders != null && orders.Any())
+            {
+                return new ListViewModel<OnlineOrderViewModel>
+                {
+                    Pagination = new PaginationViewModel
+                    {
+                        PageNumber = pagination.PageNumber,
+                        PageSize = pagination.PageSize,
+                        TotalRow = totalRow
+                    },
+                    Data = orders
+                };
+            }
+            return null!;
         }
 
         public async Task<OnlineOrderViewModel> GetOrder(Guid id)

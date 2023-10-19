@@ -1,6 +1,7 @@
 ﻿using ARTHS_Data;
 using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
@@ -30,7 +31,7 @@ namespace ARTHS_Service.Implementations
             _repairServiceRepository = unitOfWork.RepairService;
             _transactionRepository = unitOfWork.Transactions;
         }
-        public async Task<List<BasicInStoreOrderViewModel>> GetInStoreOrders(InStoreOrderFilterModel filter)
+        public async Task<ListViewModel<BasicInStoreOrderViewModel>> GetInStoreOrders(InStoreOrderFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _inStoreOrderRepository.GetAll();
 
@@ -46,12 +47,26 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(order => order.CustomerPhone.Contains(filter.CustomerPhone));
             }
-
-            return await query
+            var listOrder = query
                 .ProjectTo<BasicInStoreOrderViewModel>(_mapper.ConfigurationProvider)
-                .OrderByDescending(order => order.OrderDate)
-                .ToListAsync();
+                .OrderByDescending(order => order.OrderDate);
 
+            var orders = await listOrder.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
+            var totalRow = await listOrder.AsNoTracking().CountAsync();
+            if(orders != null || orders != null && orders.Any())
+            {
+                return new ListViewModel<BasicInStoreOrderViewModel>
+                {
+                    Pagination = new PaginationViewModel
+                    {
+                        PageNumber = pagination.PageNumber,
+                        PageSize = pagination.PageSize,
+                        TotalRow = totalRow
+                    },
+                    Data = orders
+                };
+            }
+            return null!;
         }
 
         public async Task<InStoreOrderViewModel> GetInStoreOrder(string id)

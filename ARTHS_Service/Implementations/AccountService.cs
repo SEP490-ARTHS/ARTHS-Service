@@ -39,7 +39,8 @@ namespace ARTHS_Service.Implementations
                 query = query.Where(account => account.PhoneNumber.Contains(filter.PhoneNumber));
             }
             var listAccount = query
-                .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider);
+                .ProjectTo<AccountViewModel>(_mapper.ConfigurationProvider)
+                .OrderByDescending(account => account.CreateAt);
             var accounts = await listAccount.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
             var totalRow = await listAccount.AsNoTracking().CountAsync();
             if(accounts != null || accounts != null && accounts.Any())

@@ -1,5 +1,7 @@
 ﻿using ARTHS_API.Configurations.Middleware;
 using ARTHS_Data.Models.Internal;
+using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
@@ -24,11 +26,11 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<RepairBookingViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ListViewModel<RepairBookingViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all booking repair service.")]
-        public async Task<ActionResult<List<RepairBookingViewModel>>> GetRepairBookings()
+        public async Task<ActionResult<ListViewModel<RepairBookingViewModel>>> GetRepairBookings([FromQuery] BookingFilterModel filter, [FromQuery] PaginationRequestModel pagination)
         {
-            return await _bookingService.GetRepairBookings();
+            return await _bookingService.GetRepairBookings(filter, pagination);
         }
 
 

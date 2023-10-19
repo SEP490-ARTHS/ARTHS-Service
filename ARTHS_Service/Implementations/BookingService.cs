@@ -1,5 +1,7 @@
 ﻿using ARTHS_Data;
 using ARTHS_Data.Entities;
+using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
@@ -29,15 +31,40 @@ namespace ARTHS_Service.Implementations
             _bookingSettings = bookingSettings.Value;
         }
 
-        public async Task<List<RepairBookingViewModel>> GetRepairBookings()
+        public async Task<ListViewModel<RepairBookingViewModel>> GetRepairBookings(BookingFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _repairBookingRepository.GetAll();
 
+            if (!string.IsNullOrEmpty(filter.BookingDate))
+            {
+                DateTime dateBook;
+                if (!DateTime.TryParseExact(filter.BookingDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateBook))
+                {
+                    throw new ConflictException("Vui lòng nhập đúng định dạng ngày (dd-MM-yyyy).");
+                }
+                query = query.Where(booking => booking.DateBook.Date.Equals(dateBook.Date));
+            }
 
 
-            return await query
+            var listBooking = query
                 .ProjectTo<RepairBookingViewModel>(_mapper.ConfigurationProvider)
-                .ToListAsync();
+                .OrderByDescending(booking => booking.CreateAt);
+            var bookings = await listBooking.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
+            var totalRow = await listBooking.AsNoTracking().CountAsync();
+            if(bookings != null || bookings != null && bookings.Any())
+            {
+                return new ListViewModel<RepairBookingViewModel>
+                {
+                    Pagination = new PaginationViewModel
+                    {
+                        PageNumber = pagination.PageNumber,
+                        PageSize = pagination.PageSize,
+                        TotalRow = totalRow
+                    },
+                    Data = bookings
+                };
+            }
+            return null!;
         }
 
         public async Task<RepairBookingViewModel> GetRepairBooking(Guid Id)

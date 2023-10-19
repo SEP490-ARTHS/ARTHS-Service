@@ -1,6 +1,7 @@
 ﻿using ARTHS_API.Configurations.Middleware;
 using ARTHS_Data.Models.Internal;
 using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
@@ -23,11 +24,11 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(BasicInStoreOrderViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ListViewModel<BasicInStoreOrderViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all order in store.")]
-        public async Task<ActionResult<List<BasicInStoreOrderViewModel>>> GetInStoreOrders([FromQuery] InStoreOrderFilterModel model)
+        public async Task<ActionResult<ListViewModel<BasicInStoreOrderViewModel>>> GetInStoreOrders([FromQuery] InStoreOrderFilterModel model, [FromQuery] PaginationRequestModel pagination)
         {
-            return await _inStoreOrderService.GetInStoreOrders(model);
+            return await _inStoreOrderService.GetInStoreOrders(model, pagination);
         }
 
         [HttpGet]

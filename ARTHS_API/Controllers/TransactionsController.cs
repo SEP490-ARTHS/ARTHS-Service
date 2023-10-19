@@ -1,4 +1,5 @@
-﻿using ARTHS_Data.Models.Views;
+﻿using ARTHS_Data.Models.Requests.Get;
+using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +19,11 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<TransactionViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ListViewModel<TransactionViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all transactions")]
-        public async Task<ActionResult<List<TransactionViewModel>>> GetTransactions()
+        public async Task<ActionResult<ListViewModel<TransactionViewModel>>> GetTransactions([FromQuery] PaginationRequestModel pagination)
         {
-            return await _transactionService.GetTransactions();
+            return await _transactionService.GetTransactions(pagination);
         }
     }
 }

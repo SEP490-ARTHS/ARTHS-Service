@@ -1,5 +1,6 @@
 ﻿using ARTHS_API.Configurations.Middleware;
 using ARTHS_Data.Models.Internal;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
@@ -24,11 +25,11 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<OnlineOrderViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ListViewModel<OnlineOrderViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all order online.")]
-        public async Task<ActionResult<List<OnlineOrderViewModel>>> GetOrders()
+        public async Task<ActionResult<ListViewModel<OnlineOrderViewModel>>> GetOrders([FromQuery] PaginationRequestModel pagination)
         {
-            return await _onlineOrderService.GetOrders();
+            return await _onlineOrderService.GetOrders(pagination);
         }
 
         [HttpGet]
