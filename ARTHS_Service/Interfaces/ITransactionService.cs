@@ -5,6 +5,6 @@ namespace ARTHS_Service.Interfaces
 {
     public interface ITransactionService
     {
-        Task<ListViewModel<TransactionViewModel>> GetTransactions(PaginationRequestModel pagination);
+        Task<List<TransactionViewModel>> GetTransactions();
     }
 }

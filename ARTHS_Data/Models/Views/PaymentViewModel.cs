@@ -3,6 +3,7 @@
     public class PaymentViewModel
     {
         public string OrderInfo { get; set; } = "";
+        public string OrderId { get; set; } = "";
         public int Amount { get; set; }
         public string BankCode { get; set; } = "";
         public string? CardType { get; set; } = "";

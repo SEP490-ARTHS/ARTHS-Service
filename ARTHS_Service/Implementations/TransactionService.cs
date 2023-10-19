@@ -3,6 +3,7 @@ using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ namespace ARTHS_Service.Implementations
             _transactionRepository = unitOfWork.Transactions;
         }
 
-        public async Task<ListViewModel<TransactionViewModel>> GetTransactions(PaginationRequestModel pagination)
+        public async Task<List<TransactionViewModel>> GetTransactions()
         {
             var query = _transactionRepository.GetAll();
 

@@ -19,11 +19,13 @@ namespace ARTHS_API.Controllers
     public class PaymentController : ControllerBase
     {
         private readonly IVNPayService _vnPayService;
+        private readonly ITransactionService _transactionService;
         private readonly AppSetting _appSetting;
 
-        public PaymentController(IVNPayService vnPayService, IOptions<AppSetting> appSettings)
+        public PaymentController(IVNPayService vnPayService, ITransactionService transactionService ,IOptions<AppSetting> appSettings)
         {
             _vnPayService = vnPayService;
+            _transactionService = transactionService;
             _appSetting = appSettings.Value;
         }
 
@@ -90,19 +92,29 @@ namespace ARTHS_API.Controllers
 
         [HttpGet]
         [Route("result")]
-        public ActionResult<PaymentViewModel> PaymentResult([FromQuery] Dictionary<string, string> queryParams)
+        public async Task<ActionResult<PaymentViewModel>> PaymentResult([FromQuery] Dictionary<string, string> queryParams)
         {
             if(!VnPayHelper.ValidateSignature(_appSetting.MerchantPassword, queryParams))
             {
                 return BadRequest("Invalid Signature.");
             }
             var model = VnPayHelper.ParseToResponseModel(queryParams);
-
+            var transaction = await _transactionService.GetTransaction(model.TxnRef);
+            var orderId = transaction.InStoreOrderId ?? transaction.OnlineOrderId.ToString();
+            if(transaction.InStoreOrderId != null)
+            {
+                orderId = transaction.InStoreOrderId;
+            }
+            else
+            {
+                orderId = transaction.OnlineOrderId.ToString();
+            }
             DateTime? payDate = model.PayDate is null ? null : DateTime.ParseExact(model.PayDate, "yyyyMMddHHmmss", CultureInfo.InvariantCulture);
 
             return Ok(new PaymentViewModel
             {
                 TransactionStatus = model.TransactionStatus,
+                OrderId = orderId!,
                 Response = model.ResponseCode,
                 OrderInfo = model.OrderInfo,
                 BankCode = model.BankCode,
