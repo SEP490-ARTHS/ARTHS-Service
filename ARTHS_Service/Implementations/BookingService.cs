@@ -35,6 +35,10 @@ namespace ARTHS_Service.Implementations
         {
             var query = _repairBookingRepository.GetAll();
 
+            if (filter.CustomerId.HasValue)
+            {
+                query = query.Where(booking => booking.CustomerId.Equals(filter.CustomerId.Value));
+            }
             if (!string.IsNullOrEmpty(filter.BookingDate))
             {
                 DateTime dateBook;
@@ -44,8 +48,6 @@ namespace ARTHS_Service.Implementations
                 }
                 query = query.Where(booking => booking.DateBook.Date.Equals(dateBook.Date));
             }
-
-
             var listBooking = query
                 .ProjectTo<RepairBookingViewModel>(_mapper.ConfigurationProvider)
                 .OrderByDescending(booking => booking.CreateAt);
@@ -73,6 +75,14 @@ namespace ARTHS_Service.Implementations
                 .ProjectTo<RepairBookingViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy booking");
         }
+
+        //public async Task<List<RepairBookingViewModel>> GetRepairBookingByCustomerId(Guid customerId)
+        //{
+        //    return await _repairBookingRepository.GetMany(booking => booking.CustomerId.Equals(customerId))
+        //        .ProjectTo<RepairBookingViewModel>(_mapper.ConfigurationProvider)
+        //        .OrderByDescending(booking => booking.DateBook)
+        //        .ToListAsync();
+        //}
 
         public async Task<RepairBookingViewModel> CreateBooking(Guid customerId, CreateRepairBookingModel model)
         {

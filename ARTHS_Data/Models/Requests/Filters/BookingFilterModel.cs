@@ -2,6 +2,7 @@
 {
     public class BookingFilterModel
     {
-        public string? BookingDate {  get; set; }
+        public Guid? CustomerId { get; set; }
+        public string? BookingDate { get; set; }
     }
 }
