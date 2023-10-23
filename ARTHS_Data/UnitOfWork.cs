@@ -32,8 +32,8 @@ namespace ARTHS_Data
         private ITransactionRepository _transactions = null!;
         private IFeedbackProductRepository _feedbackProduct = null!;
         private IRepairBookingRepository _repairBooking = null!;
-        
-
+        private IDeviceTokenRepository _deviceToken = null!;
+        private INotificationRepository _notification = null!;
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -152,6 +152,16 @@ namespace ARTHS_Data
         public IRepairBookingRepository RepairBooking
         {
             get { return _repairBooking ??= new RepairBookingRepository(_context); }
+        }
+
+        public IDeviceTokenRepository DeviceToken
+        {
+            get { return _deviceToken ??= new DeviceTokenRepository(_context); }
+        }
+
+        public INotificationRepository Notification
+        {
+            get { return _notification ??= new NotificationRepository(_context); }
         }
 
         public async Task<int> SaveChanges()

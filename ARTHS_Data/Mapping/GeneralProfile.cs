@@ -84,6 +84,14 @@ namespace ARTHS_Data.Mapping
             CreateMap<Transaction, TransactionViewModel>();
             CreateMap<FeedbackProduct, FeedbackProductViewModel>();
             CreateMap<RepairBooking, RepairBookingViewModel>();
+            CreateMap<Notification, NotificationViewModel>()
+                .ForMember(notificationVM => notificationVM.Data, config => config.MapFrom(notification => new NotificationDataViewModel
+                {
+                    CreateAt = notification.SendDate,
+                    IsRead = notification.IsRead,
+                    Link = notification.Link,
+                    Type = notification.Type
+                }));
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();

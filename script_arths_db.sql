@@ -88,6 +88,18 @@ CREATE TABLE Account(
 );
 GO
 
+--Table device token
+DROP TABLE IF EXISTS DeviceToken;
+GO
+CREATE TABLE DeviceToken(
+	Id uniqueidentifier primary key NOT NULL,
+	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
+	Token varchar(max),
+	CreateAt datetime NOT NULL default getdate()
+);
+GO
+
+
 --Table owner
 DROP TABLE IF EXISTS OwnerAccount;
 GO
@@ -157,7 +169,10 @@ CREATE TABLE [Notification](
 	Id uniqueidentifier primary key NOT NULL,
 	AccountId uniqueidentifier foreign key references Account(Id) NOT NULL,
 	Title nvarchar(255) NOT NULL,
-	Content nvarchar(255) NOT NULL,
+	Body nvarchar(255) NOT NULL,
+	Type nvarchar(255),
+	Link nvarchar(255),
+	IsRead bit DEFAULT 0 NOT NULL,
 	SendDate datetime NOT NULL default getdate()
 );
 GO

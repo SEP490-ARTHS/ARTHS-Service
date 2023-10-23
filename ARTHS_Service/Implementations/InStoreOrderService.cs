@@ -8,6 +8,7 @@ using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Enums;
 using ARTHS_Utility.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -22,14 +23,18 @@ namespace ARTHS_Service.Implementations
         private readonly IMotobikeProductRepository _motobikeProductRepository;
         private readonly IRepairServiceRepository _repairServiceRepository;
         private readonly ITransactionRepository _transactionRepository;
+        private readonly IAccountRepository _accountRepository;
+        private readonly INotificationService _notificationService;
 
-        public InStoreOrderService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        public InStoreOrderService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService) : base(unitOfWork, mapper)
         {
             _inStoreOrderRepository = unitOfWork.InStoreOrder;
             _inStoreOrderDetailRepository = unitOfWork.InStoreOrderDetail;
             _motobikeProductRepository = unitOfWork.MotobikeProduct;
             _repairServiceRepository = unitOfWork.RepairService;
             _transactionRepository = unitOfWork.Transactions;
+            _accountRepository = unitOfWork.Account;
+            _notificationService = notificationService;
         }
         public async Task<ListViewModel<BasicInStoreOrderViewModel>> GetInStoreOrders(InStoreOrderFilterModel filter, PaginationRequestModel pagination)
         {
@@ -131,14 +136,20 @@ namespace ARTHS_Service.Implementations
             inStoreOrder.CustomerPhone = model.CustomerPhone ?? inStoreOrder.CustomerPhone;
             inStoreOrder.LicensePlate = model.LicensePlate ?? inStoreOrder.LicensePlate;
 
-            //khi nào status là paid thì mới tạo transaction
+            
             if (model.Status != null)
             {
+                //khi nào status là paid thì mới tạo transaction
                 if (model.Status.Equals(InStoreOrderStatus.Paid) && !inStoreOrder.Status.Equals(InStoreOrderStatus.Paid))
                 {
-                    inStoreOrder.Status = model.Status;
+                    
                     await CreateTransaction(inStoreOrder);
                 }
+                if (model.Status.Equals(InStoreOrderStatus.WaitForPay))
+                {
+                    await SendNotification(inStoreOrder);
+                }
+                inStoreOrder.Status = model.Status;
             }
 
             if (model.OrderDetailModel != null && model.OrderDetailModel.Count > 0)
@@ -169,7 +180,25 @@ namespace ARTHS_Service.Implementations
             await _unitOfWork.SaveChanges();
         } 
 
-
+        private async Task SendNotification(InStoreOrder order)
+        {
+            var message = new CreateNotificationModel
+            {
+                Title = $"Đơn sửa chữa của khách hàng {order.CustomerName} đã hoàn thành",
+                Body = "Đơn sửa chữa của khách hàng đã được sửa xong. Vui lòng tiến hành thanh toán.",
+                Data = new NotificationDataViewModel
+                {
+                    CreateAt = DateTime.UtcNow.AddHours(7),
+                    Type = NotificationType.RepairService.ToString(),
+                    Link = order.Id
+                }
+            };
+            var tellers = await _accountRepository.GetMany(acc => acc.Role.RoleName.Equals(UserRole.Teller))
+                .Include(acc => acc.Role)
+                .Select(acc => acc.Id)
+                .ToListAsync();
+            await _notificationService.SendNotification(tellers, message);
+        }
 
         /// <summary>
         /// Processes in-store order details and returns the total amount.
