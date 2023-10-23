@@ -7,6 +7,7 @@ namespace ARTHS_Data.Entities
     {
         public Account()
         {
+            DeviceTokens = new HashSet<DeviceToken>();
             Notifications = new HashSet<Notification>();
         }
 
@@ -23,6 +24,7 @@ namespace ARTHS_Data.Entities
         public virtual OwnerAccount? OwnerAccount { get; set; }
         public virtual StaffAccount? StaffAccount { get; set; }
         public virtual TellerAccount? TellerAccount { get; set; }
+        public virtual ICollection<DeviceToken> DeviceTokens { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
     }
 }

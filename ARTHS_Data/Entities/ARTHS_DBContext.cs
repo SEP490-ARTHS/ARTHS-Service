@@ -23,6 +23,7 @@ namespace ARTHS_Data.Entities
         public virtual DbSet<CartItem> CartItems { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
         public virtual DbSet<CustomerAccount> CustomerAccounts { get; set; } = null!;
+        public virtual DbSet<DeviceToken> DeviceTokens { get; set; } = null!;
         public virtual DbSet<Discount> Discounts { get; set; } = null!;
         public virtual DbSet<FeedbackProduct> FeedbackProducts { get; set; } = null!;
         public virtual DbSet<FeedbackStaff> FeedbackStaffs { get; set; } = null!;
@@ -47,8 +48,8 @@ namespace ARTHS_Data.Entities
         {
             if (!optionsBuilder.IsConfigured)
             {
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                //optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
             }
         }
 
@@ -194,6 +195,25 @@ namespace ARTHS_Data.Entities
                     .HasForeignKey<CustomerAccount>(d => d.AccountId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__CustomerA__Accou__40F9A68C");
+            });
+
+            modelBuilder.Entity<DeviceToken>(entity =>
+            {
+                entity.ToTable("DeviceToken");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
+
+                entity.Property(e => e.CreateAt)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.Token).IsUnicode(false);
+
+                entity.HasOne(d => d.Account)
+                    .WithMany(p => p.DeviceTokens)
+                    .HasForeignKey(d => d.AccountId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__DeviceTok__Accou__7FB5F314");
             });
 
             modelBuilder.Entity<Discount>(entity =>
@@ -430,7 +450,9 @@ namespace ARTHS_Data.Entities
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
-                entity.Property(e => e.Content).HasMaxLength(255);
+                entity.Property(e => e.Body).HasMaxLength(255);
+
+                entity.Property(e => e.Link).HasMaxLength(255);
 
                 entity.Property(e => e.SendDate)
                     .HasColumnType("datetime")
@@ -438,11 +460,13 @@ namespace ARTHS_Data.Entities
 
                 entity.Property(e => e.Title).HasMaxLength(255);
 
+                entity.Property(e => e.Type).HasMaxLength(255);
+
                 entity.HasOne(d => d.Account)
                     .WithMany(p => p.Notifications)
                     .HasForeignKey(d => d.AccountId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Notificat__Accou__489AC854");
+                    .HasConstraintName("FK__Notificat__Accou__038683F8");
             });
 
             modelBuilder.Entity<OnlineOrder>(entity =>

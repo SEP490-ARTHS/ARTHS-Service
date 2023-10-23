@@ -28,6 +28,8 @@ namespace ARTHS_Data
         public ITransactionRepository Transactions { get; }
         public IFeedbackProductRepository FeedbackProduct { get; }
         public IRepairBookingRepository RepairBooking { get; }
+        public IDeviceTokenRepository DeviceToken { get; }
+        public INotificationRepository Notification { get; }
 
         //-----------------
         Task<int> SaveChanges();
