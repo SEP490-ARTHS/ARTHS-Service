@@ -100,13 +100,23 @@ namespace ARTHS_Service.Implementations
                     var app = FirebaseApp.DefaultInstance;
                     if (FirebaseApp.DefaultInstance == null)
                     {
-                        var basePath = AppDomain.CurrentDomain.BaseDirectory;
-                        var projectRoot = Path.GetFullPath(Path.Combine(basePath, "..", "..", "..", ".."));
-                        string credentialPath = Path.Combine(projectRoot, "ARTHS_Utility", "Helpers", "CloudStorage", "arths-45678-firebase-adminsdk-plwhs-954089d6b7.json");
+                        GoogleCredential credential;
+                        var credentialJson = Environment.GetEnvironmentVariable("GoogleCloudCredential");
+                        if(string.IsNullOrWhiteSpace(credentialJson))
+                        {
+                            var basePath = AppDomain.CurrentDomain.BaseDirectory;
+                            var projectRoot = Path.GetFullPath(Path.Combine(basePath, "..", "..", "..", ".."));
+                            string credentialPath = Path.Combine(projectRoot, "ARTHS_Utility", "Helpers", "CloudStorage", "arths-45678-firebase-adminsdk-plwhs-954089d6b7.json");
+                            credential = GoogleCredential.FromFile(credentialPath);
+                        }
+                        else
+                        {
+                            credential = GoogleCredential.FromJson(credentialJson);
+                        }
+
                         app = FirebaseApp.Create(new AppOptions()
                         {
-
-                            Credential = GoogleCredential.FromFile(credentialPath)
+                            Credential = credential
                         });
                     }
                     FirebaseMessaging messaging = FirebaseMessaging.GetMessaging(app);
