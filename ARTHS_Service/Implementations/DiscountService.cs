@@ -18,17 +18,34 @@ namespace ARTHS_Service.Implementations
     {
         private readonly IDiscountRepository _repository;
         private readonly ICloudStorageService _cloudStorageService;
+        private readonly IMotobikeProductRepository _motobikeProductRepository;
 
         public DiscountService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService) : base(unitOfWork, mapper)
         {
             _repository = unitOfWork.Discount;
+            _motobikeProductRepository = _unitOfWork.MotobikeProduct;
             _cloudStorageService = cloudStorageService;
         }
 
         public async Task<List<DiscountViewModel>> GetDiscounts(DiscountFilterModel filter)
         {
-            var query = _repository.GetAll();
+            var currentTime = DateTime.Now;
 
+            var query = _repository.GetAll();
+            if (query != null)
+            {
+                var discountsToDiscontinue = query
+                        .Where(discount => discount.EndDate < currentTime && discount.Status != DiscountStatus.Discontinued)
+                        .ToList();
+
+                foreach (var discount in discountsToDiscontinue)
+                {
+                    discount.Status = DiscountStatus.Discontinued;
+                    _repository.Update(discount);
+                }
+
+                await _unitOfWork.SaveChanges();
+            }
             if (filter.Title != null)
             {
                 query = query.Where(discount => discount.Title.Contains(filter.Title));
@@ -45,10 +62,10 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(discount => discount.EndDate <= filter.EndDate);
             }
-
-            
-
-
+            else if (filter.status != null)
+            {
+                query = query.Where(discount => discount.Status == filter.status);
+            }
             return await query
                 .ProjectTo<DiscountViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -84,6 +101,7 @@ namespace ARTHS_Service.Implementations
                     };
 
                     _repository.Add(discount);
+                    await AddDiscountIdIntoMotobikeProduct(discountId, model.MotobikeProductId);
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }
@@ -112,7 +130,7 @@ namespace ARTHS_Service.Implementations
             discount.EndDate = model.EndDate ?? discount.EndDate;
             discount.Description = model.Description ?? discount.Description;
             discount.Status = model.Status ?? discount.Status;
-
+            await AddDiscountIdIntoMotobikeProduct(id, model.MotobikeProductId);
             if (model.Image != null)
             {
                 await _cloudStorageService.Delete(id);
@@ -124,6 +142,44 @@ namespace ARTHS_Service.Implementations
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetDiscount(id) : null!;
         }
+
+        public async Task<DiscountViewModel> RemoveDiscountInProduct(Guid id)
+        {
+            var product = await _motobikeProductRepository.GetMany(p => p.Id == id).FirstOrDefaultAsync();
+            if (product != null)
+            {
+                product.DiscountId = null;
+                var result = await _unitOfWork.SaveChanges();
+                if (result > 0)
+                {
+                    return new DiscountViewModel { };
+                }
+                throw new Exception("xóa không thành công");
+            }
+            throw new NotFoundException("không tìm thấy");
+        }
+
+        private async Task<ICollection<MotobikeProduct>> AddDiscountIdIntoMotobikeProduct(Guid idDiscount, ICollection<Guid> idProducts)
+        {
+            var listProduct = new List<MotobikeProduct>();
+            foreach (Guid product in idProducts)
+            {
+                // Find the motobike product by its ID.
+                var motobikeProduct = await _motobikeProductRepository
+                    .GetMany(p => p.Id == product)
+                    .FirstOrDefaultAsync();
+
+                if (motobikeProduct != null || motobikeProduct.Discount.Status == DiscountStatus.Discontinued)
+                {
+                    // Update the DiscountId for the motobike product.
+                    motobikeProduct.DiscountId = idDiscount;
+                    _motobikeProductRepository.Update(motobikeProduct);
+                    listProduct.Add(motobikeProduct);
+                }
+            }
+            return listProduct;
+        }
+
 
     }
 }
