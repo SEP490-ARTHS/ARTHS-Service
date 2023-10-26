@@ -433,7 +433,7 @@ CREATE TABLE RepairBooking(
 	Id uniqueidentifier primary key NOT NULL,
 	CustomerId uniqueidentifier foreign key references CustomerAccount(AccountId) NOT NULL,
 	DateBook datetime NOT NULL,
-	Description nvarchar(50) NOT NULL,
+	Description nvarchar(max) NOT NULL,
 	CancellationReason nvarchar(max),
 	CancellationDate datetime,
 	Status nvarchar(100) NOT NULL,

@@ -6,6 +6,8 @@ namespace ARTHS_Data.Models.Requests.Filters
     {
         public string? Id { get; set; }
         public string? CustomerName { get; set; }
+        public string? OrderStatus { get; set; }
+        public string? ExcludeOrderStatus { get; set; }
         public string? CustomerPhone { get; set; }
     }
 }

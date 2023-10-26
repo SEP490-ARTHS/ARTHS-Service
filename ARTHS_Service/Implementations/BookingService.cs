@@ -48,12 +48,16 @@ namespace ARTHS_Service.Implementations
                 }
                 query = query.Where(booking => booking.DateBook.Date.Equals(dateBook.Date));
             }
+            if (!string.IsNullOrEmpty(filter.BookingStatus))
+            {
+                query = query.Where(booking => booking.Status.Equals(filter.BookingStatus));
+            }
             var listBooking = query
                 .ProjectTo<RepairBookingViewModel>(_mapper.ConfigurationProvider)
                 .OrderByDescending(booking => booking.CreateAt);
             var bookings = await listBooking.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
             var totalRow = await listBooking.AsNoTracking().CountAsync();
-            if(bookings != null || bookings != null && bookings.Any())
+            if(bookings != null && bookings.Any())
             {
                 return new ListViewModel<RepairBookingViewModel>
                 {
@@ -87,9 +91,9 @@ namespace ARTHS_Service.Implementations
         public async Task<RepairBookingViewModel> CreateBooking(Guid customerId, CreateRepairBookingModel model)
         {
             DateTime dateBook;
-            if(!DateTime.TryParseExact(model.DateBook, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateBook))
+            if(!DateTime.TryParseExact(model.DateBook, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateBook))
             {
-                throw new ConflictException("Vui lòng nhập đúng định dạng ngày (dd-MM-yyyy).");
+                throw new ConflictException("Vui lòng nhập đúng định dạng ngày (yyyy-MM-dd).");
             }
             if(!await IsBookingAvailableForDate(dateBook))
             {
@@ -130,9 +134,9 @@ namespace ARTHS_Service.Implementations
                 if (!string.IsNullOrEmpty(model.DateBook))
                 {
                     DateTime newDateBook;
-                    if (!DateTime.TryParseExact(model.DateBook, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out newDateBook))
+                    if (!DateTime.TryParseExact(model.DateBook, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out newDateBook))
                     {
-                        throw new ConflictException("Vui lòng nhập đúng định dạng ngày (dd-MM-yyyy).");
+                        throw new ConflictException("Vui lòng nhập đúng định dạng ngày (yyyy-MM-dd).");
                     }
                     if (!newDateBook.Date.Equals(dateBooking.Date))
                     {
@@ -207,9 +211,9 @@ namespace ARTHS_Service.Implementations
         private TimeSpan HandleTimeBooking(string timeBook)
         {
             TimeSpan result;
-            if (TimeSpan.TryParseExact(timeBook, "hh\\:mm\\:ss", null, out result))
+            if (TimeSpan.TryParseExact(timeBook, "hh\\:mm", null, out result))
             {
-                if (result >= TimeSpan.Parse("08:00:00") && result <= TimeSpan.Parse("15:00:00"))
+                if (result >= TimeSpan.Parse("08:00") && result <= TimeSpan.Parse("15:00"))
                 {
                     return result;
                 }
@@ -217,7 +221,7 @@ namespace ARTHS_Service.Implementations
             }
             else
             {
-                throw new ConflictException("Vui lòng nhập đúng định dạng thời gian (hh:mm:ss)");
+                throw new ConflictException("Vui lòng nhập đúng định dạng thời gian (hh:mm)");
             }
         }
 
