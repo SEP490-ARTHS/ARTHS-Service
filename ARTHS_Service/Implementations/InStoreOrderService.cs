@@ -52,13 +52,21 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(order => order.CustomerPhone.Contains(filter.CustomerPhone));
             }
+            if (filter.OrderStatus != null)
+            {
+                query = query.Where(order => order.Status.Equals(filter.OrderStatus));
+            }
+            if (filter.ExcludeOrderStatus != null)
+            {
+                query = query.Where(order => !order.Status.Equals(filter.ExcludeOrderStatus));
+            }
             var listOrder = query
                 .ProjectTo<BasicInStoreOrderViewModel>(_mapper.ConfigurationProvider)
                 .OrderByDescending(order => order.OrderDate);
 
             var orders = await listOrder.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
             var totalRow = await listOrder.AsNoTracking().CountAsync();
-            if(orders != null || orders != null && orders.Any())
+            if (orders != null || orders != null && orders.Any())
             {
                 return new ListViewModel<BasicInStoreOrderViewModel>
                 {
@@ -136,13 +144,13 @@ namespace ARTHS_Service.Implementations
             inStoreOrder.CustomerPhone = model.CustomerPhone ?? inStoreOrder.CustomerPhone;
             inStoreOrder.LicensePlate = model.LicensePlate ?? inStoreOrder.LicensePlate;
 
-            
+
             if (model.Status != null)
             {
                 //khi nào status là paid thì mới tạo transaction
                 if (model.Status.Equals(InStoreOrderStatus.Paid) && !inStoreOrder.Status.Equals(InStoreOrderStatus.Paid))
                 {
-                    
+
                     await CreateTransaction(inStoreOrder);
                 }
                 if (model.Status.Equals(InStoreOrderStatus.WaitForPay))
@@ -178,7 +186,7 @@ namespace ARTHS_Service.Implementations
 
             _transactionRepository.Add(transaction);
             await _unitOfWork.SaveChanges();
-        } 
+        }
 
         private async Task SendNotification(InStoreOrder order)
         {
@@ -267,7 +275,7 @@ namespace ARTHS_Service.Implementations
             }
 
             int price = product.PriceCurrent;
-            if(product.Discount != null)
+            if (product.Discount != null)
             {
                 price = price * (100 - product.Discount.DiscountAmount) / 100;
             }

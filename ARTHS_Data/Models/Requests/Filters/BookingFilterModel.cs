@@ -4,5 +4,6 @@
     {
         public Guid? CustomerId { get; set; }
         public string? BookingDate { get; set; }
+        public string? BookingStatus { get; set; }
     }
 }
