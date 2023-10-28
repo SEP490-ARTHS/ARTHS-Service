@@ -9,6 +9,8 @@ using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
 using ARTHS_Utility.Exceptions;
+using ARTHS_Utility.Helpers;
+using ARTHS_Utility.Helpers.Models;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -147,6 +149,9 @@ namespace ARTHS_Service.Implementations
                 order.CancellationReason = model.CancellationReason;
                 order.CancellationDate = DateTime.UtcNow;
             }
+            if (model.Status.Equals(OnlineOrderStatus.Transport)){
+                await handleCreateShippingOrder(order.Id);
+            }
 
             order.Status = model.Status ?? order.Status;
 
@@ -162,6 +167,54 @@ namespace ARTHS_Service.Implementations
         }
 
         //PRIVATE METHOD
+        private async Task<string> handleCreateShippingOrder(Guid orderId)
+        {
+            var order = await _onlineOrderRepository.GetMany(order => order.Id.Equals(orderId))
+                .Include(order => order.Customer)
+                    .ThenInclude(customer => customer.Account)
+                .Include(order => order.OnlineOrderDetails)
+                    .ThenInclude(detail => detail.MotobikeProduct)
+                .FirstOrDefaultAsync();
+            List<Item> items = new List<Item>();
+            foreach (var item in order!.OnlineOrderDetails)
+            {
+                var product = new Item
+                {
+                    Name = item.MotobikeProduct.Name,
+                    Code = item.MotobikeProductId.ToString(),
+                    Quantity = item.Quantity,
+                    Price = item.Price,
+                    Length = 10,
+                    Weight = 200,
+                    Width = 30,
+                    Height = 40,
+                };
+                items.Add(product);
+            }
+            var segments = order.Address.Split(',');
+            var requestData = new GhnCreateRequestModel
+            {
+                Note = "Vui lòng vận chuyển cẩn thận",
+                ToName = order.Customer.FullName,
+                ToPhone = order.PhoneNumber,
+                ToAddress = segments[0].Trim(),
+                ToWardName = segments[1].Trim(),
+                ToDistrictName = segments[2].Trim(),
+                ToProvinceName = segments[3].Trim(),
+                ClientOrderCode = order.Id.ToString(),
+                CODAmount = order.PaymentMethod.Equals(PaymentMethods.VNPay) ? 0 : order.TotalAmount,
+                Content = "Chỉ lấy hàng vào buổi trưa",
+                Weight = 200, //gram
+                Length = 10, //cm
+                Width = 30, //cm
+                Height = 40, //cm
+                InsuranceValue = order.TotalAmount,
+                Items = items
+            };
+            var resutl = await GhnHelper.CreateShippingOrderAsync(requestData);
+            return resutl;
+        }
+
         private async Task CreateTransaction(OnlineOrder onlineOrder)
         {
             var transaction = new Transaction

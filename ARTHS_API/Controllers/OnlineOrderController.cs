@@ -7,6 +7,7 @@ using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
 using ARTHS_Utility.Helpers;
+using ARTHS_Utility.Helpers.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -86,7 +87,17 @@ namespace ARTHS_API.Controllers
         public async Task<ActionResult<OnlineOrderViewModel>> UpdateOrder([FromRoute] Guid Id, [FromBody] UpdateOnlineOrderModel model)
         {
             var order = await _onlineOrderService.UpdateOrder(Id, model);
+            //await GhnHelper.CreateShippingOrderAsync();
+            //Console.WriteLine("Bàn giao " + await GhnHelper.CreateShippingOrderAsync());
             return CreatedAtAction(nameof(GetOrder), new { id = order.Id }, order);
+        }
+
+        [HttpPost]
+        [Route("ghn-web-hook")]
+        public ActionResult<GhnWebHookResponse> GhnCallBack([FromBody] GhnWebHookResponse request)
+        {
+
+            return Ok(request);
         }
 
 

@@ -43,7 +43,7 @@ namespace ARTHS_API.Controllers
 
         [HttpPost]
         [Authorize(UserRole.Teller)]
-        [ProducesResponseType(typeof(InStoreOrderViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(InStoreOrderViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Create order in store.")]
         public async Task<ActionResult<InStoreOrderViewModel>> CreateOrder([FromBody] CreateInStoreOrderModel model)
         {
@@ -55,7 +55,7 @@ namespace ARTHS_API.Controllers
         [HttpPut]
         [Route("{id}")]
         [Authorize(UserRole.Teller)]
-        [ProducesResponseType(typeof(InStoreOrderViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(InStoreOrderViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Update in store order")]
         public async Task<ActionResult<InStoreOrderViewModel>> UpdateInStoreOrder([FromRoute] string Id, [FromBody] UpdateInStoreOrderModel model)
         {
