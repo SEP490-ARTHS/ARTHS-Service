@@ -52,6 +52,10 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(booking => booking.Status.Equals(filter.BookingStatus));
             }
+            if (!string.IsNullOrEmpty(filter.ExcludeBookingStatus))
+            {
+                query = query.Where(booking => !booking.Status.Equals(filter.ExcludeBookingStatus));
+            }
             var listBooking = query
                 .ProjectTo<RepairBookingViewModel>(_mapper.ConfigurationProvider)
                 .OrderByDescending(booking => booking.CreateAt);

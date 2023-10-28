@@ -82,7 +82,7 @@ CREATE TABLE Account(
 	RoleId uniqueidentifier foreign key references AccountRole(Id) NOT NULL,
 	PhoneNumber varchar(30) unique NOT NULL,
 	PasswordHash varchar(255) NOT NULL,
-	RefreshToken varchar(255),
+	RefreshToken varchar(255),--không cần
 	Status nvarchar(100) NOT NULL,
 	CreateAt datetime NOT NULL default getdate()
 );
@@ -347,6 +347,8 @@ CREATE TABLE OnlineOrder(
 	OrderDate datetime NOT NULL default getdate()
 );
 GO
+ALTER TABLE OnlineOrder
+ADD OrderCode nvarchar(100);
 
 --Table product order detail
 DROP TABLE IF EXISTS OnlineOrderDetail;
