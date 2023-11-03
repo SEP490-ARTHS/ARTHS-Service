@@ -38,7 +38,7 @@ namespace ARTHS_API.Controllers
         [ProducesResponseType(typeof(CartViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Add product to cart")]
-        public async Task<ActionResult<CartViewModel>> AddToCart(CreateCartModel model)
+        public async Task<ActionResult<CartViewModel>> AddToCart(List<CreateCartModel> model)
         {
             var auth = (AuthModel?)HttpContext.Items["User"];
             var cart = await _cartService.AddToCart(auth!.Id, model);

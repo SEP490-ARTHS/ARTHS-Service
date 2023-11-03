@@ -7,7 +7,7 @@ namespace ARTHS_Service.Interfaces
     public interface ICartService
     {
         Task<CartViewModel> GetCartByCustomerId(Guid customerId);
-        Task<CartViewModel> AddToCart(Guid customerId, CreateCartModel model);
+        Task<CartViewModel> AddToCart(Guid customerId, List<CreateCartModel> list);
         Task<CartViewModel> UpdateCart(Guid cartId, UpdateCartModel model);
     }
 }

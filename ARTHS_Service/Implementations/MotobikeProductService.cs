@@ -36,50 +36,79 @@ namespace ARTHS_Service.Implementations
 
         public async Task<ListViewModel<MotobikeProductDetailViewModel>> GetMotobikeProducts(MotobikeProductFilterModel filter, PaginationRequestModel pagination)
         {
-            var query = _motobikeProductRepository.GetAll();
+            var baseQuery = _motobikeProductRepository.GetAll().AsQueryable();
 
             if (!string.IsNullOrEmpty(filter.Name))
             {
-                query = query.Where(product => product.Name.Contains(filter.Name));
+                baseQuery = baseQuery.Where(product => product.Name.Contains(filter.Name));
             }
+
             if (!string.IsNullOrEmpty(filter.RepairService))
             {
-                query = query.Include(product => product.RepairService)
-                    .Where(product => product.RepairService != null && product.RepairService.Name.Contains(filter.RepairService));
+                baseQuery = baseQuery.Where(product => product.RepairService != null && product.RepairService.Name.Contains(filter.RepairService));
             }
+
             if (!string.IsNullOrEmpty(filter.Category))
             {
-                query = query.Include(product => product.Category)
-                    .Where(product => product.Category != null && product.Category.CategoryName.Contains(filter.Category));
+                baseQuery = baseQuery.Where(product => product.Category != null && product.Category.CategoryName.Contains(filter.Category));
             }
+
             if (!string.IsNullOrEmpty(filter.VehiclesName))
             {
-                query = query.Include(product => product.Vehicles)
-                    .Where(product => product.Vehicles.Any(vehicle => vehicle.VehicleName.Contains(filter.VehiclesName)));
+                baseQuery = baseQuery.Where(product => product.Vehicles.Any(vehicle => vehicle.VehicleName.Contains(filter.VehiclesName)));
             }
+
             if (filter.DiscountId.HasValue)
             {
-                query = query.Where(product => product.DiscountId.Equals(filter.DiscountId.Value));
+                baseQuery = baseQuery.Where(product => product.DiscountId.Equals(filter.DiscountId.Value));
             }
-            var listProducts = query
-                .ProjectTo<MotobikeProductDetailViewModel>(_mapper.ConfigurationProvider)
-                .OrderByDescending(product => product.CreateAt);
-            var products = await listProducts.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
-            var totalRow = await listProducts.AsNoTracking().CountAsync();
-            if(products != null || products != null && products.Any())
+            if (!string.IsNullOrEmpty(filter.Status))
             {
-                return new ListViewModel<MotobikeProductDetailViewModel>
-                {
-                    Pagination = new PaginationViewModel
-                    {
-                        PageNumber = pagination.PageNumber,
-                        PageSize = pagination.PageSize,
-                        TotalRow = totalRow
-                    },
-                    Data = products
-                };
+                baseQuery = baseQuery.Where(product => product.Status.Contains(filter.Status));
             }
-            return null!;
+            if(filter.NoRepairService.HasValue &&  filter.NoRepairService.Value)
+            {
+                baseQuery = baseQuery.Where(product => product.RepairServiceId == null);
+            }
+            // Sorting logic
+            if (filter.SortByNameAsc.HasValue)
+            {
+                baseQuery = filter.SortByNameAsc.Value
+                    ? baseQuery.OrderBy(p => p.Name)
+                    : baseQuery.OrderByDescending(p => p.Name);
+            }
+
+            if (filter.SortByPriceAsc.HasValue)
+            {
+                baseQuery = filter.SortByPriceAsc.Value
+                    ? baseQuery.OrderBy(p => p.PriceCurrent)
+                    : baseQuery.OrderByDescending(p => p.PriceCurrent);
+            }
+            if (!filter.SortByNameAsc.HasValue && !filter.SortByPriceAsc.HasValue)
+            {
+                baseQuery = baseQuery.OrderByDescending(p => p.CreateAt);
+            }
+
+            var totalRow = await baseQuery.AsNoTracking().CountAsync();
+            var paginatedQuery = baseQuery
+                .Skip(pagination.PageNumber * pagination.PageSize)
+                .Take(pagination.PageSize);
+
+            var products = await paginatedQuery
+                .ProjectTo<MotobikeProductDetailViewModel>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return new ListViewModel<MotobikeProductDetailViewModel>
+            {
+                Pagination = new PaginationViewModel
+                {
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRow = totalRow
+                },
+                Data = products
+            };
         }
 
         public async Task<MotobikeProductDetailViewModel> GetMotobikeProduct(Guid id)

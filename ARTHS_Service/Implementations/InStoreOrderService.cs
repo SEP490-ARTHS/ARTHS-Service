@@ -40,9 +40,9 @@ namespace ARTHS_Service.Implementations
         {
             var query = _inStoreOrderRepository.GetAll();
 
-            if (filter.Id != null)
+            if (filter.StaffId.HasValue)
             {
-                query = query.Where(order => order.Id.Contains(filter.Id));
+                query = query.Where(order => order.StaffId.Equals(filter.StaffId));
             }
             if (filter.CustomerName != null)
             {
