@@ -34,13 +34,9 @@ namespace ARTHS_Service.Implementations
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy cart");
         }
 
-        public async Task<CartViewModel> AddToCart(Guid customerId, CreateCartModel model)
+        public async Task<CartViewModel> AddToCart(Guid customerId, List<CreateCartModel> list)
         {
-            var motobikeProduct = await _productRepository.GetMany(product => product.Id.Equals(model.ProductId)).FirstOrDefaultAsync();
-            if(motobikeProduct == null)
-            {
-                throw new NotFoundException("Không tìm thấy product");
-            }
+            
 
             var cart = await _cartRepository.GetMany(cart => cart.CustomerId.Equals(customerId)).FirstOrDefaultAsync();
             if(cart == null)
@@ -53,7 +49,15 @@ namespace ARTHS_Service.Implementations
             {
                 try
                 {
-                    await HandleAddCartItem(cart.Id, model);
+                    foreach(var item in list)
+                    {
+                        var motobikeProduct = await _productRepository.GetMany(product => product.Id.Equals(item.ProductId)).FirstOrDefaultAsync();
+                        if (motobikeProduct == null)
+                        {
+                            throw new NotFoundException("Không tìm thấy product");
+                        }
+                        await HandleAddCartItem(cart.Id, item);
+                    }
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }

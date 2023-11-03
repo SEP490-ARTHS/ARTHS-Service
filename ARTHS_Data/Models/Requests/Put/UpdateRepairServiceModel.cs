@@ -8,6 +8,8 @@ namespace ARTHS_Data.Models.Requests.Put
         public int? Price { get; set; }
         public string? Description { get; set; }
         public string? Status { get; set; }
+        public List<Guid>? MotobikeProductIds { get; set; } = new List<Guid>();
+
 
         public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
     }

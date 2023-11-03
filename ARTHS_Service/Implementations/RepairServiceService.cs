@@ -20,6 +20,7 @@ namespace ARTHS_Service.Implementations
     {
         private readonly IRepairServiceRepository _repairRepository;
         private readonly IImageRepository _imageRepository;
+        private readonly IMotobikeProductRepository _motobikeProductRepository;
 
         private readonly ICloudStorageService _cloudStorageService;
 
@@ -27,6 +28,7 @@ namespace ARTHS_Service.Implementations
         {
             _repairRepository = unitOfWork.RepairService;
             _imageRepository = unitOfWork.Image;
+            _motobikeProductRepository = unitOfWork.MotobikeProduct;
 
             _cloudStorageService = cloudStorageService;
         }
@@ -34,19 +36,46 @@ namespace ARTHS_Service.Implementations
 
         public async Task<ListViewModel<RepairServiceViewModel>> GetRepairServices(RepairServiceFilterModel filter, PaginationRequestModel pagination)
         {
-            var query = _repairRepository.GetAll();
+            var query = _repairRepository.GetAll().AsQueryable();
 
             if (filter.Name != null)
             {
                 query = query.Where(repair => repair.Name.Contains(filter.Name));
             }
-            var listService = query
-                .ProjectTo<RepairServiceViewModel>(_mapper.ConfigurationProvider)
-                .OrderByDescending(service => service.CreateAt);
-            var services = await listService.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
-            var totalRow = await listService.AsNoTracking().CountAsync();
+            if (!string.IsNullOrEmpty(filter.Status))
+            {
+                query = query.Where(repair => repair.Status.Contains(filter.Status));
+            }
+            // Sorting logic
+            if (filter.SortByNameAsc.HasValue)
+            {
+                query = filter.SortByNameAsc.Value
+                    ? query.OrderBy(p => p.Name)
+                    : query.OrderByDescending(p => p.Name);
+            }
 
-            if(services != null || services != null && services.Any())
+            if (filter.SortByPriceAsc.HasValue)
+            {
+                query = filter.SortByPriceAsc.Value
+                    ? query.OrderBy(p => p.Price)
+                    : query.OrderByDescending(p => p.Price);
+            }
+            if (!filter.SortByNameAsc.HasValue && !filter.SortByPriceAsc.HasValue)
+            {
+                query = query.OrderByDescending(p => p.CreateAt);
+            }
+
+            var totalRow = await query.AsNoTracking().CountAsync();
+            var paginatedQuery = query
+                .Skip(pagination.PageNumber * pagination.PageSize)
+                .Take(pagination.PageSize);
+
+            var services = await paginatedQuery
+               .ProjectTo<RepairServiceViewModel>(_mapper.ConfigurationProvider)
+               .AsNoTracking()
+               .ToListAsync();
+
+            if (services != null || services != null && services.Any())
             {
                 return new ListViewModel<RepairServiceViewModel>
                 {
@@ -62,14 +91,14 @@ namespace ARTHS_Service.Implementations
             return null!;
         }
 
-        public async Task<RepairServiceViewModel> GetRepairService(Guid id)
+        public async Task<RepairServiceDetailViewModel> GetRepairService(Guid id)
         {
             return await _repairRepository.GetMany(repair => repair.Id.Equals(id))
-                .ProjectTo<RepairServiceViewModel>(_mapper.ConfigurationProvider)
+                .ProjectTo<RepairServiceDetailViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy dịch vụ sữa chữa");
         }
 
-        public async Task<RepairServiceViewModel> CreateRepairService(CreateRepairServiceModel model)
+        public async Task<RepairServiceDetailViewModel> CreateRepairService(CreateRepairServiceModel model)
         {
             var imageCount = model.Images.Count();
             if (imageCount < 1 || imageCount > 4)
@@ -85,24 +114,24 @@ namespace ARTHS_Service.Implementations
             }
 
             var result = 0;
-            var repairServiceId = Guid.Empty;
+            var repairServiceId = Guid.NewGuid();
+            var repairService = new RepairService
+            {
+                Id = repairServiceId,
+                Name = model.Name,
+                Price = model.Price,
+                Description = model.Description,
+                Status = RepairServiceStatus.Active,
+
+            };
+
             using (var transaction = _unitOfWork.Transaction())
             {
                 try
                 {
-                    repairServiceId = Guid.NewGuid();
-                    var repairService = new RepairService
-                    {
-                        Id = repairServiceId,
-                        Name = model.Name,
-                        Price = model.Price,
-                        Description = model.Description,
-                        Status = RepairServiceStatus.Active
-                    };
-
                     _repairRepository.Add(repairService);
                     await CreateRepairServiceImage(repairServiceId, model.Images);
-
+                    await AddProductToRepairService(repairServiceId, model.MotobikeProductIds);
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }
@@ -115,7 +144,7 @@ namespace ARTHS_Service.Implementations
             return result > 0 ? await GetRepairService(repairServiceId) : null!;
         }
 
-        public async Task<RepairServiceViewModel> UpdateRepairService(Guid id, UpdateRepairServiceModel model)
+        public async Task<RepairServiceDetailViewModel> UpdateRepairService(Guid id, UpdateRepairServiceModel model)
         {
             var repairService = await _repairRepository.GetMany(repair => repair.Id.Equals(id)).FirstOrDefaultAsync();
 
@@ -126,7 +155,7 @@ namespace ARTHS_Service.Implementations
 
             if (model.Images != null && model.Images.Count > 0)
             {
-                if(model.Images.Count > 4)
+                if (model.Images.Count > 4)
                 {
                     throw new BadRequestException("Chỉ được chứa bốn hình ảnh.");
                 }
@@ -142,12 +171,17 @@ namespace ARTHS_Service.Implementations
                 await UpdateRepairServiceImage(id, model.Images);
             }
 
+            if(model.MotobikeProductIds != null && model.MotobikeProductIds.Count > 0)
+            {
+                await UpdateProductToRepairService(repairService.Id, model.MotobikeProductIds);
+            }
+
             repairService.Name = model.Name ?? repairService.Name;
             repairService.Price = model.Price ?? repairService.Price;
             repairService.Description = model.Description ?? repairService.Description;
             repairService.Status = model.Status ?? repairService.Status;
 
-            
+
 
             _repairRepository.Update(repairService);
             var result = await _unitOfWork.SaveChanges();
@@ -159,6 +193,46 @@ namespace ARTHS_Service.Implementations
 
 
         //PRIVATE METHOD
+
+        private async Task AddProductToRepairService(Guid repairServiceId, List<Guid> productIds)
+        {
+            var listProduct = new List<MotobikeProduct>();
+            foreach (var productId in productIds)
+            {
+                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(productId)).FirstOrDefaultAsync();
+                if (product == null) throw new NotFoundException($"Không tìm thấy product with id : {productId}");
+                product.RepairServiceId = repairServiceId;
+                listProduct.Add(product);
+            }
+            _motobikeProductRepository.UpdateRange(listProduct);
+        }
+
+        private async Task UpdateProductToRepairService(Guid repairServiceId, List<Guid> newProductIds)
+        {
+            var listProduct = new List<MotobikeProduct>();
+            var currentProductIds = await _motobikeProductRepository.GetMany(product => product.RepairServiceId.Equals(repairServiceId))
+                .Select(product => product.Id)
+                .ToListAsync();
+            //có trong tập thứ nhất nhưng không có trong tập thứ 2
+            var productIdsToAdd = newProductIds.Except(currentProductIds).ToList();
+            var productIdsToRemove = currentProductIds.Except(newProductIds).ToList();
+
+            foreach(var productId in productIdsToRemove)
+            {
+                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(productId)).FirstOrDefaultAsync();
+                product!.RepairServiceId = null;
+                listProduct.Add(product);
+            }
+            foreach(var productId in productIdsToAdd)
+            {
+                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(productId)).FirstOrDefaultAsync();
+                if (product == null) throw new NotFoundException($"Không tìm thấy product id {productId}");
+                product.RepairServiceId = repairServiceId;
+                listProduct.Add(product);
+            }
+            _motobikeProductRepository.UpdateRange(listProduct);
+        }
+
         private async Task<ICollection<Image>> CreateRepairServiceImage(Guid id, ICollection<IFormFile> images)
         {
             var listImage = new List<Image>();
