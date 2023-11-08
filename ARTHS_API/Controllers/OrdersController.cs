@@ -25,9 +25,9 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(ListViewModel<OrderViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ListViewModel<BasicOrderViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all order.")]
-        public async Task<ActionResult<ListViewModel<OrderViewModel>>> GetOrders([FromQuery] OrderFilterModel filter, [FromQuery]PaginationRequestModel pagination)
+        public async Task<ActionResult<ListViewModel<BasicOrderViewModel>>> GetOrders([FromQuery] OrderFilterModel filter, [FromQuery]PaginationRequestModel pagination)
         {
             return await _orderService.GetOrders(filter, pagination);
         }

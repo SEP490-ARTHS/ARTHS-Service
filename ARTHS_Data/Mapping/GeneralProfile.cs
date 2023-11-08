@@ -81,8 +81,11 @@ namespace ARTHS_Data.Mapping
                     Type = notification.Type
                 }));
             CreateMap<Order, OrderViewModel>();
+            CreateMap<Order, BasicOrderViewModel>();
             CreateMap<OrderDetail, OrderDetailViewModel>();
             CreateMap<RevenueStore, RevenueStoreViewModel>();
+            CreateMap<WarrantyHistory, WarrantyHistoryViewModel>();
+            CreateMap<Configuration, ConfigurationViewModel>();
 
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();

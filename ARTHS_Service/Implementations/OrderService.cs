@@ -45,7 +45,7 @@ namespace ARTHS_Service.Implementations
             _revenueStoreRepository = unitOfWork.RevenueStore;
         }
 
-        public async Task<ListViewModel<OrderViewModel>> GetOrders(OrderFilterModel filter, PaginationRequestModel pagination)
+        public async Task<ListViewModel<BasicOrderViewModel>> GetOrders(OrderFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _orderRepository.GetAll().AsQueryable();
             
@@ -89,10 +89,10 @@ namespace ARTHS_Service.Implementations
                 .Skip(pagination.PageNumber * pagination.PageSize)
                 .Take(pagination.PageSize);
             var orders = await paginatedQuery
-                .ProjectTo<OrderViewModel>(_mapper.ConfigurationProvider)
+                .ProjectTo<BasicOrderViewModel>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
-            return new ListViewModel<OrderViewModel>
+            return new ListViewModel<BasicOrderViewModel>
             {
                 Pagination = new PaginationViewModel
                 {

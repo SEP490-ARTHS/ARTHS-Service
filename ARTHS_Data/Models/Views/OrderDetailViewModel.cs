@@ -16,6 +16,6 @@ namespace ARTHS_Data.Models.Views
         public virtual BasicMotobikeProductViewModel? MotobikeProduct { get; set; }
         public virtual BasicRepairServiceViewModel? RepairService { get; set; }
         //public virtual MaintenanceSchedule? MaintenanceSchedule { get; set; }
-        //public virtual ICollection<WarrantyHistory> WarrantyHistories { get; set; } = new List<WarrantyHistory>();
+        public virtual ICollection<WarrantyHistoryViewModel> WarrantyHistories { get; set; } = new List<WarrantyHistoryViewModel>();
     }
 }

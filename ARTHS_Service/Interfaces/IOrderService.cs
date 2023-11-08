@@ -8,7 +8,7 @@ namespace ARTHS_Service.Interfaces
 {
     public interface IOrderService
     {
-        Task<ListViewModel<OrderViewModel>> GetOrders(OrderFilterModel filter, PaginationRequestModel pagination);
+        Task<ListViewModel<BasicOrderViewModel>> GetOrders(OrderFilterModel filter, PaginationRequestModel pagination);
         Task<OrderViewModel> GetOrder(string Id);
         Task<OrderViewModel> CreateOrderOnline(Guid customerId, CreateOrderOnlineModel model);
         Task<OrderViewModel> UpdateOrderOnline(string Id, UpdateOrderOnlineModel model);
