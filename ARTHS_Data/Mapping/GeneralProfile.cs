@@ -45,7 +45,6 @@ namespace ARTHS_Data.Mapping
                                                             (src.StaffAccount != null ? src.StaffAccount.Avatar : null)))));
 
             CreateMap<RepairService, RepairServiceViewModel>();
-            CreateMap<RepairService, RepairServiceDetailViewModel>();
 
             CreateMap<MotobikeProduct, MotobikeProductViewModel>()
                 .ForMember(dest => dest.PriceCurrent, otp => otp.MapFrom(src => src.MotobikeProductPrices.OrderByDescending(price => price.CreateAt).FirstOrDefault()!.PriceCurrent))
@@ -62,15 +61,7 @@ namespace ARTHS_Data.Mapping
 
             CreateMap<MotobikeProductPrice, MotobikeProductPriceViewModel>();
 
-            CreateMap<InStoreOrder, InStoreOrderViewModel>()
-                .ForMember(dest => dest.TellerName, otp => otp.MapFrom(src => src.Teller.FullName))
-                .ForMember(dest => dest.StaffName, otp => otp.MapFrom(src => src.Staff != null ? src.Staff.FullName : null))
-                .ForMember(dest => dest.PaymentMethod, otp => otp.MapFrom(src => src.Transactions.FirstOrDefault(transaction => transaction.Status.Equals("Thành công"))!.PaymentMethod));
-
-            CreateMap<InStoreOrder, BasicInStoreOrderViewModel>()
-                .ForMember(dest => dest.TellerName, otp => otp.MapFrom(src => src.Teller.FullName))
-                .ForMember(dest => dest.StaffName, otp => otp.MapFrom(src => src.Staff != null ? src.Staff.FullName : null));
-
+            
             CreateMap<MotobikeProduct, BasicMotobikeProductViewModel>()
                 .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl))
                 .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
@@ -78,12 +69,7 @@ namespace ARTHS_Data.Mapping
             CreateMap<RepairService, BasicRepairServiceViewModel>()
                 .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl));
             
-            CreateMap<InStoreOrderDetail, InStoreOrderDetailViewModel>();
-            CreateMap<OnlineOrder, OnlineOrderViewModel>()
-                .ForMember(dest => dest.CustomerName, otp => otp.MapFrom(src => src.Customer.FullName));
-            CreateMap<OnlineOrderDetail, OnlineOrderDetailViewModel>();
-            CreateMap<OnlineOrder, BasicOnlineOrderViewModel>();
-            CreateMap<Transaction, TransactionViewModel>();
+           
             CreateMap<FeedbackProduct, FeedbackProductViewModel>();
             CreateMap<RepairBooking, RepairBookingViewModel>();
             CreateMap<Notification, NotificationViewModel>()
@@ -94,6 +80,10 @@ namespace ARTHS_Data.Mapping
                     Link = notification.Link,
                     Type = notification.Type
                 }));
+            CreateMap<Order, OrderViewModel>();
+            CreateMap<OrderDetail, OrderDetailViewModel>();
+            CreateMap<RevenueStore, RevenueStoreViewModel>();
+
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();

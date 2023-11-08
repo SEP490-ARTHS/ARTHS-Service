@@ -1,6 +1,5 @@
 ﻿using ARTHS_Data;
 using ARTHS_Data.Entities;
-using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
@@ -13,100 +12,61 @@ namespace ARTHS_Service.Implementations
 {
     public class VNPayService : BaseService, IVNPayService
     {
-        private readonly IOnlineOrderRepository _onlineOrderRepository;
-        private readonly IInStoreOrderRepository _inStoreOrderRepository;
-        private readonly ITransactionRepository _transactionRepository;
+        private readonly IOrderRepository _orderRepository;
+        private readonly IRevenueStoreRepository _revenueStoreRepository;
 
         public VNPayService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
-            _onlineOrderRepository = unitOfWork.OnlineOrder;
-            _inStoreOrderRepository = unitOfWork.InStoreOrder;
-            _transactionRepository = unitOfWork.Transactions;
+            _orderRepository = unitOfWork.Order;
+            _revenueStoreRepository = unitOfWork.RevenueStore;
         }
 
 
-        public async Task<bool> ProcessOnlineOrderPayment(Guid onlineOrderId, VnPayRequestModel model)
+        public async Task<bool> ProcessInStoreOrderPayment(string orderId, VnPayRequestModel model)
         {
-            var order = await _onlineOrderRepository.GetMany(order => order.Id.Equals(onlineOrderId)).FirstOrDefaultAsync();
+            var order = await _orderRepository.GetMany(order => order.Id.Equals(orderId)).FirstOrDefaultAsync();
             if (order == null) throw new NotFoundException("Không tìm thấy thông tin order");
-            if(order.Status.Equals(OnlineOrderStatus.Paid)) throw new BadRequestException("Đơn hàng này đã thanh toán thành công rồi");
+            if (order.Status.Equals(OrderStatus.Paid)) throw new BadRequestException("Đơn hàng này đã thanh toán thành công rồi");
 
-            var transaction = new Transaction
+            var revenue = new RevenueStore
             {
-                OnlineOrderId = onlineOrderId,
-                TotalAmount = model.Amount,
-                Type = "Thanh toán hóa đơn mua hàng online của cửa hàng Thanh Huy",
-                PaymentMethod = "VNPay",
-                Status = "Đang xử lý",
-                Id = model.TxnRef
-            };
-            _transactionRepository.Add(transaction);
-            return await _unitOfWork.SaveChanges() > 0;
-        }
-
-
-        public async Task<bool> ProcessInStoreOrderPayment(string inStoreOrderId, VnPayRequestModel model)
-        {
-            var order = await _inStoreOrderRepository.GetMany(order => order.Id.Equals(inStoreOrderId)).FirstOrDefaultAsync();
-            if (order == null) throw new NotFoundException("Không tìm thấy thông tin order");
-            if (order.Status.Equals(InStoreOrderStatus.Paid)) throw new BadRequestException("Đơn hàng này đã thanh toán thành công rồi");
-
-            var transaction = new Transaction
-            {
-                InStoreOrderId = inStoreOrderId,
+                OrderId = orderId,
                 TotalAmount = model.Amount,
                 Type = "Thanh toán hóa đơn tại cửa hàng Thanh Huy",
                 PaymentMethod = "VNPay",
                 Status = "Đang xử lý",
                 Id = model.TxnRef
             };
-            _transactionRepository.Add(transaction);
+            _revenueStoreRepository.Add(revenue);
             return await _unitOfWork.SaveChanges() > 0;
         }
 
         public async Task<bool> ConfirmOrderPayment(VnPayResponseModel model)
         {
-            var transaction = await _transactionRepository.GetMany(transaction => transaction.Id.Equals(model.TxnRef)).FirstOrDefaultAsync();
-            if (transaction == null) throw new NotFoundException("Không tìm thấy thông tin của transaction");
+            var revenue = await _revenueStoreRepository.GetMany(transaction => transaction.Id.Equals(model.TxnRef)).FirstOrDefaultAsync();
+            if (revenue == null) throw new NotFoundException("Không tìm thấy thông tin của revenue");
 
-            if (transaction.OnlineOrderId.HasValue)
+
+            var order = await _orderRepository.GetMany(order => order.Id.Equals(revenue.OrderId)).FirstOrDefaultAsync();
+            if (order == null) return false;
+
+            if (model.ResponseCode == "00")
             {
-                var onlineOrder = await _onlineOrderRepository.GetMany(order => order.Id.Equals(transaction.OnlineOrderId)).FirstOrDefaultAsync();
-                if (onlineOrder == null) return false;
-
-                if(model.ResponseCode == "00")
-                {
-                    onlineOrder.Status = OnlineOrderStatus.Paid;
-                    transaction.Status = "Thành công";
-                }
-                else
-                {
-                    transaction.Status = "Thất bại";
-                }
-                _onlineOrderRepository.Update(onlineOrder);
+                order.Status = OrderStatus.Paid;
+                revenue.Status = "Thành công";
             }
             else
             {
-                var inStoreOrder = await _inStoreOrderRepository.GetMany(order => order.Id.Equals(transaction.InStoreOrderId)).FirstOrDefaultAsync();
-                if(inStoreOrder == null) return false;
-
-                if(model.ResponseCode == "00")
-                {
-                    inStoreOrder.Status = InStoreOrderStatus.Paid;
-                    transaction.Status = "Thành công";
-                }
-                else
-                {
-                    transaction.Status = "Thất bại";
-                }
-                _inStoreOrderRepository.Update(inStoreOrder);
+                revenue.Status = "Thất bại";
             }
-            transaction.UpdateAt = DateTime.UtcNow;
-            _transactionRepository.Update(transaction);
+            _orderRepository.Update(order);
+
+            revenue.UpdateAt = DateTime.UtcNow;
+            _revenueStoreRepository.Update(revenue);
 
             return await _unitOfWork.SaveChanges() > 0;
         }
 
-        
+
     }
 }

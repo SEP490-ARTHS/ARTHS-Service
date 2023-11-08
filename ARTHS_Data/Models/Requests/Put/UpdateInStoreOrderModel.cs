@@ -10,6 +10,7 @@ namespace ARTHS_Data.Models.Requests.Put
         public string? LicensePlate { get; set; }
         public string? Status { get; set; }
 
-        public List<CreateInStoreOrderDetailModel>? OrderDetailModel { get; set; } = new List<CreateInStoreOrderDetailModel>();
+
+        public List<CreateOrderOfflineDetailModel>? OrderDetailModel { get; set; } = new List<CreateOrderOfflineDetailModel>();
     }
 }

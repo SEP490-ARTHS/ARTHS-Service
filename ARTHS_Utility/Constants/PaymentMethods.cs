@@ -4,5 +4,6 @@
     {
         public const string COD = "Tiền mặt";
         public const string VNPay = "VNPay";
+        public const string ZaloPay = "ZaloPay";
     }
 }

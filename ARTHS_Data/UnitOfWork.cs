@@ -24,16 +24,16 @@ namespace ARTHS_Data
         private IMotobikeProductRepository _motobikeProduct = null!;
         private IImageRepository _image = null!;
         private IMotobikeProductPriceRepository _motobikeProductPrice = null!;
-        private IInStoreOrderRepository _inStoreOrder = null!;
-        private IInStoreOrderDetailRepository _inStoreOrderDetail = null!;
-        private IOnlineOrderRepository _onlineOrder = null!;
-        private IOnlineOrderDetailRepository _onlineOrderDetail = null!;
+        private IOrderRepository _order = null!;
+        private IOrderDetailRepository _orderDetail = null!;
         private IWarrantyRepository _warranty = null!;
-        private ITransactionRepository _transactions = null!;
+        private IRevenueStoreRepository _revenueStore = null!;
+
         private IFeedbackProductRepository _feedbackProduct = null!;
         private IRepairBookingRepository _repairBooking = null!;
         private IDeviceTokenRepository _deviceToken = null!;
         private INotificationRepository _notification = null!;
+        private IConfigurationRepository _configuration = null!;
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -114,24 +114,7 @@ namespace ARTHS_Data
             get { return _motobikeProductPrice ??= new MotobikeProductPriceRepository(_context); }
         }
 
-        public IInStoreOrderRepository InStoreOrder
-        {
-            get { return _inStoreOrder ??= new InStoreOrderRepository(_context); }
-        }
-
-        public IInStoreOrderDetailRepository InStoreOrderDetail
-        {
-            get { return _inStoreOrderDetail ??= new InStoreOrderDetailRepository(_context); }
-        }
-
-        public IOnlineOrderRepository OnlineOrder
-        {
-            get { return _onlineOrder ??= new OnlineOrderRepository(_context); }
-        }
-        public IOnlineOrderDetailRepository OnlineOrderDetail
-        {
-            get { return _onlineOrderDetail ??= new OnlineOrderDetailRepository(_context); }
-        }
+        
 
         public IWarrantyRepository Warranty
         {
@@ -139,10 +122,7 @@ namespace ARTHS_Data
 
         }
         
-        public ITransactionRepository Transactions
-        {
-            get { return _transactions ??= new TransactionRepository(_context); }
-        }
+        
 
         public IFeedbackProductRepository FeedbackProduct
         {
@@ -164,6 +144,24 @@ namespace ARTHS_Data
             get { return _notification ??= new NotificationRepository(_context); }
         }
 
+        public IOrderRepository Order
+        {
+            get { return _order ??= new OrderRepository(_context); }
+        }
+        public IOrderDetailRepository OrderDetail
+        {
+            get { return _orderDetail ??= new OrderDetailRepository(_context); }
+        }
+
+        public IRevenueStoreRepository RevenueStore
+        {
+            get { return _revenueStore ??= new RevenueStoreRepository(_context); }
+        }
+
+        public IConfigurationRepository Configuration
+        {
+            get { return _configuration ??= new ConfigurationRepository(_context); }
+        }
         public async Task<int> SaveChanges()
         {
             return await _context.SaveChangesAsync();

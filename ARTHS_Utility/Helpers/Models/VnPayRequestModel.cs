@@ -10,7 +10,7 @@
         public string IpAddress { get; set; } = null!;
         public string OrderInfo { get; set; } = null!;
         public string ReturnUrl { get; set; } = null!;
-        public Guid TxnRef { get; set; }
+        public string TxnRef { get; set; } = null!;
         public string Version { get; set; } = null!;
         public string CurrencyCode { get; set; } = null!;
 

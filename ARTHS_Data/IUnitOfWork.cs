@@ -20,16 +20,15 @@ namespace ARTHS_Data
         public IImageRepository Image { get; }
         public IMotobikeProductRepository MotobikeProduct { get; }
         public IMotobikeProductPriceRepository MotobikeProductPrice { get; }
-        public IInStoreOrderRepository InStoreOrder { get; }
-        public IInStoreOrderDetailRepository InStoreOrderDetail { get; }
-        public IOnlineOrderRepository OnlineOrder { get; }
-        public IOnlineOrderDetailRepository OnlineOrderDetail { get; }
+        public IOrderRepository Order { get; }
+        public IOrderDetailRepository OrderDetail { get; }
+        public IRevenueStoreRepository RevenueStore { get; }
         public IWarrantyRepository Warranty { get; }
-        public ITransactionRepository Transactions { get; }
         public IFeedbackProductRepository FeedbackProduct { get; }
         public IRepairBookingRepository RepairBooking { get; }
         public IDeviceTokenRepository DeviceToken { get; }
         public INotificationRepository Notification { get; }
+        public IConfigurationRepository Configuration { get; }
 
         //-----------------
         Task<int> SaveChanges();

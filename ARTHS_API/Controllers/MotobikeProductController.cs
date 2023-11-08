@@ -2,6 +2,7 @@
 using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
+using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Implementations;
 using ARTHS_Service.Interfaces;

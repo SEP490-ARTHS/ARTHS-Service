@@ -3,6 +3,7 @@ using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
+using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
@@ -43,11 +44,6 @@ namespace ARTHS_Service.Implementations
                 baseQuery = baseQuery.Where(product => product.Name.Contains(filter.Name));
             }
 
-            if (!string.IsNullOrEmpty(filter.RepairService))
-            {
-                baseQuery = baseQuery.Where(product => product.RepairService != null && product.RepairService.Name.Contains(filter.RepairService));
-            }
-
             if (!string.IsNullOrEmpty(filter.Category))
             {
                 baseQuery = baseQuery.Where(product => product.Category != null && product.Category.CategoryName.Contains(filter.Category));
@@ -62,14 +58,12 @@ namespace ARTHS_Service.Implementations
             {
                 baseQuery = baseQuery.Where(product => product.DiscountId.Equals(filter.DiscountId.Value));
             }
+
             if (!string.IsNullOrEmpty(filter.Status))
             {
                 baseQuery = baseQuery.Where(product => product.Status.Contains(filter.Status));
             }
-            if(filter.NoRepairService.HasValue &&  filter.NoRepairService.Value)
-            {
-                baseQuery = baseQuery.Where(product => product.RepairServiceId == null);
-            }
+
             // Sorting logic
             if (filter.SortByNameAsc.HasValue)
             {
@@ -149,12 +143,12 @@ namespace ARTHS_Service.Implementations
                     var motobikeProduct = new MotobikeProduct
                     {
                         Id = motobikeProductId,
-                        RepairServiceId = model.RepairServiceId,
                         DiscountId = model.DiscountId,
                         WarrantyId = model.WarrantyId,
                         CategoryId = model.CategoryId,
                         Name = model.Name,
                         PriceCurrent = model.PriceCurrent,
+                        InstallationFee = model.InstallationFee,
                         Quantity = model.Quantity,
                         Description = model.Description,
                         Vehicles = vehicles,
@@ -211,10 +205,10 @@ namespace ARTHS_Service.Implementations
             motobikeProduct.Quantity = model.Quantity ?? motobikeProduct.Quantity;
             motobikeProduct.Description = model.Description ?? motobikeProduct.Description;
             motobikeProduct.Status = model.Status ?? motobikeProduct.Status;
-            motobikeProduct.RepairServiceId = model.RepairServiceId ?? motobikeProduct.RepairServiceId;
             motobikeProduct.DiscountId = model.DiscountId ?? motobikeProduct.DiscountId;
             motobikeProduct.WarrantyId = model.WarrantyId ?? motobikeProduct.WarrantyId;
             motobikeProduct.CategoryId = model.CategoryId ?? motobikeProduct.CategoryId;
+            motobikeProduct.InstallationFee = model.InstallationFee ?? motobikeProduct.InstallationFee;
             motobikeProduct.UpdateAt = DateTime.Now;
 
             if(model.VehiclesId != null && model.VehiclesId.Count > 0)

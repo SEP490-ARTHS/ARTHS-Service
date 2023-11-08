@@ -22,16 +22,18 @@ namespace ARTHS_API.Configurations
             services.AddScoped<IRepairServiceService, RepairServiceService>();
             services.AddScoped<IDiscountService, DiscountService>();
             services.AddScoped<IMotobikeProductService, MotobikeProductService>();
-            services.AddScoped<IInStoreOrderService, InStoreOrderService>();
+
             services.AddScoped<ICartService, CartService>();
-            services.AddScoped<IOnlineOrderService, OnlineOrderService>();
+
             services.AddScoped<IWarrantyService, WarrantyService>();
             //services.AddScoped<IVNPayService, VNPayService>();
-            services.AddScoped<ITransactionService, TransactionService>();
+            services.AddScoped<IRevenueStoreService, RevenueStoreService>();
             services.AddScoped<IFeedbackProductService, FeedbackProductService>();
             services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<IDeviceTokenService, DeviceTokenService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IConfigurationService, ConfigurationService>();
 
             services.AddTransient<IVNPayService, VNPayService>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();

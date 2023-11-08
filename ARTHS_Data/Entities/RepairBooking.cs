@@ -7,6 +7,8 @@ namespace ARTHS_Data.Entities
     {
         public Guid Id { get; set; }
         public Guid CustomerId { get; set; }
+        public Guid? StaffId { get; set; }
+        public string? OrderId { get; set; }
         public DateTime DateBook { get; set; }
         public string Description { get; set; } = null!;
         public string? CancellationReason { get; set; }
@@ -15,5 +17,7 @@ namespace ARTHS_Data.Entities
         public DateTime CreateAt { get; set; }
 
         public virtual CustomerAccount Customer { get; set; } = null!;
+        public virtual Order? Order { get; set; }
+        public virtual StaffAccount? Staff { get; set; }
     }
 }

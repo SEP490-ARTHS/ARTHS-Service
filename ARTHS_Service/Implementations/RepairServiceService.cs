@@ -91,14 +91,14 @@ namespace ARTHS_Service.Implementations
             return null!;
         }
 
-        public async Task<RepairServiceDetailViewModel> GetRepairService(Guid id)
+        public async Task<RepairServiceViewModel> GetRepairService(Guid id)
         {
             return await _repairRepository.GetMany(repair => repair.Id.Equals(id))
-                .ProjectTo<RepairServiceDetailViewModel>(_mapper.ConfigurationProvider)
+                .ProjectTo<RepairServiceViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy dịch vụ sữa chữa");
         }
 
-        public async Task<RepairServiceDetailViewModel> CreateRepairService(CreateRepairServiceModel model)
+        public async Task<RepairServiceViewModel> CreateRepairService(CreateRepairServiceModel model)
         {
             var imageCount = model.Images.Count();
             if (imageCount < 1 || imageCount > 4)
@@ -120,6 +120,8 @@ namespace ARTHS_Service.Implementations
                 Id = repairServiceId,
                 Name = model.Name,
                 Price = model.Price,
+                Duration = model.Duration,
+                ReminderInterval = model.ReminderInterval,
                 Description = model.Description,
                 Status = RepairServiceStatus.Active,
 
@@ -131,7 +133,6 @@ namespace ARTHS_Service.Implementations
                 {
                     _repairRepository.Add(repairService);
                     await CreateRepairServiceImage(repairServiceId, model.Images);
-                    await AddProductToRepairService(repairServiceId, model.MotobikeProductIds);
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }
@@ -144,7 +145,7 @@ namespace ARTHS_Service.Implementations
             return result > 0 ? await GetRepairService(repairServiceId) : null!;
         }
 
-        public async Task<RepairServiceDetailViewModel> UpdateRepairService(Guid id, UpdateRepairServiceModel model)
+        public async Task<RepairServiceViewModel> UpdateRepairService(Guid id, UpdateRepairServiceModel model)
         {
             var repairService = await _repairRepository.GetMany(repair => repair.Id.Equals(id)).FirstOrDefaultAsync();
 
@@ -171,15 +172,13 @@ namespace ARTHS_Service.Implementations
                 await UpdateRepairServiceImage(id, model.Images);
             }
 
-            if(model.MotobikeProductIds != null && model.MotobikeProductIds.Count > 0)
-            {
-                await UpdateProductToRepairService(repairService.Id, model.MotobikeProductIds);
-            }
-
             repairService.Name = model.Name ?? repairService.Name;
             repairService.Price = model.Price ?? repairService.Price;
+            repairService.Duration = model.Duration ?? repairService.Duration;
+            repairService.ReminderInterval = model.ReminderInterval ?? repairService.ReminderInterval;
             repairService.Description = model.Description ?? repairService.Description;
             repairService.Status = model.Status ?? repairService.Status;
+            
 
 
 
@@ -194,44 +193,44 @@ namespace ARTHS_Service.Implementations
 
         //PRIVATE METHOD
 
-        private async Task AddProductToRepairService(Guid repairServiceId, List<Guid> productIds)
-        {
-            var listProduct = new List<MotobikeProduct>();
-            foreach (var productId in productIds)
-            {
-                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(productId)).FirstOrDefaultAsync();
-                if (product == null) throw new NotFoundException($"Không tìm thấy product with id : {productId}");
-                product.RepairServiceId = repairServiceId;
-                listProduct.Add(product);
-            }
-            _motobikeProductRepository.UpdateRange(listProduct);
-        }
+        //private async Task AddProductToRepairService(Guid repairServiceId, List<Guid> productIds)
+        //{
+        //    var listProduct = new List<MotobikeProduct>();
+        //    foreach (var productId in productIds)
+        //    {
+        //        var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(productId)).FirstOrDefaultAsync();
+        //        if (product == null) throw new NotFoundException($"Không tìm thấy product with id : {productId}");
+        //        product.RepairServiceId = repairServiceId;
+        //        listProduct.Add(product);
+        //    }
+        //    _motobikeProductRepository.UpdateRange(listProduct);
+        //}
 
-        private async Task UpdateProductToRepairService(Guid repairServiceId, List<Guid> newProductIds)
-        {
-            var listProduct = new List<MotobikeProduct>();
-            var currentProductIds = await _motobikeProductRepository.GetMany(product => product.RepairServiceId.Equals(repairServiceId))
-                .Select(product => product.Id)
-                .ToListAsync();
-            //có trong tập thứ nhất nhưng không có trong tập thứ 2
-            var productIdsToAdd = newProductIds.Except(currentProductIds).ToList();
-            var productIdsToRemove = currentProductIds.Except(newProductIds).ToList();
+        //private async Task UpdateProductToRepairService(Guid repairServiceId, List<Guid> newProductIds)
+        //{
+        //    var listProduct = new List<MotobikeProduct>();
+        //    var currentProductIds = await _motobikeProductRepository.GetMany(product => product.RepairServiceId.Equals(repairServiceId))
+        //        .Select(product => product.Id)
+        //        .ToListAsync();
+        //    //có trong tập thứ nhất nhưng không có trong tập thứ 2
+        //    var productIdsToAdd = newProductIds.Except(currentProductIds).ToList();
+        //    var productIdsToRemove = currentProductIds.Except(newProductIds).ToList();
 
-            foreach(var productId in productIdsToRemove)
-            {
-                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(productId)).FirstOrDefaultAsync();
-                product!.RepairServiceId = null;
-                listProduct.Add(product);
-            }
-            foreach(var productId in productIdsToAdd)
-            {
-                var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(productId)).FirstOrDefaultAsync();
-                if (product == null) throw new NotFoundException($"Không tìm thấy product id {productId}");
-                product.RepairServiceId = repairServiceId;
-                listProduct.Add(product);
-            }
-            _motobikeProductRepository.UpdateRange(listProduct);
-        }
+        //    foreach(var productId in productIdsToRemove)
+        //    {
+        //        var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(productId)).FirstOrDefaultAsync();
+        //        product!.RepairServiceId = null;
+        //        listProduct.Add(product);
+        //    }
+        //    foreach(var productId in productIdsToAdd)
+        //    {
+        //        var product = await _motobikeProductRepository.GetMany(product => product.Id.Equals(productId)).FirstOrDefaultAsync();
+        //        if (product == null) throw new NotFoundException($"Không tìm thấy product id {productId}");
+        //        product.RepairServiceId = repairServiceId;
+        //        listProduct.Add(product);
+        //    }
+        //    _motobikeProductRepository.UpdateRange(listProduct);
+        //}
 
         private async Task<ICollection<Image>> CreateRepairServiceImage(Guid id, ICollection<IFormFile> images)
         {

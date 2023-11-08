@@ -8,9 +8,9 @@ namespace ARTHS_Service.Interfaces
 {
     public interface IRepairServiceService
     {
-        Task<RepairServiceDetailViewModel> GetRepairService(Guid id);
+        Task<RepairServiceViewModel> GetRepairService(Guid id);
         Task<ListViewModel<RepairServiceViewModel>> GetRepairServices(RepairServiceFilterModel filter, PaginationRequestModel pagination);
-        Task<RepairServiceDetailViewModel> CreateRepairService(CreateRepairServiceModel model);
-        Task<RepairServiceDetailViewModel> UpdateRepairService(Guid id, UpdateRepairServiceModel model);
+        Task<RepairServiceViewModel> CreateRepairService(CreateRepairServiceModel model);
+        Task<RepairServiceViewModel> UpdateRepairService(Guid id, UpdateRepairServiceModel model);
     }
 }
