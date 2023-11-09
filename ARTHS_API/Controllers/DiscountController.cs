@@ -1,8 +1,10 @@
-﻿using ARTHS_Data.Models.Requests.Filters;
+﻿using ARTHS_API.Configurations.Middleware;
+using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
@@ -37,7 +39,7 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpPost]
-        //[Authorize(UserRole.Owner)]
+        [Authorize(UserRole.Owner)]
         [ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Create discount.")]
         public async Task<ActionResult<DiscountViewModel>> CreateDiscount([FromForm][Required] CreateDiscountModel model)
@@ -48,7 +50,7 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpPut]
-        //[Authorize(UserRole.Owner)]
+        [Authorize(UserRole.Owner)]
         [Route("{id}")]
         [ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Update discount.")]
@@ -80,7 +82,7 @@ namespace ARTHS_API.Controllers
         //}
 
         [HttpDelete]
-        //[Authorize(UserRole.Owner)]
+        [Authorize(UserRole.Owner)]
         [Route("{id}")]
         [ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Discontinued discounts.")]
