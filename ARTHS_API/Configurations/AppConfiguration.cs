@@ -26,7 +26,7 @@ namespace ARTHS_API.Configurations
             services.AddScoped<ICartService, CartService>();
 
             services.AddScoped<IWarrantyService, WarrantyService>();
-            //services.AddScoped<IVNPayService, VNPayService>();
+            //services.AddScoped<IVNPayService, PaymentService>();
             services.AddScoped<IRevenueStoreService, RevenueStoreService>();
             services.AddScoped<IFeedbackProductService, FeedbackProductService>();
             services.AddScoped<IBookingService, BookingService>();
@@ -34,8 +34,9 @@ namespace ARTHS_API.Configurations
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IConfigurationService, ConfigurationService>();
-
-            services.AddTransient<IVNPayService, VNPayService>();
+            
+            services.AddTransient<IGhnService, GhnService>();
+            services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
         }
 

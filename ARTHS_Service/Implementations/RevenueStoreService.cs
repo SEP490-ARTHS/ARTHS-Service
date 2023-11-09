@@ -1,4 +1,5 @@
 ﻿using ARTHS_Data;
+using ARTHS_Data.Models.Requests.Filters;
 using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
@@ -18,30 +19,39 @@ namespace ARTHS_Service.Implementations
             _revenueStoreRepository = unitOfWork.RevenueStore;
         }
 
-        public async Task<ListViewModel<RevenueStoreViewModel>> GetRevenues(PaginationRequestModel pagination)
+        public async Task<ListViewModel<RevenueStoreViewModel>> GetRevenues(RevenueFilterModel filter, PaginationRequestModel pagination)
         {
-            var query = _revenueStoreRepository.GetAll();
-
-
-            var listTransactions = query
-                .ProjectTo<RevenueStoreViewModel>(_mapper.ConfigurationProvider)
-                .OrderByDescending(transaction => transaction.TransactionDate);
-            var transactions = await listTransactions.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
-            var totalRow = await listTransactions.AsNoTracking().CountAsync();
-            if (transactions != null || transactions != null && transactions.Any())
+            var query = _revenueStoreRepository.GetAll().AsQueryable();
+            if (filter.Month.HasValue)
             {
-                return new ListViewModel<RevenueStoreViewModel>
-                {
-                    Pagination = new PaginationViewModel
-                    {
-                        PageNumber = pagination.PageNumber,
-                        PageSize = pagination.PageSize,
-                        TotalRow = totalRow
-                    },
-                    Data = transactions
-                };
+                query = query.Where(revenue => revenue.TransactionDate.Month.Equals(filter.Month));
             }
-            return null!;
+            if (filter.Year.HasValue)
+            {
+                query = query.Where(revenue => revenue.TransactionDate.Year.Equals(filter.Year));
+            }
+
+            var totalRow = await query.AsNoTracking().CountAsync();
+            var paginatedQuery = query
+               .Skip(pagination.PageNumber * pagination.PageSize)
+               .Take(pagination.PageSize);
+
+            var revenues = await paginatedQuery
+                .ProjectTo<RevenueStoreViewModel>(_mapper.ConfigurationProvider)
+                .OrderByDescending(transaction => transaction.TransactionDate)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return new ListViewModel<RevenueStoreViewModel>
+            {
+                Pagination = new PaginationViewModel
+                {
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRow = totalRow
+                },
+                Data = revenues
+            };
         }
 
         public async Task<RevenueStoreViewModel> GetRevenue(Guid Id)
