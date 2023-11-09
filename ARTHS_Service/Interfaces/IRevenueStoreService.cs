@@ -7,6 +7,6 @@ namespace ARTHS_Service.Interfaces
     public interface IRevenueStoreService
     {
         Task<ListViewModel<RevenueStoreViewModel>> GetRevenues(RevenueFilterModel filter, PaginationRequestModel pagination);
-        Task<RevenueStoreViewModel> GetRevenue(Guid Id);
+        Task<RevenueStoreViewModel> GetRevenue(string Id);
     }
 }

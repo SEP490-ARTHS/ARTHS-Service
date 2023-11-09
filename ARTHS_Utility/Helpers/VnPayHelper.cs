@@ -23,7 +23,7 @@ namespace ARTHS_Utility.Helpers
                 { "vnp_IpAddr", model.IpAddress },
                 { "vnp_OrderInfo", model.OrderInfo },
                 { "vnp_ReturnUrl", model.ReturnUrl },
-                { "vnp_TxnRef", model.TxnRef.ToString() },
+                { "vnp_TxnRef", model.TxnRef },
                 { "vnp_OrderType", model.OrderType },
                 { "vnp_BankCode", model.BankCode }
             };
@@ -66,7 +66,7 @@ namespace ARTHS_Utility.Helpers
                 TransactionNo = _tryGetRequiredParam("vnp_TransactionNo", queryParams),
                 TransactionStatus = _tryGetRequiredParam("vnp_TransactionStatus", queryParams),
                 ResponseCode = _tryGetRequiredParam("vnp_ResponseCode", queryParams),
-                TxnRef = Guid.Parse(_tryGetRequiredParam("vnp_TxnRef", queryParams)),
+                TxnRef = _tryGetRequiredParam("vnp_TxnRef", queryParams),
                 Amount = int.Parse(_tryGetRequiredParam("vnp_Amount", queryParams)) / 100,
                 SecureHash = _tryGetRequiredParam("vnp_SecureHash", queryParams),
                 OrderInfo = _tryGetRequiredParam("vnp_OrderInfo", queryParams),

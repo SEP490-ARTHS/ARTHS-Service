@@ -54,7 +54,7 @@ namespace ARTHS_Service.Implementations
             };
         }
 
-        public async Task<RevenueStoreViewModel> GetRevenue(Guid Id)
+        public async Task<RevenueStoreViewModel> GetRevenue(string Id)
         {
             return await _revenueStoreRepository.GetMany(transaction => transaction.Id.Equals(Id))
                 .ProjectTo<RevenueStoreViewModel>(_mapper.ConfigurationProvider)

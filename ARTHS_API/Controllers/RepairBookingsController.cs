@@ -66,23 +66,6 @@ namespace ARTHS_API.Controllers
             return CreatedAtAction(nameof(GetRepairBooking), new { id = booking.Id }, booking);
         }
 
-        [HttpGet]
-        [Route("setting")]
-        [ProducesResponseType(typeof(BookingSettingViewModel), StatusCodes.Status200OK)]
-        [SwaggerOperation(Summary = "Get booking setting.")]
-        public async Task<ActionResult<BookingSettingViewModel>> GetBookingSetting()
-        {
-            return await _bookingService.GetBookingSetting();
-        }
-
-        [HttpPut]
-        [Route("setting")]
-        [ProducesResponseType(typeof(BookingSettingViewModel), StatusCodes.Status201Created)]
-        [SwaggerOperation(Summary = "Update booking setting.")]
-        public async Task<ActionResult<BookingSettingViewModel>> UpdateBookingSetting([FromBody] UpdateBookingSettingModel model)
-        {
-            var setting = await _bookingService.UpdateBookingSetting(model);
-            return CreatedAtAction(nameof(GetBookingSetting), setting);
-        }
+        
     }
 }

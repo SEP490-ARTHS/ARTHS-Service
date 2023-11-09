@@ -7,5 +7,7 @@
         public string? Description { get; set; }
         public string? CancellationReason { get; set; }
         public string? Status { get; set; }
+        public Guid? StaffId { get; set; }
+
     }
 }

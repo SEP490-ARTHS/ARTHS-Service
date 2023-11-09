@@ -2,7 +2,7 @@
 {
     public class VnPayResponseModel
     {
-        public Guid TxnRef { get; set; }
+        public string TxnRef { get; set; } = null!;
         public string TmnCode { get; set; } = null!;
         public int Amount { get; set; }
         public string BankCode { get; set; } = null!;

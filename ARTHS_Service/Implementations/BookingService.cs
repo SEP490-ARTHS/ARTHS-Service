@@ -9,11 +9,9 @@ using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
 using ARTHS_Utility.Exceptions;
-using ARTHS_Utility.Settings;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Globalization;
 
 namespace ARTHS_Service.Implementations
@@ -22,13 +20,13 @@ namespace ARTHS_Service.Implementations
     {
         private readonly IRepairBookingRepository _repairBookingRepository;
 
-        private readonly BookingSetting _bookingSettings;
+        private readonly IConfigurationService _configurationService;
 
-        public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<BookingSetting> bookingSettings) : base(unitOfWork, mapper)
+
+        public BookingService(IUnitOfWork unitOfWork, IMapper mapper, IConfigurationService configurationService) : base(unitOfWork, mapper)
         {
             _repairBookingRepository = unitOfWork.RepairBooking;
-
-            _bookingSettings = bookingSettings.Value;
+            _configurationService = configurationService;
         }
 
         public async Task<ListViewModel<RepairBookingViewModel>> GetRepairBookings(BookingFilterModel filter, PaginationRequestModel pagination)
@@ -39,12 +37,17 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(booking => booking.CustomerId.Equals(filter.CustomerId.Value));
             }
+            if (filter.StaffId.HasValue)
+            {
+                query = query.Where(booking => booking.StaffId.Equals(filter.StaffId.Value));
+
+            }
             if (!string.IsNullOrEmpty(filter.BookingDate))
             {
                 DateTime dateBook;
-                if (!DateTime.TryParseExact(filter.BookingDate, "dd-MM-yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateBook))
+                if (!DateTime.TryParseExact(filter.BookingDate, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateBook))
                 {
-                    throw new ConflictException("Vui lòng nhập đúng định dạng ngày (dd-MM-yyyy).");
+                    throw new ConflictException("Vui lòng nhập đúng định dạng ngày (yyyy-MM-dd).");
                 }
                 query = query.Where(booking => booking.DateBook.Date.Equals(dateBook.Date));
             }
@@ -61,7 +64,7 @@ namespace ARTHS_Service.Implementations
                 .OrderByDescending(booking => booking.CreateAt);
             var bookings = await listBooking.Skip(pagination.PageNumber * pagination.PageSize).Take(pagination.PageSize).AsNoTracking().ToListAsync();
             var totalRow = await listBooking.AsNoTracking().CountAsync();
-            if(bookings != null && bookings.Any())
+            if (bookings != null && bookings.Any())
             {
                 return new ListViewModel<RepairBookingViewModel>
                 {
@@ -95,21 +98,31 @@ namespace ARTHS_Service.Implementations
         public async Task<RepairBookingViewModel> CreateBooking(Guid customerId, CreateRepairBookingModel model)
         {
             DateTime dateBook;
-            if(!DateTime.TryParseExact(model.DateBook, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateBook))
+            if (!DateTime.TryParseExact(model.DateBook, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateBook))
             {
                 throw new ConflictException("Vui lòng nhập đúng định dạng ngày (yyyy-MM-dd).");
             }
-            if(!await IsBookingAvailableForDate(dateBook))
+            if (model.StaffId.HasValue)
+            {
+                if (!await IsStaffAvailableForBooking(model.StaffId.Value, dateBook))
+                {
+                    throw new ConflictException($"Nhân viên này đã đủ 5 đơn đặt hàng cho ngày {dateBook:dd-MM-yyyy}. Vui lòng chọn ngày khác hoặc nhân viên khác.");
+                }
+            }
+            if (!await IsBookingAvailableForDate(dateBook))
             {
                 throw new ConflictException($"Cửa hàng đã đủ đơn cho ngày bạn chọn. Vui lòng chọn ngày khác.");
             }
+
             var booking = new RepairBooking
             {
                 Id = Guid.NewGuid(),
                 CustomerId = customerId,
                 DateBook = dateBook,
                 Description = model.Description,
-                Status = RepairBookingStatus.WaitForConfirm
+                Status = RepairBookingStatus.WaitForConfirm,
+                OrderId = null,
+                StaffId = model.StaffId
             };
             _repairBookingRepository.Add(booking);
             var result = await _unitOfWork.SaveChanges();
@@ -121,15 +134,15 @@ namespace ARTHS_Service.Implementations
             var booking = await _repairBookingRepository.GetMany(booking => booking.Id.Equals(repairBookingId)).FirstOrDefaultAsync();
             if (booking == null) throw new NotFoundException("Không tìm thấy thông tin booking.");
 
-            if(model.Status == RepairBookingStatus.Canceled && string.IsNullOrEmpty(model.CancellationReason))
+            if (model.Status == RepairBookingStatus.Canceled && string.IsNullOrEmpty(model.CancellationReason))
             {
                 throw new BadRequestException("Cần phải cung cấp lý do khi hủy lịch đặt.");
             }
+
             if (model.Status != null && model.Status.Equals(RepairBookingStatus.Canceled))
             {
                 booking.CancellationReason = model.CancellationReason;
                 booking.CancellationDate = DateTime.UtcNow;
-                
             }
 
             if (!string.IsNullOrEmpty(model.TimeBook))
@@ -150,13 +163,20 @@ namespace ARTHS_Service.Implementations
                             throw new ConflictException($"Cửa hàng đã đủ đơn cho ngày bạn chọn. Vui lòng chọn ngày khác.");
                         }
                     }
-
                 }
-
                 var timeBook = HandleTimeBooking(model.TimeBook);
                 booking.DateBook = dateBooking.Date + timeBook;
             }
-            
+
+            if (model.StaffId.HasValue && !booking.StaffId.Equals(model.StaffId))
+            {
+                if (!await IsStaffAvailableForBooking(model.StaffId, booking.DateBook))
+                {
+                    throw new ConflictException($"Nhân viên này đã đủ 5 đơn đặt hàng cho ngày {booking.DateBook:dd-MM-yyyy}. Vui lòng chọn ngày khác hoặc nhân viên khác.");
+                }
+                booking.StaffId = model.StaffId;
+            }
+
             booking.Description = model.Description ?? booking.Description;
             booking.Status = model.Status ?? booking.Status;
 
@@ -164,49 +184,23 @@ namespace ARTHS_Service.Implementations
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetRepairBooking(repairBookingId) : null!;
         }
-        
-        
 
-        public async Task<BookingSettingViewModel> GetBookingSetting()
+        private async Task<bool> IsStaffAvailableForBooking(Guid? staffId, DateTime? dateBook)
         {
-            return await Task.FromResult(new BookingSettingViewModel
+            var countBookingOfStaff = await _repairBookingRepository
+                .GetMany(booking => booking.StaffId.Equals(staffId) && booking.DateBook.Date.Equals(dateBook))
+                .CountAsync();
+            if (countBookingOfStaff.Equals(2))
             {
-                TotalStaff = _bookingSettings.TotalStaff,
-                WorkHours = _bookingSettings.WorkHours,
-                ServiceTime = _bookingSettings.ServiceTime,
-                NonBookingPercentage = _bookingSettings.NonBookingPercentage,
-                DailyOnlineBookings = CalculateDailyOnlineBookings()
-            });
-        }
-
-
-        public async Task<BookingSettingViewModel> UpdateBookingSetting(UpdateBookingSettingModel model)
-        {
-            if(model.TotalStaff == 0 || model.ServiceTime == 0 || model.WorkHours == 0)
-            {
-                throw new BadRequestException("Vui lòng nhập các giá trị total staff, service time, workHours khác 0");
+                return false;
             }
-
-            _bookingSettings.TotalStaff = model.TotalStaff ?? _bookingSettings.TotalStaff;
-            _bookingSettings.WorkHours = model.WorkHours ?? _bookingSettings.WorkHours;
-            _bookingSettings.ServiceTime = model.ServiceTime ?? _bookingSettings.ServiceTime;
-            _bookingSettings.NonBookingPercentage = model.NonBookingPercentage ?? _bookingSettings.NonBookingPercentage;
-
-            return await GetBookingSetting();
+            return true;
         }
-
-        private int CalculateDailyOnlineBookings()
-        {
-            int motosPerStaff = _bookingSettings.WorkHours / _bookingSettings.ServiceTime;
-            int totalMotosPerDay = motosPerStaff * _bookingSettings.TotalStaff;
-            return totalMotosPerDay * (100 - _bookingSettings.NonBookingPercentage) / 100;
-        }
-
 
         private async Task<bool> IsBookingAvailableForDate(DateTime dateBook)
         {
             var booking = await _repairBookingRepository.GetMany(booking => booking.DateBook.Date.Equals(dateBook.Date) && !booking.Status.Equals(RepairBookingStatus.Canceled)).ToListAsync();
-            if (booking.Count >= CalculateDailyOnlineBookings())
+            if (booking.Count >= await _configurationService.CalculateDailyOnlineBookings())
             {
                 return false;
             }
@@ -229,16 +223,5 @@ namespace ARTHS_Service.Implementations
             }
         }
 
-        //private void UpdateAppSettings()
-        //{
-        //    var section = _configuration.GetSection("BookingSetting");
-        //    section["TotalStaff"] = _bookingSettings.TotalStaff.ToString();
-        //    section["WorkHours"] = _bookingSettings.WorkHours.ToString();
-        //    section["ServiceTime"] = _bookingSettings.ServiceTime.ToString();
-        //    section["NonBookingPercentage"] = _bookingSettings.NonBookingPercentage.ToString();
-
-        //    var json = JsonConvert.SerializeObject(_bookingSettings, Formatting.Indented);
-        //    File.WriteAllText("appsettings.json", json);
-        //}
     }
 }

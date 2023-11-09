@@ -16,7 +16,7 @@ namespace ARTHS_Data.Models.Views
         public DateTime CreateAt { get; set; }
 
         public virtual CategoryViewModel? Category { get; set; }
-        public virtual DiscountViewModel? Discount { get; set; }
+        public virtual BasicDiscountViewModel? Discount { get; set; }
         public virtual ICollection<FeedbackProductViewModel> FeedbackProducts { get; set; } = new List<FeedbackProductViewModel>();
         public virtual ICollection<ImageViewModel> Images { get; set; } = new List<ImageViewModel>();
         public virtual ICollection<MotobikeProductPriceViewModel> MotobikeProductPrices { get; set; } = new List<MotobikeProductPriceViewModel>();

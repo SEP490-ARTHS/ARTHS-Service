@@ -30,6 +30,8 @@ namespace ARTHS_Service.Implementations
         private readonly INotificationService _notificationService;
         private readonly IConfigurationService _configurationService;
         private readonly IRevenueStoreRepository _revenueStoreRepository;
+        private readonly IMaintenanceScheduleRepository _maintenanceScheduleRepository;
+        private readonly IWarrantyHistoryRepository _warrantyHistoryRepository;
         public OrderService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService, IConfigurationService configurationService) : base(unitOfWork, mapper)
         {
             _orderRepository = unitOfWork.Order;
@@ -43,12 +45,14 @@ namespace ARTHS_Service.Implementations
             _notificationService = notificationService;
             _configurationService = configurationService;
             _revenueStoreRepository = unitOfWork.RevenueStore;
+            _maintenanceScheduleRepository = unitOfWork.MaintenanceSchedule;
+            _warrantyHistoryRepository = unitOfWork.WarrantyHistory;
         }
 
         public async Task<ListViewModel<BasicOrderViewModel>> GetOrders(OrderFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _orderRepository.GetAll().AsQueryable();
-            
+
             if (filter.StaffId.HasValue)
             {
                 query = query.Where(order => order.StaffId.Equals(filter.StaffId));
@@ -129,7 +133,7 @@ namespace ARTHS_Service.Implementations
                         shippingMoney = config.ShippingMoney;
                         totalPrice += shippingMoney;
                     }
-                    
+
                     var order = new Order
                     {
                         Id = orderId,
@@ -196,6 +200,7 @@ namespace ARTHS_Service.Implementations
         public async Task<OrderViewModel> CreateOrderOffline(Guid tellerId, CreateOrderOfflineModel model)
         {
             var result = 0;
+            bool sendNotifyToStaff = false;
             var orderId = string.Empty;
             using (var transaction = _unitOfWork.Transaction())
             {
@@ -204,7 +209,7 @@ namespace ARTHS_Service.Implementations
                     orderId = GenerateOrderId();
                     int totalPrice = await CreateOrderOfflineDetail(orderId, model.OrderDetailModel, false);
                     var orderType = OrderType.Offline.ToString();
-                    
+
                     var order = new Order
                     {
                         Id = orderId,
@@ -222,7 +227,7 @@ namespace ARTHS_Service.Implementations
                     if (ShouldAddStaffToOrder(model.OrderDetailModel))
                     {
                         order.StaffId = model.StaffId;
-                        
+
                         //check booking
                         if (model.BookingId.HasValue)
                         {
@@ -232,18 +237,24 @@ namespace ARTHS_Service.Implementations
                             booking.OrderId = orderId;
                             _repairBookingRepository.Update(booking);
                         }
+
+                        sendNotifyToStaff = true;
                     }
 
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
+                    if (sendNotifyToStaff)
+                    {
+                        await SendNotificationToStaff(order);
+                    }
                 }
                 catch (Exception)
                 {
                     transaction.Rollback();
                     throw;
                 }
-
             };
+
             return result > 0 ? await GetOrder(orderId) : null!;
         }
 
@@ -267,7 +278,7 @@ namespace ARTHS_Service.Implementations
 
                 if (model.Status.Equals(OrderStatus.WaitForPay))
                 {
-                    await SendNotification(order);
+                    await SendNotificationToTellers(order);
                 }
                 order.Status = model.Status;
             }
@@ -290,8 +301,11 @@ namespace ARTHS_Service.Implementations
 
         }
 
+
+        
+
         //PRIVATE
-        private async Task SendNotification(Order order)
+        private async Task SendNotificationToTellers(Order order)
         {
             var message = new CreateNotificationModel
             {
@@ -345,7 +359,7 @@ namespace ARTHS_Service.Implementations
             _cartItemRepository.RemoveRange(productToRemove);
         }
 
-        private bool ShouldAddStaffToOrder (List<CreateOrderOfflineDetailModel> listDetail)
+        private bool ShouldAddStaffToOrder(List<CreateOrderOfflineDetailModel> listDetail)
         {
             if (listDetail.Any(detail => detail.RepairServiceId.HasValue) || listDetail.Any(detail => detail.InstUsed.Equals(true)))
             {
@@ -368,7 +382,7 @@ namespace ARTHS_Service.Implementations
             int totalPrice = 0;
             foreach (var detail in listDetail)
             {
-                if(detail.MotobikeProductId.HasValue && detail.RepairServiceId.HasValue)
+                if (detail.MotobikeProductId.HasValue && detail.RepairServiceId.HasValue)
                 {
                     throw new BadRequestException("Mỗi detail chỉ chứa product hoặc repair service");
                 }
@@ -409,20 +423,28 @@ namespace ARTHS_Service.Implementations
                     }
 
                     orderDetail.WarrantyEndDate = warrantyEndDate;
-
-
                 }
                 else if (detail.RepairServiceId.HasValue)
                 {
                     var repairService = await _repairServiceRepository.GetMany(service => service.Id.Equals(detail.RepairServiceId)).FirstOrDefaultAsync();
                     if (repairService == null) throw new NotFoundException($"Không tìm thấy dịch vụ {detail.RepairServiceId}");
-
-                    detailPrice = repairService.Price;
+                    
+                    int servicePrice = repairService.Price;
+                    if(repairService.Discount != null)
+                    {
+                        servicePrice = servicePrice * (100 - repairService.Discount.DiscountAmount) / 100;
+                    }
+                    detailPrice = servicePrice;
                     orderDetail.RepairServiceId = detail.RepairServiceId;
-                    orderDetail.Price = repairService.Price;
+                    orderDetail.Price = servicePrice;
 
                     var warrantyEndDate = DateTime.UtcNow.AddHours(7);
-                    orderDetail.WarrantyEndDate = warrantyEndDate.AddMonths(1);
+                    orderDetail.WarrantyEndDate = warrantyEndDate.AddMonths(repairService.WarrantyDuration);
+
+                    if (repairService.ReminderInterval.HasValue)
+                    {
+                        CreateMaintenanceSchedule(orderDetail.Id, (int)repairService.ReminderInterval);
+                    }
                 }
 
                 orderDetail.SubTotalAmount = detailPrice;
@@ -431,6 +453,20 @@ namespace ARTHS_Service.Implementations
                 totalPrice += detailPrice;
             }
             return totalPrice;
+        }
+
+        private void CreateMaintenanceSchedule(Guid detailId, int remiderInterval)
+        {
+            var nextMaintenanceDate = DateTime.UtcNow.AddMonths(remiderInterval);
+            var reminderDate = nextMaintenanceDate.AddDays(-15);
+            var schedule = new MaintenanceSchedule
+            {
+                Id = Guid.NewGuid(),
+                OrderDetailId = detailId,
+                NextMaintenanceDate = nextMaintenanceDate,
+                ReminderDate = reminderDate,
+            };
+            _maintenanceScheduleRepository.Add(schedule);
         }
 
         private async Task<int> CreateOrderOnlineDetail(string orderId, List<CreateOrderOnlineDetailModel> listDetail)
@@ -478,24 +514,31 @@ namespace ARTHS_Service.Implementations
 
         private string GenerateOrderId()
         {
-            // Lấy timestamp hiện tại theo ticks
             long ticks = DateTime.UtcNow.Ticks;
-
-            // Sử dụng HashCode.Combine để tạo một mã băm đơn giản từ các ticks
             int hash = HashCode.Combine(ticks);
-
-            // Chuyển đổi mã băm thành một giá trị dương sử dụng phép & với 0x7FFFFFFF để bỏ qua bit dấu
             uint positiveHash = (uint)hash & 0x7FFFFFFF;
-
-            // Chuyển đổi thành một chuỗi hex
             string hashString = positiveHash.ToString("X8");
-
-            // Tạo ID với chuỗi hex 8 ký tự, đảm bảo rằng chuỗi này luôn có 8 ký tự
             string id = "OR" + hashString;
 
             return id;
         }
 
+        private async Task SendNotificationToStaff(Order order)
+        {
+            var message = new CreateNotificationModel
+            {
+                Title = $"Đơn sửa chữa của khách hàng {order.CustomerName}.",
+                Body = $"Đơn hàng {order.Id} đã được bàn giao cho bạn. Vui lòng tiến hành sửa chữa.",
+                Data = new NotificationDataViewModel
+                {
+                    CreateAt = DateTime.UtcNow.AddHours(7),
+                    Type = NotificationType.RepairService.ToString(),
+                    Link = order.Id
+                }
+            };
+            //var staffId = await _accountRepository.GetMany(account => account.Id.Equals(order.StaffId)).Select(account => account.Id).FirstOrDefaultAsync();
+            await _notificationService.SendNotification(new List<Guid> { (Guid)order.StaffId! }, message);
+        }
 
     }
 }
