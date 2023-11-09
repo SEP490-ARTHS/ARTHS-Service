@@ -8,8 +8,9 @@ namespace ARTHS_Data.Entities
         public StaffAccount()
         {
             FeedbackStaffs = new HashSet<FeedbackStaff>();
-            InStoreOrders = new HashSet<InStoreOrder>();
-            OnlineOrders = new HashSet<OnlineOrder>();
+            Orders = new HashSet<Order>();
+            RepairBookings = new HashSet<RepairBooking>();
+            WarrantyHistories = new HashSet<WarrantyHistory>();
         }
 
         public Guid AccountId { get; set; }
@@ -19,7 +20,8 @@ namespace ARTHS_Data.Entities
 
         public virtual Account Account { get; set; } = null!;
         public virtual ICollection<FeedbackStaff> FeedbackStaffs { get; set; }
-        public virtual ICollection<InStoreOrder> InStoreOrders { get; set; }
-        public virtual ICollection<OnlineOrder> OnlineOrders { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
+        public virtual ICollection<RepairBooking> RepairBookings { get; set; }
+        public virtual ICollection<WarrantyHistory> WarrantyHistories { get; set; }
     }
 }

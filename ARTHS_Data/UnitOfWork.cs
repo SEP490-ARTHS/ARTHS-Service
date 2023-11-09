@@ -24,6 +24,16 @@ namespace ARTHS_Data
         private IMotobikeProductRepository _motobikeProduct = null!;
         private IImageRepository _image = null!;
         private IMotobikeProductPriceRepository _motobikeProductPrice = null!;
+        private IOrderRepository _order = null!;
+        private IOrderDetailRepository _orderDetail = null!;
+        private IWarrantyRepository _warranty = null!;
+        private IRevenueStoreRepository _revenueStore = null!;
+
+        private IFeedbackProductRepository _feedbackProduct = null!;
+        private IRepairBookingRepository _repairBooking = null!;
+        private IDeviceTokenRepository _deviceToken = null!;
+        private INotificationRepository _notification = null!;
+        private IConfigurationRepository _configuration = null!;
 
         public UnitOfWork(ARTHS_DBContext context)
         {
@@ -103,10 +113,60 @@ namespace ARTHS_Data
         {
             get { return _motobikeProductPrice ??= new MotobikeProductPriceRepository(_context); }
         }
+
+        
+
+        public IWarrantyRepository Warranty
+        {
+            get { return _warranty ??= new WarrantyRepository(_context); }
+
+        }
+        
+        
+
+        public IFeedbackProductRepository FeedbackProduct
+        {
+            get { return _feedbackProduct ??= new FeedbackProductRepository(_context); }
+        }
+
+        public IRepairBookingRepository RepairBooking
+        {
+            get { return _repairBooking ??= new RepairBookingRepository(_context); }
+        }
+
+        public IDeviceTokenRepository DeviceToken
+        {
+            get { return _deviceToken ??= new DeviceTokenRepository(_context); }
+        }
+
+        public INotificationRepository Notification
+        {
+            get { return _notification ??= new NotificationRepository(_context); }
+        }
+
+        public IOrderRepository Order
+        {
+            get { return _order ??= new OrderRepository(_context); }
+        }
+        public IOrderDetailRepository OrderDetail
+        {
+            get { return _orderDetail ??= new OrderDetailRepository(_context); }
+        }
+
+        public IRevenueStoreRepository RevenueStore
+        {
+            get { return _revenueStore ??= new RevenueStoreRepository(_context); }
+        }
+
+        public IConfigurationRepository Configuration
+        {
+            get { return _configuration ??= new ConfigurationRepository(_context); }
+        }
         public async Task<int> SaveChanges()
         {
             return await _context.SaveChangesAsync();
         }
+
 
         public IDbContextTransaction Transaction()
         {

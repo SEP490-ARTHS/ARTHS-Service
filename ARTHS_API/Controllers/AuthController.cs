@@ -45,6 +45,17 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpPost]
+        [Route("logout")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [SwaggerOperation(Summary = "Logout.")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("accessToken");
+            return Ok(new { message = "Successfully logged out" });
+        }
+
+        [HttpPost]
         [Route("refresh-token")]
         [Authorize(UserRole.Owner, UserRole.Teller, UserRole.Staff, UserRole.Customer)]
         [ProducesResponseType(typeof(TokenViewModel), StatusCodes.Status200OK)]
@@ -71,7 +82,7 @@ namespace ARTHS_API.Controllers
         [Authorize(UserRole.Owner, UserRole.Teller, UserRole.Staff, UserRole.Customer)]
         [ProducesResponseType(typeof(AccountViewModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-        [SwaggerOperation(Summary = "Get information of auth account.")]
+        [SwaggerOperation(Summary = "Retrieve logged-in account details.")]
         public async Task<ActionResult<AccountViewModel>> GetAccount()
         {
             var auth = (AuthModel?)HttpContext.Items["User"];

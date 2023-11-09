@@ -1,9 +1,9 @@
 ﻿using ARTHS_API.Configurations.Middleware;
 using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
-using ARTHS_Service.Implementations;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +12,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ARTHS_API.Controllers
 {
-    [Route("api/repair-service")]
+    [Route("api/repair-services")]
     [ApiController]
     public class RepairServiceController : ControllerBase
     {
@@ -24,11 +24,11 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(RepairServiceViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ListViewModel<RepairServiceViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all repair services.")]
-        public async Task<ActionResult<List<RepairServiceViewModel>>> GetRepairServices([FromQuery] RepairServiceFilterModel filter)
+        public async Task<ActionResult<ListViewModel<RepairServiceViewModel>>> GetRepairServices([FromQuery] RepairServiceFilterModel filter, [FromQuery] PaginationRequestModel pagination)
         {
-            return await _repairServiceService.GetRepairServices(filter);
+            return await _repairServiceService.GetRepairServices(filter, pagination);
         }
 
         [HttpGet]
@@ -56,7 +56,7 @@ namespace ARTHS_API.Controllers
         [Route("{id}")]
         [ProducesResponseType(typeof(RepairServiceViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Update repair service.")]
-        public async Task<ActionResult<CustomerViewModel>> UpdateCustomer([FromRoute] Guid id, [FromForm] UpdateRepairServiceModel model)
+        public async Task<ActionResult<RepairServiceViewModel>> UpdateRepairService([FromRoute] Guid id, [FromForm] UpdateRepairServiceModel model)
         {
             var repairService = await _repairServiceService.UpdateRepairService(id, model);
             return CreatedAtAction(nameof(GetRepairService), new { id = repairService.Id }, repairService);

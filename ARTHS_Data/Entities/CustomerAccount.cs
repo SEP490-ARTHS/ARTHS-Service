@@ -9,7 +9,7 @@ namespace ARTHS_Data.Entities
         {
             FeedbackProducts = new HashSet<FeedbackProduct>();
             FeedbackStaffs = new HashSet<FeedbackStaff>();
-            OnlineOrders = new HashSet<OnlineOrder>();
+            Orders = new HashSet<Order>();
             RepairBookings = new HashSet<RepairBooking>();
         }
 
@@ -23,7 +23,7 @@ namespace ARTHS_Data.Entities
         public virtual Cart? Cart { get; set; }
         public virtual ICollection<FeedbackProduct> FeedbackProducts { get; set; }
         public virtual ICollection<FeedbackStaff> FeedbackStaffs { get; set; }
-        public virtual ICollection<OnlineOrder> OnlineOrders { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<RepairBooking> RepairBookings { get; set; }
     }
 }

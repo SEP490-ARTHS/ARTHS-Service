@@ -1,4 +1,5 @@
 ﻿using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -18,11 +19,11 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<AccountViewModel>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ListViewModel<AccountViewModel>), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all accounts.")]
-        public async Task<ActionResult<List<AccountViewModel>>> GetAccounts([FromQuery] AccountFilterModel filter)
+        public async Task<ActionResult<ListViewModel<AccountViewModel>>> GetAccounts([FromQuery] AccountFilterModel filter, [FromQuery] PaginationRequestModel pagination)
         {
-            var accounts = await _accountService.GetAccounts(filter);
+            var accounts = await _accountService.GetAccounts(filter, pagination);
             return Ok(accounts);
         }
     }

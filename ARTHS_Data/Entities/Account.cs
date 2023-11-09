@@ -7,6 +7,7 @@ namespace ARTHS_Data.Entities
     {
         public Account()
         {
+            DeviceTokens = new HashSet<DeviceToken>();
             Notifications = new HashSet<Notification>();
         }
 
@@ -14,7 +15,6 @@ namespace ARTHS_Data.Entities
         public Guid RoleId { get; set; }
         public string PhoneNumber { get; set; } = null!;
         public string PasswordHash { get; set; } = null!;
-        public string? RefreshToken { get; set; }
         public string Status { get; set; } = null!;
         public DateTime CreateAt { get; set; }
 
@@ -23,6 +23,7 @@ namespace ARTHS_Data.Entities
         public virtual OwnerAccount? OwnerAccount { get; set; }
         public virtual StaffAccount? StaffAccount { get; set; }
         public virtual TellerAccount? TellerAccount { get; set; }
+        public virtual ICollection<DeviceToken> DeviceTokens { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
     }
 }

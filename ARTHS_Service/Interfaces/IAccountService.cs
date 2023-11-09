@@ -1,11 +1,12 @@
 ﻿using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Views;
 
 namespace ARTHS_Service.Interfaces
 {
     public interface IAccountService
     {
-        Task<List<AccountViewModel>> GetAccounts(AccountFilterModel filter);
+        Task<ListViewModel<AccountViewModel>> GetAccounts(AccountFilterModel filter, PaginationRequestModel pagination);
         Task<List<AccountViewModel>> GetTellers(AccountFilterModel filter);
         Task<List<AccountViewModel>> GetOwners(AccountFilterModel filter);
         Task<List<AccountViewModel>> GetStaffs(AccountFilterModel filter);

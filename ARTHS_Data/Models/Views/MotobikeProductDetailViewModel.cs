@@ -7,6 +7,7 @@ namespace ARTHS_Data.Models.Views
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;
         public int PriceCurrent { get; set; }
+        public int InstallationFee { get; set; }
         public int Quantity { get; set; }
         public int WarrantyDuration { get; set; }
         public string Description { get; set; } = null!;
@@ -16,8 +17,7 @@ namespace ARTHS_Data.Models.Views
 
         public virtual CategoryViewModel? Category { get; set; }
         public virtual DiscountViewModel? Discount { get; set; }
-        public virtual RepairServiceViewModel? RepairService { get; set; }
-        //public virtual ICollection<FeedbackProduct> FeedbackProducts { get; set; } = new List<FeedbackProduct>();
+        public virtual ICollection<FeedbackProductViewModel> FeedbackProducts { get; set; } = new List<FeedbackProductViewModel>();
         public virtual ICollection<ImageViewModel> Images { get; set; } = new List<ImageViewModel>();
         public virtual ICollection<MotobikeProductPriceViewModel> MotobikeProductPrices { get; set; } = new List<MotobikeProductPriceViewModel>();
 

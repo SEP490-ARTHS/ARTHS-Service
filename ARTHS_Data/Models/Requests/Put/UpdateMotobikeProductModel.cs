@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace ARTHS_Data.Models.Views
+namespace ARTHS_Data.Models.Requests.Put
 {
     public class UpdateMotobikeProductModel
     {
@@ -9,7 +9,7 @@ namespace ARTHS_Data.Models.Views
         public int? Quantity { get; set; }
         public string? Description { get; set; }
         public string? Status { get; set; }
-        public Guid? RepairServiceId { get; set; }
+        public int? InstallationFee { get; set; }
         public Guid? DiscountId { get; set; }
         public Guid? WarrantyId { get; set; }
         public Guid? CategoryId { get; set; }

@@ -7,7 +7,7 @@ namespace ARTHS_Data.Entities
     {
         public TellerAccount()
         {
-            InStoreOrders = new HashSet<InStoreOrder>();
+            Orders = new HashSet<Order>();
         }
 
         public Guid AccountId { get; set; }
@@ -16,6 +16,6 @@ namespace ARTHS_Data.Entities
         public string? Avatar { get; set; }
 
         public virtual Account Account { get; set; } = null!;
-        public virtual ICollection<InStoreOrder> InStoreOrders { get; set; }
+        public virtual ICollection<Order> Orders { get; set; }
     }
 }

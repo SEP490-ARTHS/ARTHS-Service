@@ -37,9 +37,10 @@ namespace ARTHS_Service.Implementations
                 query = query.Where(category => category.CategoryName.Contains(filter.Name));
             }
 
-            return await query.ProjectTo<CategoryViewModel>(_mapper.ConfigurationProvider).ToListAsync();
-
-
+            return await query.
+                ProjectTo<CategoryViewModel>(_mapper.ConfigurationProvider)
+                .OrderBy(category => category.CategoryName)
+                .ToListAsync();
         }
 
         public async Task<CategoryViewModel> CreateCategory(CreateCategoryRequest request)
@@ -94,7 +95,7 @@ namespace ARTHS_Service.Implementations
                     throw new ConflictException("Tên danh mục đã tồn tại");
                 }
 
-                category.CategoryName = request.Name;
+                category.CategoryName = request.Name ?? category.CategoryName;
 
                 _categoryRepository.Update(category);
 

@@ -11,36 +11,25 @@ namespace ARTHS_Data.Mapping
             CreateMap<AccountRole, RoleViewModel>();
 
             CreateMap<CustomerAccount, CustomerViewModel>()
-                .ForMember(dest => dest.AccountId, opt => opt.MapFrom(src => src.AccountId))
-                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender))
-                .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.Avatar))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Account.PhoneNumber))
-                .ForMember(dest => dest.Cart, opt => opt.MapFrom(src => src.Cart));
+                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Account.PhoneNumber));
+
             CreateMap<OwnerAccount, OwnerViewModel>()
-                .ForMember(dest => dest.AccountId, opt => opt.MapFrom(src => src.AccountId))
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender))
-                .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.Avatar))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Account.PhoneNumber));
+
             CreateMap<TellerAccount, TellerViewModel>()
-                .ForMember(dest => dest.AccountId, opt => opt.MapFrom(src => src.AccountId))
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender))
-                .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.Avatar))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Account.PhoneNumber));
+
             CreateMap<StaffAccount, StaffViewModel>()
-                .ForMember(dest => dest.AccountId, opt => opt.MapFrom(src => src.AccountId))
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
-                .ForMember(dest => dest.Gender, opt => opt.MapFrom(src => src.Gender))
-                .ForMember(dest => dest.Avatar, opt => opt.MapFrom(src => src.Avatar))
                 .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.Account.PhoneNumber));
+
+            CreateMap<CustomerAccount, BasicCustomerViewModel>()
+                .ForMember(dest => dest.PhoneNumber, otp => otp.MapFrom(src => src.Account.PhoneNumber));
+
             CreateMap<Cart, CartViewModel>();
+
             CreateMap<CartItem, CartItemViewModel>();
+
             CreateMap<Account, AccountViewModel>()
-                .ForMember(dest => dest.AccountId, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
                 .ForMember(dest => dest.Role, otp => otp.MapFrom(src => src.Role.RoleName))
                 .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.CustomerAccount != null ? src.CustomerAccount.FullName :
                                                             (src.OwnerAccount != null ? src.OwnerAccount.FullName :
@@ -54,23 +43,58 @@ namespace ARTHS_Data.Mapping
                                                             (src.OwnerAccount != null ? src.OwnerAccount.Avatar :
                                                             (src.TellerAccount != null ? src.TellerAccount.Avatar :
                                                             (src.StaffAccount != null ? src.StaffAccount.Avatar : null)))));
-            CreateMap<RepairService, RepairServiceViewModel>();
+
+            CreateMap<RepairService, RepairServiceViewModel>()
+                .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
+
             CreateMap<MotobikeProduct, MotobikeProductViewModel>()
                 .ForMember(dest => dest.PriceCurrent, otp => otp.MapFrom(src => src.MotobikeProductPrices.OrderByDescending(price => price.CreateAt).FirstOrDefault()!.PriceCurrent))
-                .ForMember(dest => dest.WarrantyDuration, otp => otp.MapFrom(src => src.Warranty != null ? src.Warranty.Duration : 0));
+                .ForMember(dest => dest.WarrantyDuration, otp => otp.MapFrom(src => src.Warranty != null ? src.Warranty.Duration : 0))
+                .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0))
+                .ForMember(dest => dest.ImageUrl, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl));
+
             CreateMap<MotobikeProduct, MotobikeProductDetailViewModel>()
                 .ForMember(dest => dest.PriceCurrent, otp => otp.MapFrom(src => src.MotobikeProductPrices.OrderByDescending(price => price.CreateAt).FirstOrDefault()!.PriceCurrent))
                 .ForMember(dest => dest.MotobikeProductPrices, otp => otp.MapFrom(src => src.MotobikeProductPrices.OrderByDescending(price => price.CreateAt)))
                 .ForMember(dest => dest.WarrantyDuration, otp => otp.MapFrom(src => src.Warranty != null ? src.Warranty.Duration : 0));
+
             CreateMap<Image, ImageViewModel>();
+
             CreateMap<MotobikeProductPrice, MotobikeProductPriceViewModel>();
+
+            
+            CreateMap<MotobikeProduct, BasicMotobikeProductViewModel>()
+                .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl))
+                .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
+
+            CreateMap<RepairService, BasicRepairServiceViewModel>()
+                .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl))
+                .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
+            
+           
+            CreateMap<FeedbackProduct, FeedbackProductViewModel>();
+            CreateMap<RepairBooking, RepairBookingViewModel>();
+            CreateMap<Notification, NotificationViewModel>()
+                .ForMember(notificationVM => notificationVM.Data, config => config.MapFrom(notification => new NotificationDataViewModel
+                {
+                    CreateAt = notification.SendDate,
+                    IsRead = notification.IsRead,
+                    Link = notification.Link,
+                    Type = notification.Type
+                }));
+            CreateMap<Order, OrderViewModel>();
+            CreateMap<Order, BasicOrderViewModel>();
+            CreateMap<OrderDetail, OrderDetailViewModel>();
+            CreateMap<RevenueStore, RevenueStoreViewModel>();
+            CreateMap<WarrantyHistory, WarrantyHistoryViewModel>();
+            CreateMap<Configuration, ConfigurationViewModel>();
 
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();
             CreateMap<Discount, DiscountViewModel>();
+            CreateMap<Warranty, WarrantyViewModel>();
 
-            
 
         }
     }
