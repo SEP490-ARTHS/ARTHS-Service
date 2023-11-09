@@ -88,6 +88,7 @@ namespace ARTHS_Data.Mapping
             CreateMap<RevenueStore, RevenueStoreViewModel>();
             CreateMap<WarrantyHistory, WarrantyHistoryViewModel>();
             CreateMap<Configuration, ConfigurationViewModel>();
+            CreateMap<Discount, BasicDiscountViewModel>();
 
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();
