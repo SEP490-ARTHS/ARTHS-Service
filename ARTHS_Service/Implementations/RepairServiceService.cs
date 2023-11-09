@@ -122,6 +122,8 @@ namespace ARTHS_Service.Implementations
                 Price = model.Price,
                 Duration = model.Duration,
                 ReminderInterval = model.ReminderInterval,
+                WarrantyDuration = model.WarrantyDuration,
+                DiscountId = model.DiscountId,
                 Description = model.Description,
                 Status = RepairServiceStatus.Active,
 
@@ -175,6 +177,8 @@ namespace ARTHS_Service.Implementations
             repairService.Name = model.Name ?? repairService.Name;
             repairService.Price = model.Price ?? repairService.Price;
             repairService.Duration = model.Duration ?? repairService.Duration;
+            repairService.WarrantyDuration = model.WarrantyDuration ?? repairService.WarrantyDuration;
+            repairService.DiscountId = model.DiscountId ?? repairService.DiscountId;
             repairService.ReminderInterval = model.ReminderInterval ?? repairService.ReminderInterval;
             repairService.Description = model.Description ?? repairService.Description;
             repairService.Status = model.Status ?? repairService.Status;

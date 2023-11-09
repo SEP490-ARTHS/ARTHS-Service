@@ -44,7 +44,8 @@ namespace ARTHS_Data.Mapping
                                                             (src.TellerAccount != null ? src.TellerAccount.Avatar :
                                                             (src.StaffAccount != null ? src.StaffAccount.Avatar : null)))));
 
-            CreateMap<RepairService, RepairServiceViewModel>();
+            CreateMap<RepairService, RepairServiceViewModel>()
+                .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
 
             CreateMap<MotobikeProduct, MotobikeProductViewModel>()
                 .ForMember(dest => dest.PriceCurrent, otp => otp.MapFrom(src => src.MotobikeProductPrices.OrderByDescending(price => price.CreateAt).FirstOrDefault()!.PriceCurrent))
@@ -67,7 +68,8 @@ namespace ARTHS_Data.Mapping
                 .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
 
             CreateMap<RepairService, BasicRepairServiceViewModel>()
-                .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl));
+                .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl))
+                .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
             
            
             CreateMap<FeedbackProduct, FeedbackProductViewModel>();

@@ -11,7 +11,7 @@ namespace ARTHS_Utility.Helpers
         private const string Token = "ed4ee04c-749f-11ee-a6e6-e60958111f48";
         private const string ShopId = "190193";
 
-        public static async Task<string> CreateShippingOrderAsync(GhnCreateRequestModel requestData)
+        public static async Task<GhnCreateResponseModel?> CreateShippingOrderAsync(GhnCreateRequestModel requestData)
         {
             httpClient.DefaultRequestHeaders.Clear();
 
@@ -26,10 +26,17 @@ namespace ARTHS_Utility.Helpers
             if (response.IsSuccessStatusCode)
             {
                 var responseString = await response.Content.ReadAsStringAsync();
-                return responseString;
+                var responseObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseString);
+
+                if (responseObject != null && responseObject.ContainsKey("data") && responseObject["data"] != null)
+                {
+                    string dataString = JsonConvert.SerializeObject(responseObject["data"]);
+                    GhnCreateResponseModel? dataObject = JsonConvert.DeserializeObject<GhnCreateResponseModel>(dataString);
+                    return dataObject;
+                }
             }
 
-            return "Error in creating shipping order";
+            return null;
         }
     }
 }

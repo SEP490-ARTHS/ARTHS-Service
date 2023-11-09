@@ -48,8 +48,8 @@ namespace ARTHS_Data.Entities
         {
             if (!optionsBuilder.IsConfigured)
             {
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                //optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
             }
         }
 
@@ -59,7 +59,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Account");
 
-                entity.HasIndex(e => e.PhoneNumber, "UQ__Account__85FB4E38FDC2A410")
+                entity.HasIndex(e => e.PhoneNumber, "UQ__Account__85FB4E384EC7D282")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -98,7 +98,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("Cart");
 
-                entity.HasIndex(e => e.CustomerId, "UQ__Cart__A4AE64D9DF2EC1FA")
+                entity.HasIndex(e => e.CustomerId, "UQ__Cart__A4AE64D9BCB05F12")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -107,13 +107,13 @@ namespace ARTHS_Data.Entities
                     .WithOne(p => p.Cart)
                     .HasForeignKey<Cart>(d => d.CustomerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Cart__CustomerId__66603565");
+                    .HasConstraintName("FK__Cart__CustomerId__6754599E");
             });
 
             modelBuilder.Entity<CartItem>(entity =>
             {
                 entity.HasKey(e => new { e.CartId, e.MotobikeProductId })
-                    .HasName("PK__CartItem__4B299AA359B91CC6");
+                    .HasName("PK__CartItem__4B299AA304657EE4");
 
                 entity.ToTable("CartItem");
 
@@ -125,13 +125,13 @@ namespace ARTHS_Data.Entities
                     .WithMany(p => p.CartItems)
                     .HasForeignKey(d => d.CartId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__CartItem__CartId__693CA210");
+                    .HasConstraintName("FK__CartItem__CartId__6A30C649");
 
                 entity.HasOne(d => d.MotobikeProduct)
                     .WithMany(p => p.CartItems)
                     .HasForeignKey(d => d.MotobikeProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__CartItem__Motobi__6A30C649");
+                    .HasConstraintName("FK__CartItem__Motobi__6B24EA82");
             });
 
             modelBuilder.Entity<Category>(entity =>
@@ -153,7 +153,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<CustomerAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__Customer__349DA5A6A636C382");
+                    .HasName("PK__Customer__349DA5A66D71D809");
 
                 entity.ToTable("CustomerAccount");
 
@@ -227,13 +227,13 @@ namespace ARTHS_Data.Entities
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.FeedbackProducts)
                     .HasForeignKey(d => d.CustomerId)
-                    .HasConstraintName("FK__FeedbackP__Custo__60A75C0F");
+                    .HasConstraintName("FK__FeedbackP__Custo__619B8048");
 
                 entity.HasOne(d => d.MotobikeProduct)
                     .WithMany(p => p.FeedbackProducts)
                     .HasForeignKey(d => d.MotobikeProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__FeedbackP__Motob__619B8048");
+                    .HasConstraintName("FK__FeedbackP__Motob__628FA481");
             });
 
             modelBuilder.Entity<FeedbackStaff>(entity =>
@@ -271,19 +271,19 @@ namespace ARTHS_Data.Entities
                 entity.HasOne(d => d.MotobikeProduct)
                     .WithMany(p => p.Images)
                     .HasForeignKey(d => d.MotobikeProductId)
-                    .HasConstraintName("FK__Image__MotobikeP__5812160E");
+                    .HasConstraintName("FK__Image__MotobikeP__59063A47");
 
                 entity.HasOne(d => d.RepairService)
                     .WithMany(p => p.Images)
                     .HasForeignKey(d => d.RepairServiceId)
-                    .HasConstraintName("FK__Image__RepairSer__59063A47");
+                    .HasConstraintName("FK__Image__RepairSer__59FA5E80");
             });
 
             modelBuilder.Entity<MaintenanceSchedule>(entity =>
             {
                 entity.ToTable("MaintenanceSchedule");
 
-                entity.HasIndex(e => e.OrderDetailId, "UQ__Maintena__D3B9D36D7A364E7F")
+                entity.HasIndex(e => e.OrderDetailId, "UQ__Maintena__D3B9D36D44E39D20")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -296,7 +296,7 @@ namespace ARTHS_Data.Entities
                     .WithOne(p => p.MaintenanceSchedule)
                     .HasForeignKey<MaintenanceSchedule>(d => d.OrderDetailId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Maintenan__Order__7F2BE32F");
+                    .HasConstraintName("FK__Maintenan__Order__00200768");
             });
 
             modelBuilder.Entity<MotobikeProduct>(entity =>
@@ -318,27 +318,27 @@ namespace ARTHS_Data.Entities
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.MotobikeProducts)
                     .HasForeignKey(d => d.CategoryId)
-                    .HasConstraintName("FK__MotobikeP__Categ__5070F446");
+                    .HasConstraintName("FK__MotobikeP__Categ__5165187F");
 
                 entity.HasOne(d => d.Discount)
                     .WithMany(p => p.MotobikeProducts)
                     .HasForeignKey(d => d.DiscountId)
-                    .HasConstraintName("FK__MotobikeP__Disco__4E88ABD4");
+                    .HasConstraintName("FK__MotobikeP__Disco__4F7CD00D");
 
                 entity.HasOne(d => d.Warranty)
                     .WithMany(p => p.MotobikeProducts)
                     .HasForeignKey(d => d.WarrantyId)
-                    .HasConstraintName("FK__MotobikeP__Warra__4F7CD00D");
+                    .HasConstraintName("FK__MotobikeP__Warra__5070F446");
 
                 entity.HasMany(d => d.Vehicles)
                     .WithMany(p => p.MotobikeProducts)
                     .UsingEntity<Dictionary<string, object>>(
                         "ProductVehicleType",
-                        l => l.HasOne<Vehicle>().WithMany().HasForeignKey("VehicleId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__ProductVe__Vehic__5DCAEF64"),
-                        r => r.HasOne<MotobikeProduct>().WithMany().HasForeignKey("MotobikeProductId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__ProductVe__Motob__5CD6CB2B"),
+                        l => l.HasOne<Vehicle>().WithMany().HasForeignKey("VehicleId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__ProductVe__Vehic__5EBF139D"),
+                        r => r.HasOne<MotobikeProduct>().WithMany().HasForeignKey("MotobikeProductId").OnDelete(DeleteBehavior.ClientSetNull).HasConstraintName("FK__ProductVe__Motob__5DCAEF64"),
                         j =>
                         {
-                            j.HasKey("MotobikeProductId", "VehicleId").HasName("PK__ProductV__9D22640919DA7294");
+                            j.HasKey("MotobikeProductId", "VehicleId").HasName("PK__ProductV__9D2264098712A141");
 
                             j.ToTable("ProductVehicleType");
                         });
@@ -360,7 +360,7 @@ namespace ARTHS_Data.Entities
                     .WithMany(p => p.MotobikeProductPrices)
                     .HasForeignKey(d => d.MotobikeProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__MotobikeP__Motob__5441852A");
+                    .HasConstraintName("FK__MotobikeP__Motob__5535A963");
             });
 
             modelBuilder.Entity<Notification>(entity =>
@@ -427,17 +427,17 @@ namespace ARTHS_Data.Entities
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.CustomerId)
-                    .HasConstraintName("FK__Order__CustomerI__6E01572D");
+                    .HasConstraintName("FK__Order__CustomerI__6EF57B66");
 
                 entity.HasOne(d => d.Staff)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.StaffId)
-                    .HasConstraintName("FK__Order__StaffId__6FE99F9F");
+                    .HasConstraintName("FK__Order__StaffId__70DDC3D8");
 
                 entity.HasOne(d => d.Teller)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.TellerId)
-                    .HasConstraintName("FK__Order__TellerId__6EF57B66");
+                    .HasConstraintName("FK__Order__TellerId__6FE99F9F");
             });
 
             modelBuilder.Entity<OrderDetail>(entity =>
@@ -461,24 +461,24 @@ namespace ARTHS_Data.Entities
                 entity.HasOne(d => d.MotobikeProduct)
                     .WithMany(p => p.OrderDetails)
                     .HasForeignKey(d => d.MotobikeProductId)
-                    .HasConstraintName("FK__OrderDeta__Motob__74AE54BC");
+                    .HasConstraintName("FK__OrderDeta__Motob__75A278F5");
 
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.OrderDetails)
                     .HasForeignKey(d => d.OrderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__OrderDeta__Order__73BA3083");
+                    .HasConstraintName("FK__OrderDeta__Order__74AE54BC");
 
                 entity.HasOne(d => d.RepairService)
                     .WithMany(p => p.OrderDetails)
                     .HasForeignKey(d => d.RepairServiceId)
-                    .HasConstraintName("FK__OrderDeta__Repai__75A278F5");
+                    .HasConstraintName("FK__OrderDeta__Repai__76969D2E");
             });
 
             modelBuilder.Entity<OwnerAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__OwnerAcc__349DA5A66D359D00");
+                    .HasName("PK__OwnerAcc__349DA5A6E1EDABF9");
 
                 entity.ToTable("OwnerAccount");
 
@@ -501,7 +501,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("RepairBooking");
 
-                entity.HasIndex(e => e.OrderId, "UQ__RepairBo__C3905BCEFD078AF3")
+                entity.HasIndex(e => e.OrderId, "UQ__RepairBo__C3905BCE68D4A17E")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -524,17 +524,17 @@ namespace ARTHS_Data.Entities
                     .WithMany(p => p.RepairBookings)
                     .HasForeignKey(d => d.CustomerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__RepairBoo__Custo__07C12930");
+                    .HasConstraintName("FK__RepairBoo__Custo__08B54D69");
 
                 entity.HasOne(d => d.Order)
                     .WithOne(p => p.RepairBooking)
                     .HasForeignKey<RepairBooking>(d => d.OrderId)
-                    .HasConstraintName("FK__RepairBoo__Order__09A971A2");
+                    .HasConstraintName("FK__RepairBoo__Order__0A9D95DB");
 
                 entity.HasOne(d => d.Staff)
                     .WithMany(p => p.RepairBookings)
                     .HasForeignKey(d => d.StaffId)
-                    .HasConstraintName("FK__RepairBoo__Staff__08B54D69");
+                    .HasConstraintName("FK__RepairBoo__Staff__09A971A2");
             });
 
             modelBuilder.Entity<RepairService>(entity =>
@@ -550,6 +550,11 @@ namespace ARTHS_Data.Entities
                 entity.Property(e => e.Name).HasMaxLength(255);
 
                 entity.Property(e => e.Status).HasMaxLength(100);
+
+                entity.HasOne(d => d.Discount)
+                    .WithMany(p => p.RepairServices)
+                    .HasForeignKey(d => d.DiscountId)
+                    .HasConstraintName("FK__RepairSer__Disco__4BAC3F29");
             });
 
             modelBuilder.Entity<RevenueStore>(entity =>
@@ -579,13 +584,13 @@ namespace ARTHS_Data.Entities
                 entity.HasOne(d => d.Order)
                     .WithMany(p => p.RevenueStores)
                     .HasForeignKey(d => d.OrderId)
-                    .HasConstraintName("FK__RevenueSt__Order__02FC7413");
+                    .HasConstraintName("FK__RevenueSt__Order__03F0984C");
             });
 
             modelBuilder.Entity<StaffAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__StaffAcc__349DA5A6BBE35320");
+                    .HasName("PK__StaffAcc__349DA5A6494FAA9E");
 
                 entity.ToTable("StaffAccount");
 
@@ -607,7 +612,7 @@ namespace ARTHS_Data.Entities
             modelBuilder.Entity<TellerAccount>(entity =>
             {
                 entity.HasKey(e => e.AccountId)
-                    .HasName("PK__TellerAc__349DA5A6DC9C5476");
+                    .HasName("PK__TellerAc__349DA5A6BA136BFA");
 
                 entity.ToTable("TellerAccount");
 
@@ -655,13 +660,13 @@ namespace ARTHS_Data.Entities
                 entity.HasOne(d => d.HandledByNavigation)
                     .WithMany(p => p.WarrantyHistories)
                     .HasForeignKey(d => d.HandledBy)
-                    .HasConstraintName("FK__WarrantyH__Handl__7B5B524B");
+                    .HasConstraintName("FK__WarrantyH__Handl__7C4F7684");
 
                 entity.HasOne(d => d.OrderDetail)
                     .WithMany(p => p.WarrantyHistories)
                     .HasForeignKey(d => d.OrderDetailId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__WarrantyH__Order__7A672E12");
+                    .HasConstraintName("FK__WarrantyH__Order__7B5B524B");
             });
 
             OnModelCreatingPartial(modelBuilder);
