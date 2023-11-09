@@ -1,7 +1,12 @@
 ﻿using ARTHS_Data;
+using ARTHS_Data.Entities;
+using ARTHS_Data.Models.Requests.Post;
+using ARTHS_Data.Models.Views;
+using ARTHS_Data.Repositories.Implementations;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
+using ARTHS_Utility.Enums;
 using ARTHS_Utility.Exceptions;
 using ARTHS_Utility.Helpers;
 using ARTHS_Utility.Helpers.Models;
@@ -13,9 +18,11 @@ namespace ARTHS_Service.Implementations
     public class GhnService : BaseService, IGhnService
     {
         private readonly IOrderRepository _orderRepository;
-        public GhnService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        private readonly INotificationService _notificationService;
+        public GhnService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService) : base(unitOfWork, mapper)
         {
             _orderRepository = unitOfWork.Order;
+            _notificationService = notificationService;
         }
 
         public async Task<GhnCreateResponseModel> CreateShippingOrder(GhnCreateOrderModel model)
@@ -94,7 +101,25 @@ namespace ARTHS_Service.Implementations
                 order!.Status = OrderStatus.Finished;
                 _orderRepository.Update(order);
                 await _unitOfWork.SaveChanges();
+                await SendNotificationToCustomer(order);
             }
+        }
+
+
+        private async Task SendNotificationToCustomer(Order order)
+        {
+            var message = new CreateNotificationModel
+            {
+                Title = $"Giao hàng thành công.",
+                Body = $"Đơn hàng {order.Id} của bạn được giao thành công. Cảm ơn bạn đã sử dụng dịch vụ bên chúng tôi.",
+                Data = new NotificationDataViewModel
+                {
+                    CreateAt = DateTime.UtcNow.AddHours(7),
+                    Type = NotificationType.RepairService.ToString(),
+                    Link = order.Id
+                }
+            };
+            await _notificationService.SendNotification(new List<Guid> { (Guid)order.CustomerId! }, message);
         }
     }
 }

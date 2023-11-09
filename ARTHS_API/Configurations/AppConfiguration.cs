@@ -1,5 +1,7 @@
 ﻿using ARTHS_API.Configurations.Middleware;
 using ARTHS_Data;
+using ARTHS_Data.Repositories.Implementations;
+using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Implementations;
 using ARTHS_Service.Interfaces;
 using Microsoft.OpenApi.Models;
@@ -34,6 +36,7 @@ namespace ARTHS_API.Configurations
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IConfigurationService, ConfigurationService>();
+            services.AddScoped<IWarrantyHistoryService, WarrantyHistoryService>();
             
             services.AddTransient<IGhnService, GhnService>();
             services.AddTransient<IPaymentService, PaymentService>();

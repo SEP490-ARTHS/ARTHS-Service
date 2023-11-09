@@ -12,7 +12,5 @@ namespace ARTHS_Service.Interfaces
         Task<RepairBookingViewModel> GetRepairBooking(Guid Id);
         Task<RepairBookingViewModel> CreateBooking(Guid customerId, CreateRepairBookingModel model);
         Task<RepairBookingViewModel> UpdateBooking(Guid repairBookingId, UpdateRepairBookingModel model);
-        Task<BookingSettingViewModel> GetBookingSetting();
-        Task<BookingSettingViewModel> UpdateBookingSetting(UpdateBookingSettingModel model);
     }
 }

@@ -4,28 +4,28 @@ namespace ARTHS_Utility.Helpers.Models
 {
     public class GhnWebHookResponse
     {
-        public int CODAmount { get; set; } // Tiền thu hộ
+        public int? CODAmount { get; set; } // Tiền thu hộ
         public DateTime? CODTransferDate { get; set; } // Ngày chuyển tiền thu hộ
         public string? ClientOrderCode { get; set; }// Mã đơn hàng riêng của Khách hàng
-        public int ConvertedWeight { get; set; } // Khối lượng quy đổi
+        public int? ConvertedWeight { get; set; } // Khối lượng quy đổi
         public string? Description { get; set; } // Mô tả
         public FeeDetail? Fee { get; set; } // Phí
-        public int Height { get; set; } // Chiều cao
-        public bool IsPartialReturn { get; set; } // Đơn hàng giao 1 phần
-        public int Length { get; set; } // Chiều dài
+        public int? Height { get; set; } // Chiều cao
+        public bool? IsPartialReturn { get; set; } // Đơn hàng giao 1 phần
+        public int? Length { get; set; } // Chiều dài
         public string OrderCode { get; set; } = null!; // Mã vận đơn
         public string? PartialReturnCode { get; set; } // Mã vận đơn giao 1 phần
-        public int PaymentType { get; set; } // Mã người thanh toán phí dịch vụ
+        public int? PaymentType { get; set; } // Mã người thanh toán phí dịch vụ
         public string? Reason { get; set; } // Lý do
         public string? ReasonCode { get; set; } // Mã lý do
-        public int ShopID { get; set; } // Mã cửa hàng
+        public int? ShopID { get; set; } // Mã cửa hàng
         public string Status { get; set; } = null!; // Trạng thái đơn hàng
-        public DateTime Time { get; set; } // Thời gian
-        public decimal TotalFee { get; set; } // Tổng tiền phí dịch vụ
+        public DateTime? Time { get; set; } // Thời gian
+        public decimal? TotalFee { get; set; } // Tổng tiền phí dịch vụ
         public string? Type { get; set; } // Loại
         public string? Warehouse { get; set; } // Bưu cục
-        public int Weight { get; set; } // Cân nặng
-        public int Width { get; set; } // Chiều rộng
+        public int? Weight { get; set; } // Cân nặng
+        public int? Width { get; set; } // Chiều rộng
     }
 
     public class FeeDetail

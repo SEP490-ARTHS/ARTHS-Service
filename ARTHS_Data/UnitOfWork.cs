@@ -28,13 +28,13 @@ namespace ARTHS_Data
         private IOrderDetailRepository _orderDetail = null!;
         private IWarrantyRepository _warranty = null!;
         private IRevenueStoreRepository _revenueStore = null!;
-
+        private IWarrantyHistoryRepository _warrantyHistory = null!;
         private IFeedbackProductRepository _feedbackProduct = null!;
         private IRepairBookingRepository _repairBooking = null!;
         private IDeviceTokenRepository _deviceToken = null!;
         private INotificationRepository _notification = null!;
         private IConfigurationRepository _configuration = null!;
-
+        private IMaintenanceScheduleRepository _maintenanceSchedule = null!;
         public UnitOfWork(ARTHS_DBContext context)
         {
             _context = context;
@@ -161,6 +161,16 @@ namespace ARTHS_Data
         public IConfigurationRepository Configuration
         {
             get { return _configuration ??= new ConfigurationRepository(_context); }
+        }
+
+        public IMaintenanceScheduleRepository MaintenanceSchedule
+        {
+            get { return _maintenanceSchedule ??= new MaintenanceScheduleRepository(_context); }
+        }
+
+        public IWarrantyHistoryRepository WarrantyHistory
+        {
+            get { return _warrantyHistory ??= new WarrantyHistoryRepository(_context); }
         }
         public async Task<int> SaveChanges()
         {

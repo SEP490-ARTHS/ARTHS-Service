@@ -29,7 +29,8 @@ namespace ARTHS_Data
         public IDeviceTokenRepository DeviceToken { get; }
         public INotificationRepository Notification { get; }
         public IConfigurationRepository Configuration { get; }
-
+        public IMaintenanceScheduleRepository MaintenanceSchedule { get; }
+        public IWarrantyHistoryRepository WarrantyHistory { get; }
         //-----------------
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

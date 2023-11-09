@@ -22,7 +22,7 @@ namespace ARTHS_Service.Implementations
 
         private const string CREATE_ORDER_URL = "https://sb-openapi.zalopay.vn/v2/create";
         private const string QUERY_ORDER_URL = "https://sb-openapi.zalopay.vn/v2/query";
-        private const string CallBack_URL = "https://4926-1-52-35-143.ngrok.io/api/payments/zalopay-callback";
+        private const string CallBack_URL = "https://thanh-huy.azurewebsites.net/api/payments/zalopay-callback";
 
         public PaymentService(IUnitOfWork unitOfWork, IMapper mapper, IOptions<AppSetting> appSettings) : base(unitOfWork, mapper)
         {
@@ -38,7 +38,11 @@ namespace ARTHS_Service.Implementations
             var order = await _orderRepository.GetMany(order => order.Id.Equals(orderId)).FirstOrDefaultAsync();
             if (order == null) throw new NotFoundException("Không tìm thấy thông tin order");
             if (order.Status.Equals(OrderStatus.Paid)) throw new BadRequestException("Đơn hàng này đã thanh toán thành công rồi");
-
+            var existRevenues = await _revenueStoreRepository.GetMany(revenue => revenue.OrderId!.Equals(orderId)).ToListAsync();
+            if(existRevenues != null)
+            {
+                _revenueStoreRepository.RemoveRange(existRevenues);
+            }
             var revenue = new RevenueStore
             {
                 OrderId = orderId,
@@ -92,6 +96,11 @@ namespace ARTHS_Service.Implementations
             DateTime now = DateTime.UtcNow.AddHours(7);
             string AppTransId = now.ToString("yyMMddHHmmssfff") + "_" + model.OrderId;
 
+            var existRevenues = await _revenueStoreRepository.GetMany(revenue => revenue.OrderId!.Equals(order.Id)).ToListAsync();
+            if (existRevenues != null)
+            {
+                _revenueStoreRepository.RemoveRange(existRevenues);
+            }
             var revenue = new RevenueStore
             {
                 Id = AppTransId,
