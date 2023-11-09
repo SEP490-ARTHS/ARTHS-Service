@@ -1,5 +1,6 @@
 ﻿using ARTHS_API.Configurations.Middleware;
 using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
@@ -22,11 +23,11 @@ namespace ARTHS_API.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(BasicDiscountViewModel), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get all discounts.")]
-        public async Task<ActionResult<List<DiscountViewModel>>> GetDiscounts([FromQuery] DiscountFilterModel filter)
+        public async Task<ActionResult<ListViewModel<BasicDiscountViewModel>>> GetDiscounts([FromQuery] DiscountFilterModel filter, [FromQuery] PaginationRequestModel pagination)
         {
-            return await _discountService.GetDiscounts(filter);
+            return await _discountService.GetDiscounts(filter, pagination);
         }
 
         [HttpGet]
