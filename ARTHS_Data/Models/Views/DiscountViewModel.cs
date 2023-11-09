@@ -10,5 +10,8 @@
         public string ImageUrl { get; set; } = null!;
         public string Description { get; set; } = null!;
         public string Status { get; set; } = null!;
+        public virtual ICollection<MotobikeProductViewModel> MotobikeProducts { get; set; } = new List<MotobikeProductViewModel>();
+        public virtual ICollection<BasicRepairServiceViewModel> RepairService { get; set; } = new List<BasicRepairServiceViewModel>();
+
     }
 }

@@ -10,6 +10,7 @@ namespace ARTHS_Data.Models.Requests.Put
         public DateTime? EndDate { get; set; }
         public IFormFile? Image { get; set; }
         public string? Description { get; set; }
-        public string? Status { get; set; }
+        public List<Guid>? MotobikeProductId { get; set; } = new List<Guid>();
+        public List<Guid>? RepairServiceId { get; set; } = new List<Guid>();
     }
 }

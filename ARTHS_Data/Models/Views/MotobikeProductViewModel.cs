@@ -1,6 +1,4 @@
-﻿using ARTHS_Data.Entities;
-
-namespace ARTHS_Data.Models.Views
+﻿namespace ARTHS_Data.Models.Views
 {
     public class MotobikeProductViewModel
     {
@@ -14,7 +12,7 @@ namespace ARTHS_Data.Models.Views
         //public virtual CategoryViewModel? Category { get; set; }
         public int DiscountAmount { get; set; }
         //public virtual DiscountViewModel? Discount { get; set; }
-        public virtual BasicRepairServiceViewModel? RepairService { get; set; }
+        //public virtual BasicRepairServiceViewModel? RepairService { get; set; }
 
         public string ImageUrl { get; set; } = null!;
         //public virtual ICollection<ImageViewModel> Images { get; set; } = new List<ImageViewModel>();
