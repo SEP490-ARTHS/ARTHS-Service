@@ -98,22 +98,10 @@ namespace ARTHS_Data.Mapping
             CreateMap<Warranty, WarrantyViewModel>();
             CreateMap<MotobikeProduct, DiscountViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.DiscountId))
-                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Discount.Title))
-                .ForMember(dest => dest.DiscountAmount, opt => opt.MapFrom(src => src.Discount.DiscountAmount))
-                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.Discount.StartDate))
-                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.Discount.EndDate))
-                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Discount.ImageUrl))
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Discount.Description))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Discount.Status));
+                .ForMember(dest => dest.DiscountAmount, opt => opt.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
             CreateMap<RepairService, DiscountViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.DiscountId))
-                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Discount.Title))
-                .ForMember(dest => dest.DiscountAmount, opt => opt.MapFrom(src => src.Discount.DiscountAmount))
-                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.Discount.StartDate))
-                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.Discount.EndDate))
-                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Discount.ImageUrl))
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Discount.Description))
-                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Discount.Status));
+                .ForMember(dest => dest.DiscountAmount, opt => opt.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
 
 
 

@@ -1,6 +1,7 @@
 ﻿using ARTHS_Data;
 using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Requests.Filters;
+using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
@@ -29,48 +30,66 @@ namespace ARTHS_Service.Implementations
             _repairServiceRepository = _unitOfWork.RepairService;
         }
 
-        public async Task<List<DiscountViewModel>> GetDiscounts(DiscountFilterModel filter)
+        public async Task<ListViewModel<BasicDiscountViewModel>> GetDiscounts(DiscountFilterModel filter, PaginationRequestModel pagination)
         {
             var currentTime = DateTime.Now;
 
-            var query = _repository.GetAll();
+            var query = _repository.GetAll().AsQueryable();
             if (query != null)
             {
                 var discountsToDiscontinue = query
                         .Where(discount => discount.EndDate < currentTime && discount.Status != DiscountStatus.Discontinued)
                         .ToList();
 
-                foreach (var discount in discountsToDiscontinue)
+                foreach (var discounts in discountsToDiscontinue)
                 {
-                    discount.Status = DiscountStatus.Discontinued;
-                    _repository.Update(discount);
+                    discounts.Status = DiscountStatus.Discontinued;
+                    _repository.Update(discounts);
                 }
 
                 await _unitOfWork.SaveChanges();
+
+                if (filter.Title != null)
+                {
+                    query = query.Where(discount => discount.Title.Contains(filter.Title));
+                }
+                if (filter.StartDate != null && filter.EndDate != null)
+                {
+                    query = query.Where(discount => discount.StartDate >= filter.StartDate && discount.EndDate <= filter.EndDate);
+                }
+                else if (filter.StartDate != null)
+                {
+                    query = query.Where(discount => discount.StartDate >= filter.StartDate);
+                }
+                else if (filter.EndDate != null)
+                {
+                    query = query.Where(discount => discount.EndDate <= filter.EndDate);
+                }
+                else if (filter.status != null)
+                {
+                    query = query.Where(discount => discount.Status == filter.status);
+                }
             }
-            if (filter.Title != null)
-            {
-                query = query.Where(discount => discount.Title.Contains(filter.Title));
-            }
-            if (filter.StartDate != null && filter.EndDate != null)
-            {
-                query = query.Where(discount => discount.StartDate >= filter.StartDate && discount.EndDate <= filter.EndDate);
-            }
-            else if (filter.StartDate != null)
-            {
-                query = query.Where(discount => discount.StartDate >= filter.StartDate);
-            }
-            else if (filter.EndDate != null)
-            {
-                query = query.Where(discount => discount.EndDate <= filter.EndDate);
-            }
-            else if (filter.status != null)
-            {
-                query = query.Where(discount => discount.Status == filter.status);
-            }
-            return await query
-                .ProjectTo<DiscountViewModel>(_mapper.ConfigurationProvider)
+            var totalRow = await query.AsNoTracking().CountAsync();
+            var paginatedQuery = query
+                .Skip(pagination.PageNumber * pagination.PageSize)
+                .Take(pagination.PageSize);
+
+            var discount = await paginatedQuery
+                .ProjectTo<BasicDiscountViewModel>(_mapper.ConfigurationProvider)
+                .AsNoTracking()
                 .ToListAsync();
+
+            return new ListViewModel<BasicDiscountViewModel>
+            {
+                Pagination = new PaginationViewModel
+                {
+                    PageNumber = pagination.PageNumber,
+                    PageSize = pagination.PageSize,
+                    TotalRow = totalRow
+                },
+                Data = discount
+            };
         }
 
         public async Task<DiscountViewModel> GetDiscount(Guid id)
@@ -111,8 +130,11 @@ namespace ARTHS_Service.Implementations
                     };
 
                     _repository.Add(discount);
-                    await AddDiscountIdIntoMotobikeProduct(discountId, model.MotobikeProductId);
-                    await AddDiscountIdIntoRepairService(discountId, model.RepairServiceId);
+                    if (model.MotobikeProductId != null)
+                        await AddDiscountIdIntoMotobikeProduct(discountId, model.MotobikeProductId);
+
+                    if (model.RepairServiceId != null)
+                        await AddDiscountIdIntoRepairService(discountId, model.RepairServiceId);
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }
@@ -205,41 +227,55 @@ namespace ARTHS_Service.Implementations
             throw new NotFoundException("không tìm thấy");
         }
 
-        private async Task<ICollection<MotobikeProduct>> AddDiscountIdIntoMotobikeProduct(Guid idDiscount, ICollection<Guid> idProducts)
+        private async Task<ICollection<MotobikeProduct>> AddDiscountIdIntoMotobikeProduct(Guid idDiscount, ICollection<Guid>? idProducts)
         {
             var listProduct = new List<MotobikeProduct>();
-            foreach (Guid product in idProducts)
+            if (idProducts != null)
             {
-                // Find the motobike product by its ID.
-                var motobikeProduct = await _motobikeProductRepository
-                    .GetMany(p => p.Id == product)
-                    .FirstOrDefaultAsync();
-
-                if (motobikeProduct != null)
+                foreach (Guid product in idProducts)
                 {
-                    // Update the DiscountId for the motobike product.
-                    motobikeProduct.DiscountId = idDiscount;
-                    _motobikeProductRepository.Update(motobikeProduct);
-                    listProduct.Add(motobikeProduct);
+                    // Find the motobike product by its ID.
+                    var motobikeProduct = await _motobikeProductRepository
+                        .GetMany(p => p.Id == product)
+                        .FirstOrDefaultAsync();
+
+                    if (motobikeProduct != null)
+                    {
+                        // Update the DiscountId for the motobike product.
+                        motobikeProduct.DiscountId = idDiscount;
+                        _motobikeProductRepository.Update(motobikeProduct);
+                        listProduct.Add(motobikeProduct);
+                    }
+                    else
+                    {
+                        throw new NotFoundException("không tìm thấy product này: " + product);
+                    }
                 }
             }
             return listProduct;
         }
 
-        private async Task<ICollection<RepairService>> AddDiscountIdIntoRepairService(Guid idDiscount, ICollection<Guid> idService)
+        private async Task<ICollection<RepairService>> AddDiscountIdIntoRepairService(Guid idDiscount, ICollection<Guid>? idService)
         {
             var listService = new List<RepairService>();
-            foreach (Guid service in idService)
+            if (idService != null)
             {
-                var repairService = await _repairServiceRepository
-                    .GetMany(s => s.Id == service)
-                    .FirstOrDefaultAsync();
-
-                if (repairService != null)
+                foreach (Guid service in idService)
                 {
-                    repairService.DiscountId = idDiscount;
-                    _repairServiceRepository.Update(repairService);
-                    listService.Add(repairService);
+                    var repairService = await _repairServiceRepository
+                        .GetMany(s => s.Id == service)
+                        .FirstOrDefaultAsync();
+
+                    if (repairService != null)
+                    {
+                        repairService.DiscountId = idDiscount;
+                        _repairServiceRepository.Update(repairService);
+                        listService.Add(repairService);
+                    }
+                    else
+                    {
+                        throw new NotFoundException("không tìm thấy dịch vụ này: " + service);
+                    }
                 }
             }
             return listService;
