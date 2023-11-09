@@ -18,17 +18,36 @@ namespace ARTHS_Service.Implementations
     {
         private readonly IDiscountRepository _repository;
         private readonly ICloudStorageService _cloudStorageService;
+        private readonly IMotobikeProductRepository _motobikeProductRepository;
+        private readonly IRepairServiceRepository _repairServiceRepository;
 
         public DiscountService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService) : base(unitOfWork, mapper)
         {
             _repository = unitOfWork.Discount;
+            _motobikeProductRepository = _unitOfWork.MotobikeProduct;
             _cloudStorageService = cloudStorageService;
+            _repairServiceRepository = _unitOfWork.RepairService;
         }
 
         public async Task<List<DiscountViewModel>> GetDiscounts(DiscountFilterModel filter)
         {
-            var query = _repository.GetAll();
+            var currentTime = DateTime.Now;
 
+            var query = _repository.GetAll();
+            if (query != null)
+            {
+                var discountsToDiscontinue = query
+                        .Where(discount => discount.EndDate < currentTime && discount.Status != DiscountStatus.Discontinued)
+                        .ToList();
+
+                foreach (var discount in discountsToDiscontinue)
+                {
+                    discount.Status = DiscountStatus.Discontinued;
+                    _repository.Update(discount);
+                }
+
+                await _unitOfWork.SaveChanges();
+            }
             if (filter.Title != null)
             {
                 query = query.Where(discount => discount.Title.Contains(filter.Title));
@@ -45,10 +64,10 @@ namespace ARTHS_Service.Implementations
             {
                 query = query.Where(discount => discount.EndDate <= filter.EndDate);
             }
-
-            
-
-
+            else if (filter.status != null)
+            {
+                query = query.Where(discount => discount.Status == filter.status);
+            }
             return await query
                 .ProjectTo<DiscountViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
@@ -69,6 +88,14 @@ namespace ARTHS_Service.Implementations
             {
                 try
                 {
+                    if (model.EndDate < DateTime.Now)
+                    {
+                        throw new BadRequestException("thời gian khuyến mãi phải lớn hơn hiện tại");
+                    }
+                    else if (model.StartDate > model.EndDate)
+                    {
+                        throw new BadRequestException("thời gian khuyến mãi sai");
+                    }
                     discountId = Guid.NewGuid();
                     var imageUrl = await _cloudStorageService.Upload(discountId, model.Image.ContentType, model.Image.OpenReadStream());
                     var discount = new Discount
@@ -84,6 +111,8 @@ namespace ARTHS_Service.Implementations
                     };
 
                     _repository.Add(discount);
+                    await AddDiscountIdIntoMotobikeProduct(discountId, model.MotobikeProductId);
+                    await AddDiscountIdIntoRepairService(discountId, model.RepairServiceId);
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
                 }
@@ -105,14 +134,21 @@ namespace ARTHS_Service.Implementations
             {
                 throw new NotFoundException("Không tìm thấy khuyến mãi");
             }
-
             discount.Title = model.Title ?? discount.Title;
             discount.DiscountAmount = model.DiscountAmount ?? discount.DiscountAmount;
             discount.StartDate = model.StartDate ?? discount.StartDate;
             discount.EndDate = model.EndDate ?? discount.EndDate;
             discount.Description = model.Description ?? discount.Description;
-            discount.Status = model.Status ?? discount.Status;
-
+            if (discount.EndDate > DateTime.Now)
+            {
+                discount.Status = DiscountStatus.Active;
+                await AddDiscountIdIntoMotobikeProduct(id, model.MotobikeProductId);
+                await AddDiscountIdIntoRepairService(id, model.RepairServiceId);
+            }
+            else
+            {
+                throw new BadRequestException("thời gian khuyến mãi phải lớn hơn hiện tại");
+            }
             if (model.Image != null)
             {
                 await _cloudStorageService.Delete(id);
@@ -123,6 +159,90 @@ namespace ARTHS_Service.Implementations
             _repository.Update(discount);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetDiscount(id) : null!;
+        }
+
+        public async Task<DiscountViewModel> DiscontinuedDiscount(Guid id)
+        {
+            var discount = await _repository.GetMany(d => d.Id.Equals(id)).FirstOrDefaultAsync();
+            if (discount == null)
+            {
+                throw new NotFoundException("Không tìm thấy khuyến mãi");
+            }
+            discount.Status = DiscountStatus.Discontinued;
+            _repository.Update(discount);
+            var result = await _unitOfWork.SaveChanges();
+            return result > 0 ? await GetDiscount(id) : null!;
+        }
+        public async Task<DiscountViewModel> RemoveDiscountInProduct(Guid id)
+        {
+            var product = await _motobikeProductRepository.GetMany(p => p.Id == id).FirstOrDefaultAsync();
+            if (product != null)
+            {
+                product.DiscountId = null;
+                var result = await _unitOfWork.SaveChanges();
+                if (result > 0)
+                {
+                    return new DiscountViewModel { };
+                }
+                throw new Exception("xóa không thành công");
+            }
+            throw new NotFoundException("không tìm thấy");
+        }
+
+        public async Task<DiscountViewModel> RemoveDiscountInService(Guid id)
+        {
+            var service = await _repairServiceRepository.GetMany(s => s.Id == id).FirstOrDefaultAsync();
+            if (service != null)
+            {
+                service.DiscountId = null;
+                var result = await _unitOfWork.SaveChanges();
+                if (result > 0)
+                {
+                    return new DiscountViewModel { };
+                }
+                throw new Exception("xóa không thành công");
+            }
+            throw new NotFoundException("không tìm thấy");
+        }
+
+        private async Task<ICollection<MotobikeProduct>> AddDiscountIdIntoMotobikeProduct(Guid idDiscount, ICollection<Guid> idProducts)
+        {
+            var listProduct = new List<MotobikeProduct>();
+            foreach (Guid product in idProducts)
+            {
+                // Find the motobike product by its ID.
+                var motobikeProduct = await _motobikeProductRepository
+                    .GetMany(p => p.Id == product)
+                    .FirstOrDefaultAsync();
+
+                if (motobikeProduct != null)
+                {
+                    // Update the DiscountId for the motobike product.
+                    motobikeProduct.DiscountId = idDiscount;
+                    _motobikeProductRepository.Update(motobikeProduct);
+                    listProduct.Add(motobikeProduct);
+                }
+            }
+            return listProduct;
+        }
+
+        private async Task<ICollection<RepairService>> AddDiscountIdIntoRepairService(Guid idDiscount, ICollection<Guid> idService)
+        {
+            var listService = new List<RepairService>();
+            foreach (Guid service in idService)
+            {
+                var repairService = await _repairServiceRepository
+                    .GetMany(s => s.Id == service)
+                    .FirstOrDefaultAsync();
+
+                if (repairService != null)
+                {
+                    repairService.DiscountId = idDiscount;
+                    _repairServiceRepository.Update(repairService);
+                    listService.Add(repairService);
+                }
+            }
+            return listService;
         }
 
     }

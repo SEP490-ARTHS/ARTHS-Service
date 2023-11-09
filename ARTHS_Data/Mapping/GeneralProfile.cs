@@ -62,7 +62,7 @@ namespace ARTHS_Data.Mapping
 
             CreateMap<MotobikeProductPrice, MotobikeProductPriceViewModel>();
 
-            
+
             CreateMap<MotobikeProduct, BasicMotobikeProductViewModel>()
                 .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl))
                 .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
@@ -70,8 +70,8 @@ namespace ARTHS_Data.Mapping
             CreateMap<RepairService, BasicRepairServiceViewModel>()
                 .ForMember(dest => dest.Image, otp => otp.MapFrom(src => src.Images.FirstOrDefault()!.ImageUrl))
                 .ForMember(dest => dest.DiscountAmount, otp => otp.MapFrom(src => src.Discount != null ? src.Discount.DiscountAmount : 0));
-            
-           
+
+
             CreateMap<FeedbackProduct, FeedbackProductViewModel>();
             CreateMap<RepairBooking, RepairBookingViewModel>();
             CreateMap<Notification, NotificationViewModel>()
@@ -92,8 +92,28 @@ namespace ARTHS_Data.Mapping
             //------------------------------------------
             CreateMap<Category, CategoryViewModel>();
             CreateMap<Vehicle, VehicleViewModel>();
-            CreateMap<Discount, DiscountViewModel>();
+            CreateMap<Discount, DiscountViewModel>()
+                .ForMember(dest => dest.RepairService, opt => opt.MapFrom(src => src.RepairServices));
             CreateMap<Warranty, WarrantyViewModel>();
+            CreateMap<MotobikeProduct, DiscountViewModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.DiscountId))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Discount.Title))
+                .ForMember(dest => dest.DiscountAmount, opt => opt.MapFrom(src => src.Discount.DiscountAmount))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.Discount.StartDate))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.Discount.EndDate))
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Discount.ImageUrl))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Discount.Description))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Discount.Status));
+            CreateMap<RepairService, DiscountViewModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.DiscountId))
+                .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Discount.Title))
+                .ForMember(dest => dest.DiscountAmount, opt => opt.MapFrom(src => src.Discount.DiscountAmount))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.Discount.StartDate))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.Discount.EndDate))
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Discount.ImageUrl))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Discount.Description))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Discount.Status));
+
 
 
         }

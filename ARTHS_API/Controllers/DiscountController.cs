@@ -54,10 +54,43 @@ namespace ARTHS_API.Controllers
         [Route("{id}")]
         [ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Update discount.")]
-        public async Task<ActionResult<CustomerViewModel>> UpdateCustomer([FromRoute] Guid id, [FromForm] UpdateDiscountModel model)
+        public async Task<ActionResult<DiscountViewModel>> UpdateDiscount([FromRoute] Guid id, [FromForm] UpdateDiscountModel model)
         {
             var Discount = await _discountService.UpdateDiscount(id, model);
             return CreatedAtAction(nameof(GetDiscount), new { id = Discount.Id }, Discount);
         }
+
+        //[HttpDelete]
+        ////[Authorize(UserRole.Owner)]
+        //[Route("product/{id}")]
+        //[ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
+        //[SwaggerOperation(Summary = "Remove discounts from products.")]
+        //public async Task<ActionResult<DiscountViewModel>> RemoveDiscountFromProduct([FromRoute] Guid id)
+        //{
+        //    var result = await _discountService.RemoveDiscountInProduct(id);
+        //    return result != null ? Ok("xóa thành công") : NotFound();
+        //}
+        //[HttpDelete]
+        ////[Authorize(UserRole.Owner)]
+        //[Route("service/{id}")]
+        //[ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
+        //[SwaggerOperation(Summary = "Remove discounts from service.")]
+        //public async Task<ActionResult<DiscountViewModel>> RemoveDiscountFromService([FromRoute] Guid id)
+        //{
+        //    var result = await _discountService.RemoveDiscountInService(id);
+        //    return result != null ? Ok("xóa thành công") : NotFound();
+        //}
+
+        [HttpDelete]
+        [Authorize(UserRole.Owner)]
+        [Route("{id}")]
+        [ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Discontinued discounts.")]
+        public async Task<ActionResult<DiscountViewModel>> DiscontinuedDiscount([FromRoute] Guid id)
+        {
+            var Discount = await _discountService.DiscontinuedDiscount(id);
+            return CreatedAtAction(nameof(GetDiscount), new { id = Discount.Id }, Discount);
+        }
+
     }
 }
