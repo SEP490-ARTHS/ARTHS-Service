@@ -4,10 +4,13 @@ using ARTHS_Data.Models.Views;
 
 namespace ARTHS_Service.Interfaces
 {
-    public interface IFeedbackProductService
+    public interface IFeedbackService
     {
-        Task<FeedbackProductViewModel> GetFeedback(Guid Id);
+        Task<FeedbackProductViewModel> GetFeedbackProduct(Guid Id);
         Task<FeedbackProductViewModel> CreateProductFeedback(Guid customerId, CreateFeedbackProductModel model);
         Task<FeedbackProductViewModel> UpdateProductFeedback(Guid customerId, Guid feedbackId, UpdateFeedbackProductModel model);
+        Task<FeedbackStaffViewModel> GetFeedbackStaff(Guid Id);
+        Task<FeedbackStaffViewModel> CreateFeedbackStaff(CreateFeedbackStaffModel model);
+
     }
 }
