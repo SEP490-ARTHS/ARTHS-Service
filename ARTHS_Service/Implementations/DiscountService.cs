@@ -35,41 +35,40 @@ namespace ARTHS_Service.Implementations
             var currentTime = DateTime.Now;
 
             var query = _repository.GetAll().AsQueryable();
-            if (query != null)
+
+            var discountsToDiscontinue = query
+                    .Where(discount => discount.EndDate < currentTime && discount.Status != DiscountStatus.Discontinued)
+                    .ToList();
+
+            foreach (var discounts in discountsToDiscontinue)
             {
-                var discountsToDiscontinue = query
-                        .Where(discount => discount.EndDate < currentTime && discount.Status != DiscountStatus.Discontinued)
-                        .ToList();
-
-                foreach (var discounts in discountsToDiscontinue)
-                {
-                    discounts.Status = DiscountStatus.Discontinued;
-                    _repository.Update(discounts);
-                }
-
-                await _unitOfWork.SaveChanges();
-
-                if (filter.Title != null)
-                {
-                    query = query.Where(discount => discount.Title.Contains(filter.Title));
-                }
-                if (filter.StartDate != null && filter.EndDate != null)
-                {
-                    query = query.Where(discount => discount.StartDate >= filter.StartDate && discount.EndDate <= filter.EndDate);
-                }
-                else if (filter.StartDate != null)
-                {
-                    query = query.Where(discount => discount.StartDate >= filter.StartDate);
-                }
-                else if (filter.EndDate != null)
-                {
-                    query = query.Where(discount => discount.EndDate <= filter.EndDate);
-                }
-                else if (filter.status != null)
-                {
-                    query = query.Where(discount => discount.Status == filter.status);
-                }
+                discounts.Status = DiscountStatus.Discontinued;
+                _repository.Update(discounts);
             }
+
+            await _unitOfWork.SaveChanges();
+
+            if (filter.Title != null)
+            {
+                query = query.Where(discount => discount.Title.Contains(filter.Title));
+            }
+            if (filter.StartDate != null && filter.EndDate != null)
+            {
+                query = query.Where(discount => discount.StartDate >= filter.StartDate && discount.EndDate <= filter.EndDate);
+            }
+            else if (filter.StartDate != null)
+            {
+                query = query.Where(discount => discount.StartDate >= filter.StartDate);
+            }
+            else if (filter.EndDate != null)
+            {
+                query = query.Where(discount => discount.EndDate <= filter.EndDate);
+            }
+            else if (filter.status != null)
+            {
+                query = query.Where(discount => discount.Status == filter.status);
+            }
+
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
                 .Skip(pagination.PageNumber * pagination.PageSize)
