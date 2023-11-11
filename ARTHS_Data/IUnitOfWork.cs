@@ -31,6 +31,7 @@ namespace ARTHS_Data
         public IConfigurationRepository Configuration { get; }
         public IMaintenanceScheduleRepository MaintenanceSchedule { get; }
         public IWarrantyHistoryRepository WarrantyHistory { get; }
+        public IFeedbackStaffRepository FeedbackStaff { get; }
         //-----------------
         Task<int> SaveChanges();
         IDbContextTransaction Transaction();

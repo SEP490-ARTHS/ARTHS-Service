@@ -30,7 +30,7 @@ namespace ARTHS_API.Configurations
             services.AddScoped<IWarrantyService, WarrantyService>();
             //services.AddScoped<IVNPayService, PaymentService>();
             services.AddScoped<IRevenueStoreService, RevenueStoreService>();
-            services.AddScoped<IFeedbackProductService, FeedbackProductService>();
+            services.AddScoped<IFeedbackService, FeedbackService>();
             services.AddScoped<IBookingService, BookingService>();
             services.AddScoped<IDeviceTokenService, DeviceTokenService>();
             services.AddScoped<INotificationService, NotificationService>();

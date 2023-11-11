@@ -28,14 +28,14 @@ namespace ARTHS_Service.Implementations
             _cloudStorageService = cloudStorageService;
         }
 
-        public async Task<StaffViewModel> GetStaff(Guid id)
+        public async Task<StaffDetailViewModel> GetStaff(Guid id)
         {
             return await _staffRepository.GetMany(staff => staff.AccountId.Equals(id))
-                .ProjectTo<StaffViewModel>(_mapper.ConfigurationProvider)
+                .ProjectTo<StaffDetailViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy staff.");
         }
 
-        public async Task<StaffViewModel> CreateStaff(RegisterStaffModel model)
+        public async Task<StaffDetailViewModel> CreateStaff(RegisterStaffModel model)
         {
             var result = 0;
             var accountId = Guid.Empty;
@@ -67,7 +67,7 @@ namespace ARTHS_Service.Implementations
             return result > 0 ? await GetStaff(accountId) : null!;
         }
 
-        public async Task<StaffViewModel> UpdateStaff(Guid id, UpdateStaffModel model)
+        public async Task<StaffDetailViewModel> UpdateStaff(Guid id, UpdateStaffModel model)
         {
             var staff = await _staffRepository.GetMany(staff => staff.AccountId.Equals(id))
                                                 .Include(staff => staff.Account)
@@ -98,7 +98,7 @@ namespace ARTHS_Service.Implementations
             return result > 0 ? await GetStaff(staff.AccountId) : null!;
         }
 
-        public async Task<StaffViewModel> UploadAvatar(Guid id, IFormFile image)
+        public async Task<StaffDetailViewModel> UploadAvatar(Guid id, IFormFile image)
         {
             var staff = await _staffRepository.GetMany(staff => staff.AccountId.Equals(id)).FirstOrDefaultAsync();
             if (staff != null)

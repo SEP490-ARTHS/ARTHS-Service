@@ -9,30 +9,60 @@ using ARTHS_Utility.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ARTHS_Service.Implementations
 {
-    public class FeedbackProductService : BaseService, IFeedbackProductService
+    public class FeedbackService : BaseService, IFeedbackService
     {
         private readonly IFeedbackProductRepository _feedbackProductRepository;
         private readonly IMotobikeProductRepository _motobikeProductRepository;
+        private readonly IFeedbackStaffRepository _feedbackStaffRepository;
+        private readonly IStaffRepository _staffRepository;
 
-        public FeedbackProductService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
+        public FeedbackService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
             _feedbackProductRepository = unitOfWork.FeedbackProduct;
             _motobikeProductRepository = unitOfWork.MotobikeProduct;
+            _feedbackStaffRepository = unitOfWork.FeedbackStaff;
+            _staffRepository = unitOfWork.Staff;
         }
 
-        public async Task<FeedbackProductViewModel> GetFeedback(Guid Id)
+        public async Task<FeedbackProductViewModel> GetFeedbackProduct(Guid Id)
         {
             return await _feedbackProductRepository.GetMany(feedback => feedback.Id.Equals(Id))
                 .ProjectTo<FeedbackProductViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy feedback");
+        }
+
+        public async Task<FeedbackStaffViewModel> GetFeedbackStaff(Guid Id)
+        {
+            return await _feedbackStaffRepository.GetMany(feedback => feedback.Id.Equals(Id))
+                .ProjectTo<FeedbackStaffViewModel>(_mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy feedback");
+        }
+
+        public async Task<FeedbackStaffViewModel> CreateFeedbackStaff(CreateFeedbackStaffModel model)
+        {
+            var staff = await _staffRepository.GetMany(staff => staff.AccountId.Equals(model.StaffId))
+                .Include(staff => staff.FeedbackStaffs)
+                .FirstOrDefaultAsync();
+            if (staff == null) throw new NotFoundException("Không tìm thấy staff");
+            if(staff.FeedbackStaffs.Any(feeback => feeback.CustomerId.Equals(model.CustomerId)))
+            {
+                throw new ConflictException("Mỗi customer chỉ được tạo một feedback");
+            }
+            var feedbackId = Guid.NewGuid();
+            var feedback = new FeedbackStaff
+            {
+                Id = feedbackId,
+                StaffId = model.StaffId,
+                CustomerId = model.CustomerId,
+                Title = model.Title,
+                Content = model.Content
+            };
+
+            _feedbackStaffRepository.Add(feedback);
+            return await _unitOfWork.SaveChanges() > 0 ? await GetFeedbackStaff(feedbackId) : null!;
         }
 
         public async Task<FeedbackProductViewModel> CreateProductFeedback(Guid customerId, CreateFeedbackProductModel model)
@@ -58,7 +88,7 @@ namespace ARTHS_Service.Implementations
             _feedbackProductRepository.Add(feedback);
 
             var result = await _unitOfWork.SaveChanges();
-            return result > 0 ? await GetFeedback(feedbackId) : null!;
+            return result > 0 ? await GetFeedbackProduct(feedbackId) : null!;
         }
 
         public async Task<FeedbackProductViewModel> UpdateProductFeedback(Guid customerId, Guid feedbackId, UpdateFeedbackProductModel model)
@@ -73,7 +103,7 @@ namespace ARTHS_Service.Implementations
 
             _feedbackProductRepository.Update(feedback);
             var result = await _unitOfWork.SaveChanges();
-            return result > 0 ? await GetFeedback(feedbackId) : null!;
+            return result > 0 ? await GetFeedbackProduct(feedbackId) : null!;
         }
     }
 }
