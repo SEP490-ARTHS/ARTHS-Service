@@ -95,7 +95,7 @@ namespace ARTHS_Service.Implementations
 
         public async Task GhnCallBack(GhnWebHookResponse model)
         {
-            if (model.Status.Equals("delivered"))
+            if (model.Status!.Equals("delivered"))
             {
                 var order = await _orderRepository.GetMany(order => order.ShippingCode != null && order.ShippingCode.Equals(model.OrderCode)).FirstOrDefaultAsync();
                 order!.Status = OrderStatus.Finished;

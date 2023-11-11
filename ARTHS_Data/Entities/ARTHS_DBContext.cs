@@ -49,7 +49,7 @@ namespace ARTHS_Data.Entities
             if (!optionsBuilder.IsConfigured)
             {
 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                //optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
+//                optionsBuilder.UseSqlServer("Server=TAN-TRUNG\\HAMMER;Database=ARTHS_DB;Persist Security Info=False;User ID=sa;Password=123456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
             }
         }
 
@@ -283,7 +283,7 @@ namespace ARTHS_Data.Entities
             {
                 entity.ToTable("MaintenanceSchedule");
 
-                entity.HasIndex(e => e.OrderDetailId, "UQ__Maintena__D3B9D36D44E39D20")
+                entity.HasIndex(e => e.OrderDetailId, "UQ__Maintena__D3B9D36D74BCA53B")
                     .IsUnique();
 
                 entity.Property(e => e.Id).ValueGeneratedNever();
@@ -292,11 +292,17 @@ namespace ARTHS_Data.Entities
 
                 entity.Property(e => e.ReminderDate).HasColumnType("datetime");
 
+                entity.HasOne(d => d.Customer)
+                    .WithMany(p => p.MaintenanceSchedules)
+                    .HasForeignKey(d => d.CustomerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Maintenan__Custo__17F790F9");
+
                 entity.HasOne(d => d.OrderDetail)
                     .WithOne(p => p.MaintenanceSchedule)
                     .HasForeignKey<MaintenanceSchedule>(d => d.OrderDetailId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Maintenan__Order__00200768");
+                    .HasConstraintName("FK__Maintenan__Order__17036CC0");
             });
 
             modelBuilder.Entity<MotobikeProduct>(entity =>

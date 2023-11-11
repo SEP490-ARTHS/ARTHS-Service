@@ -342,6 +342,7 @@ GO
 CREATE TABLE MaintenanceSchedule(
 	Id uniqueidentifier primary key NOT NULL,
 	OrderDetailId uniqueidentifier unique foreign key references OrderDetail(Id) NOT NULL,
+	CustomerId uniqueidentifier foreign key references CustomerAccount(AccountId) NOT NULL, 
 	NextMaintenanceDate datetime NOT NULL,
 	ReminderDate datetime NOT NULL,
 	RemiderSend bit NOT NULL DEFAULT 0

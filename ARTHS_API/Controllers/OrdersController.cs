@@ -7,7 +7,6 @@ using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -18,10 +17,12 @@ namespace ARTHS_API.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly IInvoiceService _invoiceService;
 
-        public OrdersController(IOrderService orderService)
+        public OrdersController(IOrderService orderService, IInvoiceService invoiceService)
         {
             _orderService = orderService;
+            _invoiceService = invoiceService;
         }
 
         [HttpGet]
@@ -88,7 +89,14 @@ namespace ARTHS_API.Controllers
         }
 
 
-
+        [HttpGet]
+        [Route("generate-invoice/{id}")]
+        [SwaggerOperation(Summary = "Generate bill for order.")]
+        public async Task<ActionResult<string>> Get([FromRoute] string Id)
+        {
+            var result = await _invoiceService.GenerateInvoice(Id, "D:\\invoice");
+            return Ok(result);
+        }
 
     }
 }
