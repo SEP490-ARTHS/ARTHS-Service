@@ -200,12 +200,13 @@ namespace ARTHS_Service.Implementations
         public async Task<OrderViewModel> CreateOrderOffline(Guid tellerId, CreateOrderOfflineModel model)
         {
             var result = 0;
-            bool sendNotifyToStaff = false;
+            
             var orderId = string.Empty;
             using (var transaction = _unitOfWork.Transaction())
             {
                 try
                 {
+                    bool sendNotifyToStaff = false;
                     orderId = GenerateOrderId();
                     int totalPrice = await CreateOrderOfflineDetail(orderId, model.OrderDetailModel, false);
                     var orderType = OrderType.Offline.ToString();
@@ -226,6 +227,7 @@ namespace ARTHS_Service.Implementations
                     //add staff or not
                     if (ShouldAddStaffToOrder(model.OrderDetailModel))
                     {
+                        if (!model.StaffId.HasValue) throw new BadRequestException("Vui lòng chọn nhân viên");
                         order.StaffId = model.StaffId;
 
                         //check booking
@@ -236,17 +238,20 @@ namespace ARTHS_Service.Implementations
                             if (booking == null) throw new NotFoundException($"Không tìm thấy booking {model.BookingId}");
                             booking.OrderId = orderId;
                             _repairBookingRepository.Update(booking);
+
+                            order.CustomerId = booking.CustomerId;
                         }
 
                         sendNotifyToStaff = true;
                     }
 
                     result = await _unitOfWork.SaveChanges();
-                    transaction.Commit();
                     if (sendNotifyToStaff)
                     {
                         await SendNotificationToStaff(order);
                     }
+                    transaction.Commit();
+
                 }
                 catch (Exception)
                 {
@@ -254,7 +259,6 @@ namespace ARTHS_Service.Implementations
                     throw;
                 }
             };
-
             return result > 0 ? await GetOrder(orderId) : null!;
         }
 
@@ -438,13 +442,12 @@ namespace ARTHS_Service.Implementations
                     orderDetail.RepairServiceId = detail.RepairServiceId;
                     orderDetail.Price = servicePrice;
 
-                    var warrantyEndDate = DateTime.UtcNow.AddHours(7);
-                    orderDetail.WarrantyEndDate = warrantyEndDate.AddMonths(repairService.WarrantyDuration);
-
-                    if (repairService.ReminderInterval.HasValue)
-                    {
-                        CreateMaintenanceSchedule(orderDetail.Id, (int)repairService.ReminderInterval);
-                    }
+                    orderDetail.WarrantyEndDate = repairService.WarrantyDuration == 0 ? null : DateTime.UtcNow.AddHours(7).AddMonths(repairService.WarrantyDuration);
+                    
+                    //if (repairService.ReminderInterval.HasValue)
+                    //{
+                    //    CreateMaintenanceSchedule(orderDetail.Id, (int)repairService.ReminderInterval);
+                    //}
                 }
 
                 orderDetail.SubTotalAmount = detailPrice;
@@ -512,7 +515,7 @@ namespace ARTHS_Service.Implementations
             return totalPrice;
         }
 
-        private string GenerateOrderId()
+        private static string GenerateOrderId()
         {
             long ticks = DateTime.UtcNow.Ticks;
             int hash = HashCode.Combine(ticks);

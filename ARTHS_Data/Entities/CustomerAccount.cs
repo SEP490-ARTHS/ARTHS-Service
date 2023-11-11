@@ -9,6 +9,7 @@ namespace ARTHS_Data.Entities
         {
             FeedbackProducts = new HashSet<FeedbackProduct>();
             FeedbackStaffs = new HashSet<FeedbackStaff>();
+            MaintenanceSchedules = new HashSet<MaintenanceSchedule>();
             Orders = new HashSet<Order>();
             RepairBookings = new HashSet<RepairBooking>();
         }
@@ -23,6 +24,7 @@ namespace ARTHS_Data.Entities
         public virtual Cart? Cart { get; set; }
         public virtual ICollection<FeedbackProduct> FeedbackProducts { get; set; }
         public virtual ICollection<FeedbackStaff> FeedbackStaffs { get; set; }
+        public virtual ICollection<MaintenanceSchedule> MaintenanceSchedules { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<RepairBooking> RepairBookings { get; set; }
     }

@@ -37,7 +37,9 @@ namespace ARTHS_API.Configurations
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IConfigurationService, ConfigurationService>();
             services.AddScoped<IWarrantyHistoryService, WarrantyHistoryService>();
-            
+
+            services.AddScoped<IInvoiceService, InvoiceService>();
+
             services.AddTransient<IGhnService, GhnService>();
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
