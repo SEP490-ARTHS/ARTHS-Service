@@ -65,6 +65,7 @@ namespace ARTHS_Service.Implementations
             if (model.ResponseCode == "00")
             {
                 order.Status = OrderStatus.Paid;
+                order.PaymentMethod = PaymentMethods.VNPay;
                 revenue.Status = "Thành công";
             }
             else
@@ -180,6 +181,7 @@ namespace ARTHS_Service.Implementations
                     if (onlineOrder == null) return false;
 
                     onlineOrder.Status = OrderStatus.Paid;
+                    onlineOrder.PaymentMethod = PaymentMethods.ZaloPay;
                     revenue.Status = "Thành công";
                     _orderRepository.Update(onlineOrder);
 

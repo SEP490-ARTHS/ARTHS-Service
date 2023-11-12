@@ -71,6 +71,53 @@ namespace ARTHS_API.Controllers
             return notification ? NoContent() : NotFound();
         }
 
+        [HttpPost]
+        [ProducesResponseType(typeof(NotificationViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Send notification.")]
+        public async Task<ActionResult<string>> SendNotification([FromBody] List<string> deviceToken)
+        {
+            var messageData = new Dictionary<string, string>
+                    {
+                        { "type", "type_ne" },
+                        { "link", "link_ne" },
+                        { "createAt", DateTime.Now.ToString() }
+                    };
+            var message = new MulticastMessage()
+            {
+                Notification = new FirebaseAdmin.Messaging.Notification()
+                {
+                    Title = "Test thoông báo",
+                    Body = "Test thông báo."
+                },
+                Data = messageData,
+                Tokens = deviceToken
+            };
+            var app = FirebaseApp.DefaultInstance;
+            if (FirebaseApp.DefaultInstance == null)
+            {
+                GoogleCredential credential;
+                var credentialJson = Environment.GetEnvironmentVariable("GoogleCloudCredential");
+                if (string.IsNullOrWhiteSpace(credentialJson))
+                {
+                    var basePath = AppDomain.CurrentDomain.BaseDirectory;
+                    var projectRoot = Path.GetFullPath(Path.Combine(basePath, "..", "..", "..", ".."));
+                    string credentialPath = Path.Combine(projectRoot, "ARTHS_Utility", "Helpers", "CloudStorage", "arths-45678-firebase-adminsdk-plwhs-954089d6b7.json");
+                    credential = GoogleCredential.FromFile(credentialPath);
+                }
+                else
+                {
+                    credential = GoogleCredential.FromJson(credentialJson);
+                }
 
+                app = FirebaseApp.Create(new AppOptions()
+                {
+                    Credential = credential
+                });
+            }
+            FirebaseMessaging messaging = FirebaseMessaging.GetMessaging(app);
+            await messaging.SendMulticastAsync(message);
+            return "Send thành công";
+        }
     }
 }
+

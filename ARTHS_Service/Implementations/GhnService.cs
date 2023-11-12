@@ -64,10 +64,10 @@ namespace ARTHS_Service.Implementations
                 Note = model.Note,
                 ToName = order.Customer!.FullName,
                 ToPhone = order.CustomerPhoneNumber,
-                ToAddress = segments[0].Trim(),
-                ToWardName = segments[1].Trim(),
-                ToDistrictName = segments[2].Trim(),
-                ToProvinceName = segments[3].Trim(),
+                ToAddress = segments[0].Trim(), //số nhà đường
+                ToWardName = segments[1].Trim(), //quận
+                ToDistrictName = segments[2].Trim(), // huyện
+                ToProvinceName = segments[3].Trim(), // tỉnh thành
                 ClientOrderCode = order.Id.ToString(),
                 CODAmount = order.PaymentMethod!.Equals(PaymentMethods.VNPay) ||order.PaymentMethod!.Equals(PaymentMethods.ZaloPay) ? 0 : order.TotalAmount,
                 Content = model.Content,
