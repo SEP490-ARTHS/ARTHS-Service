@@ -3,9 +3,9 @@
     public class OrderViewModel
     {
         public string Id { get; set; } = null!;
-        public Guid? CustomerId { get; set; }
+        //public Guid? CustomerId { get; set; }
         public Guid? TellerId { get; set; }
-        public Guid? StaffId { get; set; }
+        //public Guid? StaffId { get; set; }
         public string? ShippingCode { get; set; }
         public int? ShippingMoney { get; set; }
         public string CustomerPhoneNumber { get; set; } = null!;
@@ -20,8 +20,8 @@
         public string OrderType { get; set; } = null!;
         public DateTime OrderDate { get; set; }
 
-        //public virtual CustomerAccount? Customer { get; set; }
-        //public virtual StaffAccount? Staff { get; set; }
+        public virtual BasicCustomerViewModel? Customer { get; set; }
+        public virtual StaffViewModel? Staff { get; set; }
         //public virtual TellerAccount? Teller { get; set; }
         //public virtual RepairBooking? RepairBooking { get; set; }
         public virtual ICollection<OrderDetailViewModel> OrderDetails { get; set; } = new List<OrderDetailViewModel>();
