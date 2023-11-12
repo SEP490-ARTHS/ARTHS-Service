@@ -1,10 +1,12 @@
 ﻿using ARTHS_Data;
+using ARTHS_Data.Entities;
 using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Interfaces;
+using ARTHS_Utility.Enums;
 using ARTHS_Utility.Exceptions;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -19,10 +21,15 @@ namespace ARTHS_Service.Implementations
     {
         private readonly IDeviceTokenRepository _deviceTokenRepository;
         private readonly INotificationRepository _notificationRepository;
+
+        private readonly IMaintenanceScheduleRepository _maintenanceScheduleRepository;
+        private readonly IOrderDetailRepository _orderDetailRepository;
         public NotificationService(IUnitOfWork unitOfWork, IMapper mapper) : base(unitOfWork, mapper)
         {
             _deviceTokenRepository = unitOfWork.DeviceToken;
             _notificationRepository = unitOfWork.Notification;
+            _maintenanceScheduleRepository = unitOfWork.MaintenanceSchedule;
+            _orderDetailRepository = unitOfWork.OrderDetail;
         }
 
         public async Task<NotificationViewModel> GetNotification(Guid id)
@@ -89,7 +96,7 @@ namespace ARTHS_Service.Implementations
                     };
                     var message = new MulticastMessage()
                     {
-                        Notification = new Notification()
+                        Notification = new FirebaseAdmin.Messaging.Notification()
                         {
                             Title = model.Title,
                             Body = model.Body
@@ -159,6 +166,49 @@ namespace ARTHS_Service.Implementations
             var result = await _unitOfWork.SaveChanges();
             return result > 0;
         }
-        
+
+        public async Task CheckAndSendMaintenanceReminders()
+        {
+            var today = DateTime.UtcNow; // Hoặc DateTime.Now nếu bạn đang theo dõi theo múi giờ cụ thể
+            var maintenanceSchedules = await _maintenanceScheduleRepository
+                .GetMany(m => m.ReminderDate.Date == today.Date && !m.RemiderSend)
+                .ToListAsync();
+
+            foreach (var schedule in maintenanceSchedules)
+            {
+                // Gửi thông báo
+                await SendNotificationToCustomer(schedule);
+
+                // Cập nhật trạng thái đã gửi
+                schedule.RemiderSend = true;
+                _maintenanceScheduleRepository.Update(schedule);
+            }
+
+            // Lưu các thay đổi vào cơ sở dữ liệu
+            await _unitOfWork.SaveChanges();
+        }
+
+        private async Task SendNotificationToCustomer(MaintenanceSchedule schedule)
+        {
+            var detail = await _orderDetailRepository.GetMany(detail => detail.Id.Equals(schedule.OrderDetailId))
+                .Include(detail => detail.RepairService)
+                .FirstOrDefaultAsync();
+
+            var message = new CreateNotificationModel
+            {
+                Title = $"Nhắc nhở sắp đến lịch bảo trỉ tiếp theo.",
+                Body = $"Bạn đã sử dụng dịch vụ bảo trì bảo dưỡng {detail!.RepairService!.Name} " +
+                $"bên chúng tôi và đã sắp đến hạn bảo dưỡng lần tiếp theo vào ngày {schedule.NextMaintenanceDate.ToString("ddMMyyy")}. " +
+                $"Để đảm bảo được tình trạng xe tốt nhất bạn nên đặt lịch sửa bảo trì lần tiếp theo hoặc có thể đem xe đến để chúng tôi có thể chăm sóc tốt cho xe của bạn.",
+                Data = new NotificationDataViewModel
+                {
+                    CreateAt = DateTime.UtcNow.AddHours(7),
+                    Type = NotificationType.RepairService.ToString(),
+                    Link = detail.Id.ToString()
+                }
+            };
+            //var staffId = await _accountRepository.GetMany(account => account.Id.Equals(order.StaffId)).Select(account => account.Id).FirstOrDefaultAsync();
+            await SendNotification(new List<Guid> { schedule.CustomerId }, message);
+        }
     }
 }

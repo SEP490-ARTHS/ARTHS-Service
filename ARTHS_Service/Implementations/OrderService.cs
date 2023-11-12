@@ -279,6 +279,7 @@ namespace ARTHS_Service.Implementations
                 if (model.Status.Equals(OrderStatus.Finished))
                 {
                     await CreateTransaction(order);
+                    await CreateMaintenanceSchedule(order.Id);
                 }
 
                 if (model.Status.Equals(OrderStatus.WaitForPay))
@@ -459,18 +460,43 @@ namespace ARTHS_Service.Implementations
             return totalPrice;
         }
 
-        private void CreateMaintenanceSchedule(Guid detailId, int remiderInterval)
+        private async Task CreateMaintenanceSchedule(string orderId)
         {
-            var nextMaintenanceDate = DateTime.UtcNow.AddMonths(remiderInterval);
-            var reminderDate = nextMaintenanceDate.AddDays(-15);
-            var schedule = new MaintenanceSchedule
+            using (var transaction = _unitOfWork.Transaction())
             {
-                Id = Guid.NewGuid(),
-                OrderDetailId = detailId,
-                NextMaintenanceDate = nextMaintenanceDate,
-                ReminderDate = reminderDate,
+                try
+                {
+                    var order = await _orderRepository.GetMany(order => order.Id.Equals(orderId) && order.CustomerId != null)
+                        .Include(order => order.OrderDetails)
+                            .ThenInclude(detail => detail.RepairService)
+                        .FirstOrDefaultAsync();
+                    if (order == null) return;
+                    var details = order.OrderDetails.Where(detail => detail.RepairService != null && detail.RepairService.ReminderInterval != null);
+                    if (details == null) return;
+
+                    foreach (var detail in details)
+                    {
+                        var nextMaintenanceDate = DateTime.UtcNow.AddMonths((int)detail.RepairService!.ReminderInterval!);
+                        var reminderDate = nextMaintenanceDate.AddDays(-15);
+                        var schedule = new MaintenanceSchedule
+                        {
+                            Id = Guid.NewGuid(),
+                            CustomerId = (Guid)order.CustomerId!,
+                            OrderDetailId = detail.Id,
+                            NextMaintenanceDate = nextMaintenanceDate,
+                            ReminderDate = reminderDate,
+                        };
+                        _maintenanceScheduleRepository.Add(schedule);
+                    }
+                    await _unitOfWork.SaveChanges();
+                    transaction.Commit();
+                }
+                catch (Exception)
+                {
+                    transaction.Rollback();
+                    throw;
+                }
             };
-            _maintenanceScheduleRepository.Add(schedule);
         }
 
         private async Task<int> CreateOrderOnlineDetail(string orderId, List<CreateOrderOnlineDetailModel> listDetail)

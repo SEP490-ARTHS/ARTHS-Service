@@ -4,6 +4,8 @@ using ARTHS_Data.Repositories.Implementations;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Implementations;
 using ARTHS_Service.Interfaces;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.OpenApi.Models;
 
 namespace ARTHS_API.Configurations
@@ -101,5 +103,42 @@ namespace ARTHS_API.Configurations
             app.UseMiddleware<ExceptionHandlingMiddleware>();
         }
 
+        public static void AddHangfireDashboard(this IApplicationBuilder app)
+        {
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                // Bạn có thể cần cấu hình thêm bảo mật tại đây
+                // Authorization = new[] { new MyHangfireAuthorizationFilter() }
+            });
+        }
+
+        public static void AddHangfireServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHangfire(config =>
+            {
+                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection"), new SqlServerStorageOptions
+                    {
+                        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                        QueuePollInterval = TimeSpan.Zero,
+                        UseRecommendedIsolationLevel = true,
+                        DisableGlobalLocks = true
+                    });
+            });
+
+            services.AddHangfireServer();
+        }
+        public static void AddHangfireJobs(this IServiceProvider serviceProvider, IRecurringJobManager recurringJobManager)
+        {
+            // Đăng ký công việc định kỳ với Hangfire sử dụng factory delegate
+            recurringJobManager.AddOrUpdate(
+                "SendMaintenanceReminders",
+                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<INotificationService>().CheckAndSendMaintenanceReminders(),
+                "0 9 * * *"
+            );
+        }
     }
 }
