@@ -35,6 +35,7 @@ namespace ARTHS_Data
         private INotificationRepository _notification = null!;
         private IConfigurationRepository _configuration = null!;
         private IMaintenanceScheduleRepository _maintenanceSchedule = null!;
+        private IFeedbackStaffRepository _feedbackStaff = null!;
         public UnitOfWork(ARTHS_DBContext context)
         {
             _context = context;
@@ -171,6 +172,11 @@ namespace ARTHS_Data
         public IWarrantyHistoryRepository WarrantyHistory
         {
             get { return _warrantyHistory ??= new WarrantyHistoryRepository(_context); }
+        }
+
+        public IFeedbackStaffRepository FeedbackStaff
+        {
+            get { return _feedbackStaff ??= new FeedbackStaffRepository(_context); }
         }
         public async Task<int> SaveChanges()
         {

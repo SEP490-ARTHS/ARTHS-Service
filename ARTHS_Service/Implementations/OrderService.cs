@@ -127,7 +127,7 @@ namespace ARTHS_Service.Implementations
                     var orderType = OrderType.Online.ToString();
                     int totalPrice = await CreateOrderOnlineDetail(orderId, model.OrderDetailModels);
                     int shippingMoney = 0;
-                    if (totalPrice >= 1000000)
+                    if (totalPrice <= 1000000)
                     {
                         var config = await _configurationService.GetSetting();
                         shippingMoney = config.ShippingMoney;
@@ -218,6 +218,7 @@ namespace ARTHS_Service.Implementations
                         TellerId = tellerId,
                         CustomerPhoneNumber = model.CustomerPhoneNumber,
                         CustomerName = model.CustomerName,
+                        LicensePlate = model.LicensePlate,
                         OrderType = orderType,
                         Status = OrderStatus.Processing,
                         TotalAmount = totalPrice

@@ -36,18 +36,18 @@ namespace ARTHS_API.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        [ProducesResponseType(typeof(StaffViewModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(StaffDetailViewModel), StatusCodes.Status200OK)]
         [SwaggerOperation(Summary = "Get staff by id.")]
-        public async Task<ActionResult<StaffViewModel>> GetStaff([FromRoute] Guid id)
+        public async Task<ActionResult<StaffDetailViewModel>> GetStaff([FromRoute] Guid id)
         {
             return await _staffService.GetStaff(id);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(StaffViewModel), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(StaffDetailViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(StaffDetailViewModel), StatusCodes.Status409Conflict)]
         [SwaggerOperation(Summary = "Register staff.")]
-        public async Task<ActionResult<StaffViewModel>> CreateStaff([FromBody][Required] RegisterStaffModel model)
+        public async Task<ActionResult<StaffDetailViewModel>> CreateStaff([FromBody][Required] RegisterStaffModel model)
         {
             var staff = await _staffService.CreateStaff(model);
             //chuẩn REST
@@ -58,10 +58,10 @@ namespace ARTHS_API.Controllers
         [HttpPut]
         [Route("{id}")]
         //[Authorize(UserRole.Staff)]
-        [ProducesResponseType(typeof(StaffViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(StaffDetailViewModel), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         [SwaggerOperation(Summary = "Update staff.")]
-        public async Task<ActionResult<StaffViewModel>> UpdateStaff([FromRoute] Guid id, [FromBody] UpdateStaffModel model)
+        public async Task<ActionResult<StaffDetailViewModel>> UpdateStaff([FromRoute] Guid id, [FromBody] UpdateStaffModel model)
         {
             var staff = await _staffService.UpdateStaff(id, model);
             return CreatedAtAction(nameof(GetStaff), new { id = staff.AccountId }, staff);
@@ -70,9 +70,9 @@ namespace ARTHS_API.Controllers
         [HttpPut]
         [Route("avatar")]
         [Authorize(UserRole.Staff)]
-        [ProducesResponseType(typeof(CustomerViewModel), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(StaffDetailViewModel), StatusCodes.Status201Created)]
         [SwaggerOperation(Summary = "Upload avatar for staff.")]
-        public async Task<ActionResult<CustomerViewModel>> UploadAvatar([Required] IFormFile image)
+        public async Task<ActionResult<StaffDetailViewModel>> UploadAvatar([Required] IFormFile image)
         {
             var auth = (AuthModel?)HttpContext.Items["User"];
             var staff = await _staffService.UploadAvatar(auth!.Id, image);

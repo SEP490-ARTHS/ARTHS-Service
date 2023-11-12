@@ -7,9 +7,9 @@ namespace ARTHS_Service.Interfaces
 {
     public interface IStaffService
     {
-        Task<StaffViewModel> GetStaff(Guid id);
-        Task<StaffViewModel> CreateStaff(RegisterStaffModel model);
-        Task<StaffViewModel> UpdateStaff(Guid id, UpdateStaffModel model);
-        Task<StaffViewModel> UploadAvatar(Guid id, IFormFile image);
+        Task<StaffDetailViewModel> GetStaff(Guid id);
+        Task<StaffDetailViewModel> CreateStaff(RegisterStaffModel model);
+        Task<StaffDetailViewModel> UpdateStaff(Guid id, UpdateStaffModel model);
+        Task<StaffDetailViewModel> UploadAvatar(Guid id, IFormFile image);
     }
 }
