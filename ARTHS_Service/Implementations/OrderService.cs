@@ -49,7 +49,7 @@ namespace ARTHS_Service.Implementations
             _warrantyHistoryRepository = unitOfWork.WarrantyHistory;
         }
 
-        public async Task<ListViewModel<BasicOrderViewModel>> GetOrders(OrderFilterModel filter, PaginationRequestModel pagination)
+        public async Task<ListViewModel<OrderViewModel>> GetOrders(OrderFilterModel filter, PaginationRequestModel pagination)
         {
             var query = _orderRepository.GetAll().AsQueryable();
 
@@ -93,10 +93,10 @@ namespace ARTHS_Service.Implementations
                 .Skip(pagination.PageNumber * pagination.PageSize)
                 .Take(pagination.PageSize);
             var orders = await paginatedQuery
-                .ProjectTo<BasicOrderViewModel>(_mapper.ConfigurationProvider)
+                .ProjectTo<OrderViewModel>(_mapper.ConfigurationProvider)
                 .AsNoTracking()
                 .ToListAsync();
-            return new ListViewModel<BasicOrderViewModel>
+            return new ListViewModel<OrderViewModel>
             {
                 Pagination = new PaginationViewModel
                 {
