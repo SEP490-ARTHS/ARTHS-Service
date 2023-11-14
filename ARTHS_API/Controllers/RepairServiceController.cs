@@ -4,6 +4,7 @@ using ARTHS_Data.Models.Requests.Get;
 using ARTHS_Data.Models.Requests.Post;
 using ARTHS_Data.Models.Requests.Put;
 using ARTHS_Data.Models.Views;
+using ARTHS_Service.Implementations;
 using ARTHS_Service.Interfaces;
 using ARTHS_Utility.Constants;
 using Microsoft.AspNetCore.Mvc;
@@ -60,6 +61,28 @@ namespace ARTHS_API.Controllers
         {
             var repairService = await _repairServiceService.UpdateRepairService(id, model);
             return CreatedAtAction(nameof(GetRepairService), new { id = repairService.Id }, repairService);
+        }
+
+        [HttpPut]
+        [Authorize(UserRole.Owner)]
+        [Route("image/{id}")]
+        [ProducesResponseType(typeof(RepairServiceViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Update repair service image.")]
+        public async Task<ActionResult<MotobikeProductDetailViewModel>> UpdateMotobileProductImage([FromRoute] Guid id, [FromForm] UpdateImageModel model)
+        {
+            var repairService = await _repairServiceService.UpdateRepairServiceImage(id, model);
+            return CreatedAtAction(nameof(GetRepairService), new { id = repairService.Id }, repairService);
+        }
+
+        [HttpDelete]
+        [Authorize(UserRole.Owner)]
+        [Route("image/{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [SwaggerOperation(Summary = "Remove repair service image.")]
+        public async Task<IActionResult> Remove([FromRoute] Guid id)
+        {
+            await _repairServiceService.RemoveRepairServieImage(id);
+            return NoContent();
         }
     }
 }

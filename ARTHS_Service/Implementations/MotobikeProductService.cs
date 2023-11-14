@@ -134,7 +134,7 @@ namespace ARTHS_Service.Implementations
                 try
                 {
                     var vehicles = await _vehicleRepository.GetMany(vehicle => model.VehiclesId.Contains(vehicle.Id)).ToListAsync();
-                    if(vehicles.Count == 0)
+                    if (vehicles.Count == 0)
                     {
                         throw new BadRequestException("Vui lòng nhập lại vehicle id.");
                     }
@@ -159,7 +159,8 @@ namespace ARTHS_Service.Implementations
                     await CreateMotobikeProductImage(motobikeProductId, model.Images);
                     result = await _unitOfWork.SaveChanges();
                     transaction.Commit();
-                }catch (Exception)
+                }
+                catch (Exception)
                 {
                     transaction.Rollback();
                     throw;
@@ -172,31 +173,32 @@ namespace ARTHS_Service.Implementations
         public async Task<MotobikeProductDetailViewModel> UpdateMotobikeProduct(Guid id, UpdateMotobikeProductModel model)
         {
             var motobikeProduct = await _motobikeProductRepository.GetMany(product => product.Id.Equals(id)).Include(product => product.Vehicles).FirstOrDefaultAsync();
-            if(motobikeProduct == null)
+            if (motobikeProduct == null)
             {
                 throw new NotFoundException("Không tìm thấy product.");
             }
 
-            if (model.Images != null && model.Images.Count > 0)
-            {
-                if (model.Images.Count > 4)
-                {
-                    throw new BadRequestException("Chỉ được chứa bốn hình ảnh.");
-                }
+            //if (model.Images != null && model.Images.Count > 0)
+            //{
+            //    if (model.Images.Count > 4)
+            //    {
+            //        throw new BadRequestException("Chỉ được chứa bốn hình ảnh.");
+            //    }
 
-                foreach (IFormFile image in model.Images)
-                {
-                    if (!image.ContentType.StartsWith("image/"))
-                    {
-                        throw new BadRequestException("File không phải là hình ảnh");
-                    }
-                }
+            //    foreach (IFormFile image in model.Images)
+            //    {
+            //        if (!image.ContentType.StartsWith("image/"))
+            //        {
+            //            throw new BadRequestException("File không phải là hình ảnh");
+            //        }
+            //    }
 
-                await UpdateMotobikeProductImage(id, model.Images);
-            }
+            //    await UpdateMotobikeProductImage(id, model.Images);
+            //}
+
             motobikeProduct.PriceCurrent = model.PriceCurrent ?? motobikeProduct.PriceCurrent;
 
-            if(model.PriceCurrent != null)
+            if (model.PriceCurrent != null)
             {
                 CreateMotobikeProductPrice(id, (int)model.PriceCurrent);
             }
@@ -211,10 +213,10 @@ namespace ARTHS_Service.Implementations
             motobikeProduct.InstallationFee = model.InstallationFee ?? motobikeProduct.InstallationFee;
             motobikeProduct.UpdateAt = DateTime.Now;
 
-            if(model.VehiclesId != null && model.VehiclesId.Count > 0)
+            if (model.VehiclesId != null && model.VehiclesId.Count > 0)
             {
                 var vehicles = await _vehicleRepository.GetMany(vehicle => model.VehiclesId.Contains(vehicle.Id)).ToListAsync();
-                if(vehicles.Count == 0)
+                if (vehicles.Count == 0)
                 {
                     throw new BadRequestException("Vui lòng nhập lại vehicle id.");
                 }
@@ -246,7 +248,7 @@ namespace ARTHS_Service.Implementations
         private async Task<ICollection<Image>> CreateMotobikeProductImage(Guid id, ICollection<IFormFile> images)
         {
             var listImage = new List<Image>();
-            foreach(IFormFile image in images)
+            foreach (IFormFile image in images)
             {
                 var imageId = Guid.NewGuid();
                 var url = await _cloudStorageService.Upload(imageId, image.ContentType, image.OpenReadStream());
@@ -262,18 +264,38 @@ namespace ARTHS_Service.Implementations
             return listImage;
         }
 
-        private async Task<bool> UpdateMotobikeProductImage(Guid id, ICollection<IFormFile> images)
+        public async Task<MotobikeProductDetailViewModel> UpdateMotobikeProductImage(Guid motobikeProductId, UpdateImageModel model)
         {
-            var existImages = await _imageRepository.GetMany(image => image.MotobikeProductId.Equals(id)).ToListAsync();
-            foreach (var image in existImages)
+            if (!model.Image.ContentType.StartsWith("image/"))
             {
-                await _cloudStorageService.Delete(image.Id);
+                throw new BadRequestException("file không phải là hình ảnh");
             }
-            _imageRepository.RemoveRange(existImages);
-            
-            var uploadedImages = await CreateMotobikeProductImage(id, images);
-            return uploadedImages != null && uploadedImages.Count == images.Count;
+            var imageId = Guid.NewGuid();
+            var url = await _cloudStorageService.Upload(imageId, model.Image.ContentType, model.Image.OpenReadStream());
+            var newImage = new Image
+            {
+                Id = imageId,
+                MotobikeProductId = motobikeProductId,
+                ImageUrl = url
+            };
+            _imageRepository.Add(newImage);
+            return await _unitOfWork.SaveChanges() > 0 ? await GetMotobikeProduct(motobikeProductId) : null!;
         }
 
+        public async Task RemoveMotobikeProductImage(Guid imageId)
+        {
+            var existImage = await _imageRepository.GetMany(image => image.Id.Equals(imageId)).FirstOrDefaultAsync();
+            if (existImage != null)
+            {
+                await _cloudStorageService.Delete(imageId);
+                _imageRepository.Remove(existImage);
+
+                await _unitOfWork.SaveChanges();
+            }
+            else
+            {
+                throw new NotFoundException("Không tìm thấy image");
+            }
+        }
     }
 }

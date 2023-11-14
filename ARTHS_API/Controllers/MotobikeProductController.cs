@@ -62,5 +62,27 @@ namespace ARTHS_API.Controllers
             var motobikeProduct = await _motobikeProductService.UpdateMotobikeProduct(id, model);
             return CreatedAtAction(nameof(GetMotobikeProduct), new { id = motobikeProduct.Id }, motobikeProduct);
         }
+
+        [HttpPut]
+        [Authorize(UserRole.Owner)]
+        [Route("image/{id}")]
+        [ProducesResponseType(typeof(MotobikeProductDetailViewModel), StatusCodes.Status201Created)]
+        [SwaggerOperation(Summary = "Update motobike product image.")]
+        public async Task<ActionResult<MotobikeProductDetailViewModel>> UpdateMotobileProductImage([FromRoute] Guid id, [FromForm] UpdateImageModel model)
+        {
+            var motobikeProduct = await _motobikeProductService.UpdateMotobikeProductImage(id, model);
+            return CreatedAtAction(nameof(GetMotobikeProduct), new { id = motobikeProduct.Id }, motobikeProduct);
+        }
+
+        [HttpDelete]
+        [Authorize(UserRole.Owner)]
+        [Route("image/{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [SwaggerOperation(Summary = "Remove motobike product image.")]
+        public async Task<IActionResult> Remove([FromRoute] Guid id)
+        {
+            await _motobikeProductService.RemoveMotobikeProductImage(id);
+            return NoContent();
+        }
     }
 }

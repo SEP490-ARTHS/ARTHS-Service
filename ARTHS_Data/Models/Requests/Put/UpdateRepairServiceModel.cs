@@ -16,6 +16,6 @@ namespace ARTHS_Data.Models.Requests.Put
 
 
 
-        public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
+        //public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
     }
 }

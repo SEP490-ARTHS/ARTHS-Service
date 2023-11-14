@@ -14,6 +14,6 @@ namespace ARTHS_Data.Models.Requests.Put
         public Guid? WarrantyId { get; set; }
         public Guid? CategoryId { get; set; }
         public List<Guid>? VehiclesId { get; set; } = new List<Guid>();
-        public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
+        //public List<IFormFile>? Images { get; set; } = new List<IFormFile>();
     }
 }
