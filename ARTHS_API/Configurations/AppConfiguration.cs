@@ -6,6 +6,7 @@ using ARTHS_Service.Implementations;
 using ARTHS_Service.Interfaces;
 using Hangfire;
 using Hangfire.SqlServer;
+using HangfireBasicAuthenticationFilter;
 using Microsoft.OpenApi.Models;
 
 namespace ARTHS_API.Configurations
@@ -105,10 +106,18 @@ namespace ARTHS_API.Configurations
 
         public static void AddHangfireDashboard(this IApplicationBuilder app)
         {
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            app.UseHangfireDashboard("/hangfire/job-dashboard", new DashboardOptions
             {
-                // Bạn có thể cần cấu hình thêm bảo mật tại đây
-                // Authorization = new[] { new MyHangfireAuthorizationFilter() }
+                DashboardTitle = "Hangfire Job of Thanh Huy motorbike server",
+                DarkModeEnabled = false,
+                Authorization = new[]
+                {
+                    new HangfireCustomBasicAuthenticationFilter
+                    {
+                        User = "admin",
+                        Pass = "admin@@"
+                    }
+                }
             });
         }
 

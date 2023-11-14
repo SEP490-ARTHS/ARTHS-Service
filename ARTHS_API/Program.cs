@@ -82,6 +82,8 @@ app.AddHangfireDashboard();
 var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
 app.Services.AddHangfireJobs(recurringJobManager);
 
+
+
 app.UseExceptionHandling();
 
 //--------------------

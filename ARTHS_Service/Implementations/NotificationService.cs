@@ -174,6 +174,8 @@ namespace ARTHS_Service.Implementations
                 .GetMany(m => m.ReminderDate.Date == today.Date && !m.RemiderSend)
                 .ToListAsync();
 
+            if(maintenanceSchedules.Count == 0) return;
+            
             foreach (var schedule in maintenanceSchedules)
             {
                 // Gửi thông báo
