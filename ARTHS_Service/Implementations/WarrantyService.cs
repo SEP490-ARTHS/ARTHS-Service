@@ -30,6 +30,7 @@ namespace ARTHS_Service.Implementations
             }
 
             return await query
+                .OrderBy(warranty => warranty.Duration)
                 .ProjectTo<WarrantyViewModel>(_mapper.ConfigurationProvider)
                 .ToListAsync();
         }

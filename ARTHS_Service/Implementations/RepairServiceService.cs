@@ -156,23 +156,7 @@ namespace ARTHS_Service.Implementations
                 throw new NotFoundException("Không tìm thấy repair service.");
             }
 
-            if (model.Images != null && model.Images.Count > 0)
-            {
-                if (model.Images.Count > 4)
-                {
-                    throw new BadRequestException("Chỉ được chứa bốn hình ảnh.");
-                }
-
-                foreach (IFormFile image in model.Images)
-                {
-                    if (!image.ContentType.StartsWith("image/"))
-                    {
-                        throw new BadRequestException("File không phải là hình ảnh");
-                    }
-                }
-
-                await UpdateRepairServiceImage(id, model.Images);
-            }
+            
 
             repairService.Name = model.Name ?? repairService.Name;
             repairService.Price = model.Price ?? repairService.Price;
@@ -255,19 +239,38 @@ namespace ARTHS_Service.Implementations
             return listImage;
         }
 
-        private async Task<bool> UpdateRepairServiceImage(Guid id, ICollection<IFormFile> images)
+        public async Task<RepairServiceViewModel> UpdateRepairServiceImage(Guid repairServiceId, UpdateImageModel model)
         {
-            var existImages = await _imageRepository.GetMany(image => image.RepairServiceId.Equals(id)).ToListAsync();
-            foreach (var image in existImages)
+            if (!model.Image.ContentType.StartsWith("image/"))
             {
-                await _cloudStorageService.Delete(image.Id);
-                //_imageRepository.Remove(image);
+                throw new BadRequestException("file không phải là hình ảnh");
             }
-            _imageRepository.RemoveRange(existImages);
-            //await _unitOfWork.SaveChanges();
+            var imageId = Guid.NewGuid();
+            var url = await _cloudStorageService.Upload(imageId, model.Image.ContentType, model.Image.OpenReadStream());
+            var newImage = new Image
+            {
+                Id = imageId,
+                RepairServiceId = repairServiceId,
+                ImageUrl = url
+            };
+            _imageRepository.Add(newImage);
+            return await _unitOfWork.SaveChanges() > 0 ? await GetRepairService(repairServiceId) : null!;
+        }
 
-            var uploadedImages = await CreateRepairServiceImage(id, images);
-            return uploadedImages != null && uploadedImages.Count == images.Count;
+        public async Task RemoveRepairServieImage(Guid imageId)
+        {
+            var existImage = await _imageRepository.GetMany(image => image.Id.Equals(imageId)).FirstOrDefaultAsync();
+            if (existImage != null)
+            {
+                await _cloudStorageService.Delete(imageId);
+                _imageRepository.Remove(existImage);
+
+                await _unitOfWork.SaveChanges();
+            }
+            else
+            {
+                throw new NotFoundException("Không tìm thấy image");
+            }
         }
     }
 }
