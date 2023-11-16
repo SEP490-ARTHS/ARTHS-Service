@@ -17,58 +17,44 @@ namespace ARTHS_Service.Implementations
 {
     public class DiscountService : BaseService, IDiscountService
     {
-        private readonly IDiscountRepository _repository;
+        private readonly IDiscountRepository _discountRepository;
         private readonly ICloudStorageService _cloudStorageService;
         private readonly IMotobikeProductRepository _motobikeProductRepository;
         private readonly IRepairServiceRepository _repairServiceRepository;
+        private readonly IMaintenanceScheduleRepository _maintenanceScheduleRepository;
 
         public DiscountService(IUnitOfWork unitOfWork, IMapper mapper, ICloudStorageService cloudStorageService) : base(unitOfWork, mapper)
         {
-            _repository = unitOfWork.Discount;
-            _motobikeProductRepository = _unitOfWork.MotobikeProduct;
+            _discountRepository = unitOfWork.Discount;
+            _motobikeProductRepository = unitOfWork.MotobikeProduct;
             _cloudStorageService = cloudStorageService;
-            _repairServiceRepository = _unitOfWork.RepairService;
+            _repairServiceRepository = unitOfWork.RepairService;
+            _maintenanceScheduleRepository = unitOfWork.MaintenanceSchedule;
         }
 
         public async Task<ListViewModel<BasicDiscountViewModel>> GetDiscounts(DiscountFilterModel filter, PaginationRequestModel pagination)
         {
-            var currentTime = DateTime.Now;
+            var query = _discountRepository.GetAll().AsQueryable();
 
-            var query = _repository.GetAll().AsQueryable();
-            if (query != null)
+            if (filter.Title != null)
             {
-                var discountsToDiscontinue = query
-                        .Where(discount => discount.EndDate < currentTime && discount.Status != DiscountStatus.Discontinued)
-                        .ToList();
-
-                foreach (var discounts in discountsToDiscontinue)
-                {
-                    discounts.Status = DiscountStatus.Discontinued;
-                    _repository.Update(discounts);
-                }
-
-                await _unitOfWork.SaveChanges();
-
-                if (filter.Title != null)
-                {
-                    query = query.Where(discount => discount.Title.Contains(filter.Title));
-                }
-                if (filter.StartDate != null && filter.EndDate != null)
-                {
-                    query = query.Where(discount => discount.StartDate >= filter.StartDate && discount.EndDate <= filter.EndDate);
-                }
-                else if (filter.StartDate != null)
-                {
-                    query = query.Where(discount => discount.StartDate >= filter.StartDate);
-                }
-                else if (filter.EndDate != null)
-                {
-                    query = query.Where(discount => discount.EndDate <= filter.EndDate);
-                }
-                else if (filter.status != null)
-                {
-                    query = query.Where(discount => discount.Status == filter.status);
-                }
+                query = query.Where(discount => discount.Title.Contains(filter.Title));
+            }
+            if (filter.StartDate != null && filter.EndDate != null)
+            {
+                query = query.Where(discount => discount.StartDate >= filter.StartDate && discount.EndDate <= filter.EndDate);
+            }
+            else if (filter.StartDate != null)
+            {
+                query = query.Where(discount => discount.StartDate >= filter.StartDate);
+            }
+            else if (filter.EndDate != null)
+            {
+                query = query.Where(discount => discount.EndDate <= filter.EndDate);
+            }
+            else if (filter.status != null)
+            {
+                query = query.Where(discount => discount.Status == filter.status);
             }
             var totalRow = await query.AsNoTracking().CountAsync();
             var paginatedQuery = query
@@ -94,7 +80,7 @@ namespace ARTHS_Service.Implementations
 
         public async Task<DiscountViewModel> GetDiscount(Guid id)
         {
-            return await _repository.GetMany(discount => discount.Id.Equals(id))
+            return await _discountRepository.GetMany(discount => discount.Id.Equals(id))
                 .ProjectTo<DiscountViewModel>(_mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy khuyến mãi");
         }
@@ -129,7 +115,7 @@ namespace ARTHS_Service.Implementations
                         Status = DiscountStatus.Active
                     };
 
-                    _repository.Add(discount);
+                    _discountRepository.Add(discount);
                     if (model.MotobikeProductId != null)
                         await AddDiscountIdIntoMotobikeProduct(discountId, model.MotobikeProductId);
 
@@ -150,7 +136,7 @@ namespace ARTHS_Service.Implementations
 
         public async Task<DiscountViewModel> UpdateDiscount(Guid id, UpdateDiscountModel model)
         {
-            var discount = await _repository.GetMany(d => d.Id.Equals(id)).FirstOrDefaultAsync();
+            var discount = await _discountRepository.GetMany(d => d.Id.Equals(id)).FirstOrDefaultAsync();
 
             if (discount == null)
             {
@@ -178,20 +164,20 @@ namespace ARTHS_Service.Implementations
                 discount.ImageUrl = newImageUrl;
             }
 
-            _repository.Update(discount);
+            _discountRepository.Update(discount);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetDiscount(id) : null!;
         }
 
         public async Task<DiscountViewModel> DiscontinuedDiscount(Guid id)
         {
-            var discount = await _repository.GetMany(d => d.Id.Equals(id)).FirstOrDefaultAsync();
+            var discount = await _discountRepository.GetMany(d => d.Id.Equals(id)).FirstOrDefaultAsync();
             if (discount == null)
             {
                 throw new NotFoundException("Không tìm thấy khuyến mãi");
             }
             discount.Status = DiscountStatus.Discontinued;
-            _repository.Update(discount);
+            _discountRepository.Update(discount);
             var result = await _unitOfWork.SaveChanges();
             return result > 0 ? await GetDiscount(id) : null!;
         }
@@ -281,5 +267,23 @@ namespace ARTHS_Service.Implementations
             return listService;
         }
 
+        public async Task CheckDicounts()
+        {
+            var currentTime = DateTime.UtcNow;
+
+            var discountsToDiscontinue = await _discountRepository
+                    .GetMany(discount => discount.EndDate.Date < currentTime.Date && discount.Status != DiscountStatus.Discontinued)
+                    .ToListAsync();
+
+            if (discountsToDiscontinue.Count == 0) return;
+
+            foreach (var discount in discountsToDiscontinue)
+            {
+                discount.Status = DiscountStatus.Discontinued;
+            }
+
+            _discountRepository.UpdateRange(discountsToDiscontinue);
+            await _unitOfWork.SaveChanges();
+        }
     }
 }

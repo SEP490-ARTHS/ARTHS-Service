@@ -4,6 +4,9 @@ using ARTHS_Data.Repositories.Implementations;
 using ARTHS_Data.Repositories.Interfaces;
 using ARTHS_Service.Implementations;
 using ARTHS_Service.Interfaces;
+using Hangfire;
+using Hangfire.SqlServer;
+using HangfireBasicAuthenticationFilter;
 using Microsoft.OpenApi.Models;
 
 namespace ARTHS_API.Configurations
@@ -39,7 +42,6 @@ namespace ARTHS_API.Configurations
             services.AddScoped<IWarrantyHistoryService, WarrantyHistoryService>();
 
             services.AddScoped<IInvoiceService, InvoiceService>();
-
             services.AddTransient<IGhnService, GhnService>();
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
@@ -101,5 +103,56 @@ namespace ARTHS_API.Configurations
             app.UseMiddleware<ExceptionHandlingMiddleware>();
         }
 
+        public static void AddHangfireDashboard(this IApplicationBuilder app)
+        {
+            app.UseHangfireDashboard("/hangfire/job-dashboard", new DashboardOptions
+            {
+                DashboardTitle = "Hangfire Job of Thanh Huy motorbike server",
+                DarkModeEnabled = true,
+                Authorization = new[]
+                {
+                    new HangfireCustomBasicAuthenticationFilter
+                    {
+                        User = "admin.arths",
+                        Pass = "admin.arths.@.@"
+                    }
+                }
+            });
+        }
+
+        public static void AddHangfireServices(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHangfire(config =>
+            {
+                config.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection"), new SqlServerStorageOptions
+                    {
+                        CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                        SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                        QueuePollInterval = TimeSpan.Zero,
+                        UseRecommendedIsolationLevel = true,
+                        DisableGlobalLocks = true
+                    });
+            });
+
+            services.AddHangfireServer();
+        }
+        public static void AddHangfireJobs(this IServiceProvider serviceProvider, IRecurringJobManager recurringJobManager)
+        {
+            // Đăng ký công việc định kỳ với Hangfire sử dụng factory delegate
+            recurringJobManager.AddOrUpdate(
+                "SendMaintenanceReminders",
+                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<INotificationService>().CheckAndSendMaintenanceReminders(),
+                "30 5 * * *"
+            );
+            recurringJobManager.AddOrUpdate(
+                "CheckDiscontinuedDiscount",
+                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IDiscountService>().CheckDicounts(),
+                "0 17 * * *"
+            );
+            
+        }
     }
 }

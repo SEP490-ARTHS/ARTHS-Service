@@ -12,5 +12,7 @@ namespace ARTHS_Service.Interfaces
         Task<bool> SendNotification(ICollection<Guid> accountIds, CreateNotificationModel model);
         Task<NotificationViewModel> UpdateNotification(Guid id, UpdateNotificationModel model);
         Task<bool> DeleteNotification(Guid Id);
+
+        Task CheckAndSendMaintenanceReminders();
     }
 }

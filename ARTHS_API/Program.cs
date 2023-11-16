@@ -1,11 +1,12 @@
-﻿using ARTHS_Data.Entities;
-using ARTHS_Utility.Settings;
-using Newtonsoft.Json.Converters;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Serialization;
+﻿using ARTHS_API.Configurations;
+using ARTHS_Data.Entities;
 using ARTHS_Data.Mapping;
-using ARTHS_API.Configurations;
+using ARTHS_Utility.Settings;
+using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -13,17 +14,16 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.Configure<AppSetting>(builder.Configuration.GetSection("AppSetting"));
 builder.Services.AddDbContext<ARTHS_DBContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-//builder.Services.AddDbContext<ARTHS_DBContext>(options =>
-//        options.UseSqlServer(
-//            builder.Configuration.GetConnectionString("DefaultConnection"),
-//            sqlOptions =>
-//            {
-//                sqlOptions.EnableRetryOnFailure(
-//                    maxRetryCount: 5, // Number of times to retry before giving up
-//                    maxRetryDelay: TimeSpan.FromSeconds(10), // Maximum delay between retries
-//                    errorNumbersToAdd: null); // SQL error codes to treat as transient. Can be null.
-//            }));
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("DefaultConnection"),
+            sqlOptions =>
+            {
+                sqlOptions.EnableRetryOnFailure(
+                    maxRetryCount: 5, // Number of times to retry before giving up
+                    maxRetryDelay: TimeSpan.FromSeconds(10), // Maximum delay between retries
+                    errorNumbersToAdd: null); // SQL error codes to treat as transient. Can be null.
+            }));
+
 
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews()
@@ -53,6 +53,8 @@ builder.Services.AddCors(options =>
                       });
 });
 
+builder.Services.AddHangfireServices(builder.Configuration);
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwagger();
 builder.Services.AddDependenceInjection();
@@ -65,12 +67,19 @@ app.UseCors(MyAllowSpecificOrigins);
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
-    app.UseSwagger();
-    app.UseSwaggerUI();
+app.UseSwagger();
+app.UseSwaggerUI();
 //}
 
 //--------------------
 app.UseJwt();
+
+app.AddHangfireDashboard();
+// Đăng ký các công việc định kỳ của Hangfire
+var recurringJobManager = app.Services.GetRequiredService<IRecurringJobManager>();
+app.Services.AddHangfireJobs(recurringJobManager);
+
+
 
 app.UseExceptionHandling();
 
