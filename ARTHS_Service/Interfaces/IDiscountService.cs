@@ -15,5 +15,6 @@ namespace ARTHS_Service.Interfaces
         public Task<DiscountViewModel> RemoveDiscountInProduct(Guid id);
         public Task<DiscountViewModel> RemoveDiscountInService(Guid id);
         public Task<DiscountViewModel> DiscontinuedDiscount(Guid id);
+        public Task CheckDicounts();
     }
 }

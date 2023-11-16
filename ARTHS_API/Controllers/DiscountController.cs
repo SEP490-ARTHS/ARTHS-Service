@@ -93,5 +93,12 @@ namespace ARTHS_API.Controllers
             return CreatedAtAction(nameof(GetDiscount), new { id = Discount.Id }, Discount);
         }
 
+        //[HttpPut]
+        //[ProducesResponseType(typeof(DiscountViewModel), StatusCodes.Status201Created)]
+        //[SwaggerOperation(Summary = "check discount.")]
+        //public async Task checkDiscount()
+        //{
+        //    await _discountService.CheckDicounts();
+        //}
     }
 }
