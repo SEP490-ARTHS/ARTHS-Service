@@ -42,7 +42,6 @@ namespace ARTHS_API.Configurations
             services.AddScoped<IWarrantyHistoryService, WarrantyHistoryService>();
 
             services.AddScoped<IInvoiceService, InvoiceService>();
-
             services.AddTransient<IGhnService, GhnService>();
             services.AddTransient<IPaymentService, PaymentService>();
             services.AddTransient<IUnitOfWork, UnitOfWork>();
@@ -109,13 +108,13 @@ namespace ARTHS_API.Configurations
             app.UseHangfireDashboard("/hangfire/job-dashboard", new DashboardOptions
             {
                 DashboardTitle = "Hangfire Job of Thanh Huy motorbike server",
-                DarkModeEnabled = false,
+                DarkModeEnabled = true,
                 Authorization = new[]
                 {
                     new HangfireCustomBasicAuthenticationFilter
                     {
-                        User = "admin",
-                        Pass = "admin@@"
+                        User = "admin.arths",
+                        Pass = "admin.arths.@.@"
                     }
                 }
             });
@@ -142,35 +141,18 @@ namespace ARTHS_API.Configurations
         }
         public static void AddHangfireJobs(this IServiceProvider serviceProvider, IRecurringJobManager recurringJobManager)
         {
+            // Đăng ký công việc định kỳ với Hangfire sử dụng factory delegate
             recurringJobManager.AddOrUpdate(
                 "SendMaintenanceReminders",
-                () => ExecuteSendMaintenanceReminders(serviceProvider),
+                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<INotificationService>().CheckAndSendMaintenanceReminders(),
                 "30 5 * * *"
             );
-
             recurringJobManager.AddOrUpdate(
                 "CheckDiscontinuedDiscount",
-                () => ExecuteCheckDiscontinuedDiscount(serviceProvider),
-                "30 5 * * *"
+                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<IDiscountService>().CheckDicounts(),
+                "0 17 * * *"
             );
-        }
-
-        public static void ExecuteSendMaintenanceReminders(IServiceProvider serviceProvider)
-        {
-            using (var scope = serviceProvider.CreateScope())
-            {
-                var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
-                service.CheckAndSendMaintenanceReminders();
-            }
-        }
-
-        public static void ExecuteCheckDiscontinuedDiscount(IServiceProvider serviceProvider)
-        {
-            using (var scope = serviceProvider.CreateScope())
-            {
-                var service = scope.ServiceProvider.GetRequiredService<IDiscountService>();
-                service.CheckDicounts();
-            }
+            
         }
     }
 }

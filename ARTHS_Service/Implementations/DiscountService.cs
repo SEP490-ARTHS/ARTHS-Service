@@ -269,17 +269,20 @@ namespace ARTHS_Service.Implementations
 
         public async Task CheckDicounts()
         {
-            var currentTime = DateTime.UtcNow.AddHours(7);
+            var currentTime = DateTime.UtcNow;
 
             var discountsToDiscontinue = await _discountRepository
-                    .GetMany(discount => discount.EndDate.Date < currentTime.Date && discount.Status != DiscountStatus.Discontinued) 
+                    .GetMany(discount => discount.EndDate.Date < currentTime.Date && discount.Status != DiscountStatus.Discontinued)
                     .ToListAsync();
+
             if (discountsToDiscontinue.Count == 0) return;
-            foreach (var discounts in discountsToDiscontinue)
+
+            foreach (var discount in discountsToDiscontinue)
             {
-                discounts.Status = DiscountStatus.Discontinued;
-                _discountRepository.Update(discounts);
+                discount.Status = DiscountStatus.Discontinued;
             }
+
+            _discountRepository.UpdateRange(discountsToDiscontinue);
             await _unitOfWork.SaveChanges();
         }
     }
