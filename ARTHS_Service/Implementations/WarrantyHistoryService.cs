@@ -65,6 +65,7 @@ namespace ARTHS_Data.Repositories.Implementations
                 OrderDetailId = model.OrderDetailId,
                 HandledBy = model.HandledBy,
                 RepairDate = DateTime.UtcNow.AddHours(7),
+                RepairDetails = model.RepairDetails,
                 TotalAmount = model.TotalAmount,
                 Status = "Hoàn thành"
             };

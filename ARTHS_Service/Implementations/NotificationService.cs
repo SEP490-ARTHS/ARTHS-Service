@@ -169,6 +169,7 @@ namespace ARTHS_Service.Implementations
 
         public async Task CheckAndSendMaintenanceReminders()
         {
+            //Console.WriteLine("Check maintenance schedules and send notification for customer");
             var today = DateTime.UtcNow; // Hoặc DateTime.Now nếu bạn đang theo dõi theo múi giờ cụ thể
             var maintenanceSchedules = await _maintenanceScheduleRepository
                 .GetMany(m => m.ReminderDate.Date == today.Date && !m.RemiderSend)

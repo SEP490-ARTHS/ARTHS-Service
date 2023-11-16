@@ -14,9 +14,6 @@ var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.Configure<AppSetting>(builder.Configuration.GetSection("AppSetting"));
 builder.Services.AddDbContext<ARTHS_DBContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddDbContext<ARTHS_DBContext>(options =>
         options.UseSqlServer(
             builder.Configuration.GetConnectionString("DefaultConnection"),
             sqlOptions =>

@@ -133,11 +133,14 @@ namespace ARTHS_Service.Implementations
                         shippingMoney = config.ShippingMoney;
                         totalPrice += shippingMoney;
                     }
-
+                    var customerName = await _accountRepository.GetMany(cus => cus.Id.Equals(customerId))
+                        .Select(acc => acc.CustomerAccount!.FullName)
+                        .FirstOrDefaultAsync();
                     var order = new Order
                     {
                         Id = orderId,
                         CustomerId = customerId,
+                        CustomerName = customerName,
                         CustomerPhoneNumber = model.CustomerPhoneNumber,
                         Address = model.Address,
                         PaymentMethod = model.PaymentMethod,

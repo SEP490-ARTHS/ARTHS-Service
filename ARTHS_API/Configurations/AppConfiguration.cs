@@ -142,12 +142,35 @@ namespace ARTHS_API.Configurations
         }
         public static void AddHangfireJobs(this IServiceProvider serviceProvider, IRecurringJobManager recurringJobManager)
         {
-            // Đăng ký công việc định kỳ với Hangfire sử dụng factory delegate
             recurringJobManager.AddOrUpdate(
                 "SendMaintenanceReminders",
-                () => serviceProvider.CreateScope().ServiceProvider.GetRequiredService<INotificationService>().CheckAndSendMaintenanceReminders(),
-                "0 9 * * *"
+                () => ExecuteSendMaintenanceReminders(serviceProvider),
+                "30 5 * * *"
             );
+
+            recurringJobManager.AddOrUpdate(
+                "CheckDiscontinuedDiscount",
+                () => ExecuteCheckDiscontinuedDiscount(serviceProvider),
+                "30 5 * * *"
+            );
+        }
+
+        public static void ExecuteSendMaintenanceReminders(IServiceProvider serviceProvider)
+        {
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var service = scope.ServiceProvider.GetRequiredService<INotificationService>();
+                service.CheckAndSendMaintenanceReminders();
+            }
+        }
+
+        public static void ExecuteCheckDiscontinuedDiscount(IServiceProvider serviceProvider)
+        {
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var service = scope.ServiceProvider.GetRequiredService<IDiscountService>();
+                service.CheckDicounts();
+            }
         }
     }
 }
