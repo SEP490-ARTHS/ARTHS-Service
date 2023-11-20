@@ -15,7 +15,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
+      
+      - name: Remove artifacts
+        uses: c-hive/gha-remove-artifacts@v1.3.0
+            
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
